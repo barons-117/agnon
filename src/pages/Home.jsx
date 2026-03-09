@@ -24,7 +24,7 @@ export default function Home({ onNavigate }) {
       {/* How to use */}
       <div className="info-block green" style={{marginBottom: '16px'}}>
         <strong>📱 איך משתמשים באתר?</strong><br/>
-        בצד שמאל (או בכפתור התפריט במובייל) תמצאו את כל הקטגוריות.
+        בצד ימין (או בכפתור התפריט במובייל) תמצאו את כל הקטגוריות.
         לחצו על כל טאב לקבלת המידע הרלוונטי.
       </div>
 
