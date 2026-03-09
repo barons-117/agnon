@@ -50,39 +50,73 @@ export function Vaad() {
 export function VaadNotices() {
   const [notices, setNotices] = React.useState([])
   const [loading, setLoading] = React.useState(true)
+  const [activeBuilding, setActiveBuilding] = React.useState('both')
 
   React.useEffect(() => {
     fetch(import.meta.env.BASE_URL + 'notices.json')
       .then(r => r.json())
       .then(data => {
-          const sorted = data.slice().sort((a, b) => {
-            const parse = d => { const [day,month,year] = d.split('/'); return new Date(year,month-1,day) }
-            return parse(b.date) - parse(a.date)
-          })
-          setNotices(sorted); setLoading(false)
+        const sorted = data.slice().sort((a, b) => {
+          const parse = d => { const [day,month,year] = d.split('/'); return new Date(year,month-1,day) }
+          return parse(b.date) - parse(a.date)
         })
+        setNotices(sorted); setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
+
+  const buildingTabs = [
+    { id: 'both', label: '🏢 שני הבניינים' },
+    { id: '12',   label: '🏠 עגנון 12' },
+    { id: '14',   label: '🏠 עגנון 14' },
+  ]
+
+  const filtered = notices.filter(n => {
+    if (activeBuilding === 'both') return n.building === 'both'
+    return n.building === activeBuilding || n.building === 'both'
+  })
 
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">📣</div>הודעות וועד הבית</div>
 
+      <div style={{display:'flex', gap:'8px', marginBottom:'20px', flexWrap:'wrap'}}>
+        {buildingTabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`pro-tab-btn${activeBuilding === tab.id ? ' active' : ''}`}
+            onClick={() => setActiveBuilding(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {loading && <div style={{color:'var(--muted)',fontSize:'14px'}}>טוען...</div>}
 
-      {!loading && notices.length === 0 && (
+      {!loading && filtered.length === 0 && (
         <div className="info-block" style={{textAlign:'center',color:'var(--muted)',fontSize:'15px',padding:'32px 18px'}}>
           📭 אין הודעות כרגע.
         </div>
       )}
 
-      {notices.map(n => (
-        <div key={n.id} style={{borderBottom:'1px solid var(--border)',paddingBottom:'16px',marginBottom:'16px'}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
-            <div style={{fontWeight:'700',fontSize:'15px',color:'var(--primary)'}}>{n.title}</div>
-            <div style={{fontSize:'12px',color:'var(--muted)',flexShrink:0,marginRight:'12px'}}>{n.date}</div>
+      {filtered.map((n, i) => (
+        <div key={n.id} style={{
+          borderBottom: i < filtered.length-1 ? '1px solid var(--border)' : 'none',
+          paddingBottom:'16px', marginBottom:'16px'
+        }}>
+          <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'6px', gap:'8px'}}>
+            <div style={{fontWeight:'700', fontSize:'15px', color:'var(--primary)'}}>{n.title}</div>
+            <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'4px', flexShrink:0}}>
+              <div style={{fontSize:'12px', color:'var(--muted)'}}>{n.date}</div>
+              {n.building !== 'both' && (
+                <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>
+                  עגנון {n.building}
+                </div>
+              )}
+            </div>
           </div>
-          <div style={{fontSize:'14px',lineHeight:'1.7',color:'var(--text)',whiteSpace:'pre-line'}}>{n.text}</div>
+          <div style={{fontSize:'14px', lineHeight:'1.7', color:'var(--text)', whiteSpace:'pre-line'}}>{n.text}</div>
         </div>
       ))}
     </div>
