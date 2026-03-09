@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import Home from './pages/Home.jsx'
+import Manage from './pages/Manage.jsx'
 import Contractors from './pages/Contractors.jsx'
 import Pros from './pages/Pros.jsx'
 import {
