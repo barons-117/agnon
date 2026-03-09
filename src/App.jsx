@@ -4,6 +4,7 @@ import Home from './pages/Home.jsx'
 import Manage from './pages/Manage.jsx'
 import Requests from './pages/Requests.jsx'
 import Admin from './pages/Admin.jsx'
+import Emergency from './pages/Emergency.jsx'
 import ResidentsRoomCalendar from './pages/ResidentsRoomCalendar.jsx'
 import Contractors from './pages/Contractors.jsx'
 import Pros from './pages/Pros.jsx'
@@ -32,6 +33,7 @@ const pages = {
   'contractors':    <Contractors />,
   'whatsapp':       <Whatsapp />,
   'ac':             <AC />,
+  'emergency':      <Emergency />,
   'residents-room': <ResidentsRoomCalendar />,
 }
 
@@ -75,7 +77,6 @@ export default function App() {
         />
 
         <main className="main">
-          {/* Render active page – wrapped in tab-panel div */}
           {Object.entries(pages).map(([id, component]) => (
             <section
               key={id}
@@ -85,6 +86,7 @@ export default function App() {
               {activeTab === id && component}
             </section>
           ))}
+          <footer className="site-footer">כל הזכויות שמורות © ארז ברון 2026</footer>
         </main>
       </div>
     </>

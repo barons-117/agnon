@@ -301,7 +301,15 @@ body {
 .pro-phone:hover { background: var(--accent); }
 .pro-phone-missing { display: inline-flex; align-items: center; gap: 6px; background: #f0ede8; color: var(--muted); border: 1px dashed var(--border); padding: 6px 14px; border-radius: 100px; font-size: 12px; font-weight: 600; margin-top: 4px; }
 
-/* RESPONSIVE */
+.nav-item.nav-muted { color: rgba(255,255,255,0.3); font-size: 12.5px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 12px; }
+.nav-item.nav-muted:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5); }
+.nav-item.nav-muted.active { background: var(--accent); color: #fff; }
+
+.site-footer {
+  text-align: center; padding: 20px; font-size: 12px;
+  color: var(--muted); border-top: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
 @media (max-width: 700px) {
   .topbar { display: flex; }
   .layout { height: calc(100vh - 58px); position: relative; }
