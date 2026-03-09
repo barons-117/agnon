@@ -52,7 +52,7 @@ export function VaadNotices() {
   const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
-    fetch('notices.json')
+    fetch(import.meta.env.BASE_URL + 'notices.json')
       .then(r => r.json())
       .then(data => { setNotices(data); setLoading(false) })
       .catch(() => setLoading(false))
