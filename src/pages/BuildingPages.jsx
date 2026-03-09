@@ -109,7 +109,12 @@ export function VaadNotices() {
             <div style={{fontWeight:'700', fontSize:'15px', color:'var(--primary)'}}>{n.title}</div>
             <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'4px', flexShrink:0}}>
               <div style={{fontSize:'12px', color:'var(--muted)'}}>{n.date}</div>
-              {n.building !== 'both' && (
+              {n.building === 'both' ? (
+                <div style={{display:'flex', gap:'4px'}}>
+                  <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>עגנון 12</div>
+                  <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>עגנון 14</div>
+                </div>
+              ) : (
                 <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>
                   עגנון {n.building}
                 </div>
