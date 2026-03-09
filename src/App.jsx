@@ -4,6 +4,7 @@ import Home from './pages/Home.jsx'
 import Manage from './pages/Manage.jsx'
 import Requests from './pages/Requests.jsx'
 import Admin from './pages/Admin.jsx'
+import ResidentsRoomCalendar from './pages/ResidentsRoomCalendar.jsx'
 import Contractors from './pages/Contractors.jsx'
 import Pros from './pages/Pros.jsx'
 import {
@@ -31,7 +32,7 @@ const pages = {
   'contractors':    <Contractors />,
   'whatsapp':       <Whatsapp />,
   'ac':             <AC />,
-  'residents-room': <ResidentsRoom />,
+  'residents-room': <ResidentsRoomCalendar />,
 }
 
 export default function App() {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { sendDoneEmail } from '../lib/emailjs.js'
+import RoomBookings from './RoomBookings.jsx'
 
 const ADMIN_PASSWORD = 'hightower2026'
 
@@ -8,6 +9,7 @@ export default function Admin() {
   const [authed, setAuthed] = useState(false)
   const [pw, setPw] = useState('')
   const [pwError, setPwError] = useState(false)
+  const [adminTab, setAdminTab] = useState('requests')
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('all') // all | open | done
@@ -77,8 +79,19 @@ export default function Admin() {
 
   return (
     <div className="card">
+      <div className="panel-title" style={{marginBottom:'16px'}}><div className="icon">⚙️</div>ממשק ניהול</div>
+
+      {/* Main admin tabs */}
+      <div style={{display:'flex', gap:'8px', marginBottom:'24px', borderBottom:'1px solid var(--border)', paddingBottom:'16px'}}>
+        <button className={`pro-tab-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>📝 מערכת פניות</button>
+        <button className={`pro-tab-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>🛋️ הזמנת חדרי דיירים</button>
+      </div>
+
+      {adminTab === 'rooms' && <RoomBookings />}
+
+      {adminTab === 'requests' && <>
       <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px'}}>
-        <div className="panel-title" style={{marginBottom:0}}><div className="icon">📋</div>פניות דיירים</div>
+        <div style={{fontWeight:'700', fontSize:'16px', color:'var(--primary)'}}>פניות דיירים</div>
         <button onClick={loadRequests} style={{
           background:'#f0ede8', border:'1px solid var(--border)', borderRadius:'100px',
           padding:'7px 16px', fontSize:'13px', fontWeight:'600', cursor:'pointer',
@@ -144,6 +157,7 @@ export default function Admin() {
           </div>
         </div>
       ))}
+      </>}
     </div>
   )
 }
