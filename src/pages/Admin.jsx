@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { sendDoneEmail } from '../lib/emailjs.js'
 import RoomBookings from './RoomBookings.jsx'
+import AdminNotices from './AdminNotices.jsx'
 
 const ADMIN_PASSWORD = 'hightower2026'
 
@@ -82,12 +83,14 @@ export default function Admin() {
       <div className="panel-title" style={{marginBottom:'16px'}}><div className="icon">⚙️</div>ממשק ניהול</div>
 
       {/* Main admin tabs */}
-      <div style={{display:'flex', gap:'8px', marginBottom:'24px', borderBottom:'1px solid var(--border)', paddingBottom:'16px'}}>
+      <div style={{display:'flex', gap:'8px', marginBottom:'24px', borderBottom:'1px solid var(--border)', paddingBottom:'16px', flexWrap:'wrap'}}>
         <button className={`pro-tab-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>📝 מערכת פניות</button>
         <button className={`pro-tab-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>🛋️ הזמנת חדרי דיירים</button>
+        <button className={`pro-tab-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>📣 הודעות ועד בית</button>
       </div>
 
       {adminTab === 'rooms' && <RoomBookings />}
+      {adminTab === 'notices' && <AdminNotices />}
 
       {adminTab === 'requests' && <>
       <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'20px'}}>
