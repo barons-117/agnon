@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import Home from './pages/Home.jsx'
 import Manage from './pages/Manage.jsx'
@@ -42,6 +42,15 @@ export default function App() {
     return window.location.hash.replace('#','') || 'home'
   })
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  useEffect(() => {
+    const onHash = () => {
+      const tab = window.location.hash.replace('#','') || 'home'
+      setActiveTab(tab)
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
 
   const handleTabChange = (tab) => {
     setActiveTab(tab)
