@@ -1,6 +1,34 @@
 import SecretField from '../components/SecretField.jsx'
 
-export function Vaad() {
+export function Boni() {
+  return (
+    <div className="card">
+      <div className="panel-title"><div className="icon">🏗️</div>בוני התיכון</div>
+
+      <div className="section-label">👤 אנשי קשר</div>
+
+      <div className="member-card" style={{flexDirection:'column', alignItems:'flex-start', gap:'10px'}}>
+        <div>
+          <div className="member-name">חן שושן – בדק בית</div>
+          <div style={{fontSize:'13px', color:'var(--muted)', marginTop:'3px'}}>
+            <a href="mailto:info@boh.co.il" style={{color:'var(--accent2)', textDecoration:'none'}}>info@boh.co.il</a>
+            &nbsp;|&nbsp;
+            <a href="mailto:bedek4u@boh.co.il" style={{color:'var(--accent2)', textDecoration:'none'}}>bedek4u@boh.co.il</a>
+          </div>
+        </div>
+        <a href="tel:0545035577" className="member-phone">📞 054-503-5577</a>
+      </div>
+
+      <div className="member-card" style={{flexDirection:'column', alignItems:'flex-start', gap:'10px'}}>
+        <div>
+          <div className="member-name">אורי – בדק ומנהל עבודה בפרויקט</div>
+        </div>
+        <a href="tel:0546333228" className="member-phone">📞 054-633-3228</a>
+      </div>
+
+    </div>
+  )
+}
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">👥</div>חברי ועד הבית</div>

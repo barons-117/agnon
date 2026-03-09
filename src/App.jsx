@@ -4,7 +4,7 @@ import Manage from './pages/Manage.jsx'
 import Contractors from './pages/Contractors.jsx'
 import Pros from './pages/Pros.jsx'
 import {
-  Vaad, VaadNotices, Wifi, Cleaning, Trash
+  Boni, Vaad, VaadNotices, Wifi, Cleaning, Trash
 } from './pages/BuildingPages.jsx'
 import {
   Parking, Details, Arnona, Whatsapp, AC, ResidentsRoom
@@ -14,6 +14,7 @@ const pages = {
   'manage':         <Manage />,
   'vaad':           <Vaad />,
   'vaad-notices':   <VaadNotices />,
+  'boni':           <Boni />,
   'wifi':           <Wifi />,
   'cleaning':       <Cleaning />,
   'trash':          <Trash />,
