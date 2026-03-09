@@ -29,6 +29,8 @@ export function Boni() {
     </div>
   )
 }
+
+export function Vaad() {
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">👥</div>חברי ועד הבית</div>
