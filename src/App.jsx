@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
 import Home from './pages/Home.jsx'
 import Manage from './pages/Manage.jsx'
+import Requests from './pages/Requests.jsx'
+import Admin from './pages/Admin.jsx'
 import Contractors from './pages/Contractors.jsx'
 import Pros from './pages/Pros.jsx'
 import {
@@ -14,6 +16,8 @@ import {
 const pages = {
   'home':           <Home />,
   'manage':         <Manage />,
+  'requests':       <Requests />,
+  'admin':          <Admin />,
   'vaad':           <Vaad />,
   'vaad-notices':   <VaadNotices />,
   'boni':           <Boni />,

@@ -15,6 +15,7 @@ export const navSections = [
       { id: 'vaad',         icon: '👥', label: 'ועד הבית' },
       { id: 'boni',         icon: '🏗️', label: 'בוני התיכון' },
       { id: 'vaad-notices', icon: '📣', label: 'הודעות וועד' },
+      { id: 'requests',     icon: '📝', label: 'פנייה לניהול' },
     ],
   },
   {
