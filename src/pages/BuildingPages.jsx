@@ -1,3 +1,4 @@
+import React from 'react'
 import SecretField from '../components/SecretField.jsx'
 
 export function Boni() {
@@ -47,12 +48,37 @@ export function Vaad() {
 }
 
 export function VaadNotices() {
+  const [notices, setNotices] = React.useState([])
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    fetch('notices.json')
+      .then(r => r.json())
+      .then(data => { setNotices(data); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">📣</div>הודעות וועד הבית</div>
-      <div className="info-block" style={{textAlign:'center',color:'var(--muted)',fontSize:'15px',padding:'32px 18px'}}>
-        📭 פה יתפרסמו הודעות וועד הבית.
-      </div>
+
+      {loading && <div style={{color:'var(--muted)',fontSize:'14px'}}>טוען...</div>}
+
+      {!loading && notices.length === 0 && (
+        <div className="info-block" style={{textAlign:'center',color:'var(--muted)',fontSize:'15px',padding:'32px 18px'}}>
+          📭 אין הודעות כרגע.
+        </div>
+      )}
+
+      {notices.slice().reverse().map(n => (
+        <div key={n.id} style={{borderBottom:'1px solid var(--border)',paddingBottom:'16px',marginBottom:'16px'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
+            <div style={{fontWeight:'700',fontSize:'15px',color:'var(--primary)'}}>{n.title}</div>
+            <div style={{fontSize:'12px',color:'var(--muted)',flexShrink:0,marginRight:'12px'}}>{n.date}</div>
+          </div>
+          <div style={{fontSize:'14px',lineHeight:'1.7',color:'var(--text)',whiteSpace:'pre-line'}}>{n.text}</div>
+        </div>
+      ))}
     </div>
   )
 }

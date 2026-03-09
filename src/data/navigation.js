@@ -7,8 +7,8 @@ export const navSections = [
     items: [
       { id: 'manage',       icon: '🏢', label: 'חברת ניהול' },
       { id: 'vaad',         icon: '👥', label: 'ועד הבית' },
-      { id: 'vaad-notices', icon: '📣', label: 'הודעות וועד' },
       { id: 'boni',         icon: '🏗️', label: 'בוני התיכון' },
+      { id: 'vaad-notices', icon: '📣', label: 'הודעות וועד' },
     ],
   },
   {
