@@ -39,6 +39,17 @@ export default function RoomBookings() {
 
   const save = async () => {
     if (!form.booker_name || !form.date) return
+
+    // בדיקת תאריך כפול
+    const duplicate = bookings.find(b =>
+      b.building === activeBuilding &&
+      b.date === form.date &&
+      b.id !== editingId
+    )
+    if (duplicate) {
+      const confirm = window.confirm(`כבר יש אירוע בתאריך הזה (${formatDate(form.date)}).\nהאם לשמור בכל זאת?`)
+      if (!confirm) return
+    }
     setSaving(true)
     if (editingId) {
       await supabase.from('room_bookings').update({

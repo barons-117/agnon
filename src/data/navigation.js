@@ -23,6 +23,7 @@ export const navSections = [
     items: [
       { id: 'wifi',     icon: '📶', label: 'WiFi וקודים' },
       { id: 'cleaning', icon: '🧹', label: 'לוח ניקיון' },
+      { id: 'residents-room', icon: '🛋️', label: 'חדר דיירים' },
       { id: 'trash',    icon: '🗑️', label: 'פחים ומחזור' },
       { id: 'parking',  icon: '🚗', label: 'חניון' },
       { id: 'details',  icon: '📋', label: 'מיקוד, גוש וכתובת' },
@@ -36,7 +37,6 @@ export const navSections = [
       { id: 'contractors',    icon: '🔧', label: 'קבלנים וספקים' },
       { id: 'whatsapp',       icon: '💬', label: 'קבוצות וואטסאפ' },
       { id: 'ac',             icon: '❄️', label: 'מיזוג אוויר בדירות' },
-      { id: 'residents-room', icon: '🛋️', label: 'חדר דיירים' },
     ],
   },
 ]
