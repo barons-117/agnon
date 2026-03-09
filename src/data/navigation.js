@@ -22,7 +22,6 @@ export const navSections = [
       { id: 'wifi',           icon: '📶', label: 'WiFi וקודים' },
       { id: 'cleaning',       icon: '🧹', label: 'לוח ניקיון' },
       { id: 'residents-room', icon: '🛋️', label: 'חדר דיירים' },
-      { id: 'trash',          icon: '🗑️', label: 'פחים ומחזור' },
       { id: 'parking',        icon: '🚗', label: 'חניון' },
       { id: 'details',        icon: '📋', label: 'מיקוד, גוש וכתובת' },
     ],

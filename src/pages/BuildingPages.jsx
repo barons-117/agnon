@@ -161,93 +161,52 @@ export function Wifi() {
 }
 
 export function Cleaning() {
+  const [tab, setTab] = React.useState('schedule')
   return (
     <div className="card">
-      <div className="panel-title"><div className="icon">🧹</div>לוח ניקיון הבניין</div>
-      <div className="clean-row">
-        <div className="clean-area"><span className="clean-icon">🚪</span><span className="clean-name">לובי</span></div>
-        <div className="clean-days"><span className="day-badge daily">כל יום</span></div>
+      <div className="panel-title"><div className="icon">🧹</div>ניקיון ואשפה</div>
+      <div style={{display:'flex', gap:'6px', marginBottom:'20px', flexWrap:'wrap'}}>
+        {[
+          { id:'schedule', label:'📅 ימי ניקיון' },
+          { id:'gazem',    label:'🌿 פינוי גזם' },
+          { id:'pit',      label:'🗑️ פיר אשפה' },
+          { id:'recycle',  label:'♻️ פחי מחזור' },
+        ].map(t => (
+          <button key={t.id} className={`pro-tab-btn${tab === t.id ? ' active' : ''}`} onClick={() => setTab(t.id)}>{t.label}</button>
+        ))}
       </div>
-      <div className="clean-row">
-        <div className="clean-area"><span className="clean-icon">🏠</span><span className="clean-name">קומות 1–10</span></div>
-        <div className="clean-days"><span className="day-badge">ראשון</span><span className="day-badge">רביעי</span></div>
-      </div>
-      <div className="clean-row">
-        <div className="clean-area"><span className="clean-icon">🏠</span><span className="clean-name">קומות 11–20</span></div>
-        <div className="clean-days"><span className="day-badge">שני</span><span className="day-badge">חמישי</span></div>
-      </div>
-      <div className="clean-row">
-        <div className="clean-area"><span className="clean-icon">🗑️</span><span className="clean-name">חדרי אשפה</span></div>
-        <div className="clean-days"><span className="day-badge daily">כל יום</span></div>
-      </div>
-      <div className="clean-row" style={{borderBottom:'none'}}>
-        <div className="clean-area"><span className="clean-icon">🚗</span><span className="clean-name">לובאים חניון</span></div>
-        <div className="clean-days" style={{flexDirection:'column',alignItems:'flex-end',gap:'5px'}}>
-          <div style={{display:'flex',alignItems:'center',gap:'5px'}}>
-            <span style={{fontSize:'11px',color:'var(--muted)'}}>סריקה ואשפה</span>
-            <span className="day-badge daily">כל יום</span>
-          </div>
-          <div style={{display:'flex',alignItems:'center',gap:'5px'}}>
-            <span style={{fontSize:'11px',color:'var(--muted)'}}>שטיפה</span>
-            <span className="day-badge wash">שלישי</span>
-            <span className="day-badge wash">שישי</span>
+      {tab === 'schedule' && <>
+        <div className="clean-row"><div className="clean-area"><span className="clean-icon">🚪</span><span className="clean-name">לובי</span></div><div className="clean-days"><span className="day-badge daily">כל יום</span></div></div>
+        <div className="clean-row"><div className="clean-area"><span className="clean-icon">🏠</span><span className="clean-name">קומות 1–10</span></div><div className="clean-days"><span className="day-badge">ראשון</span><span className="day-badge">רביעי</span></div></div>
+        <div className="clean-row"><div className="clean-area"><span className="clean-icon">🏠</span><span className="clean-name">קומות 11–20</span></div><div className="clean-days"><span className="day-badge">שני</span><span className="day-badge">חמישי</span></div></div>
+        <div className="clean-row"><div className="clean-area"><span className="clean-icon">🗑️</span><span className="clean-name">חדרי אשפה</span></div><div className="clean-days"><span className="day-badge daily">כל יום</span></div></div>
+        <div className="clean-row" style={{borderBottom:'none'}}>
+          <div className="clean-area"><span className="clean-icon">🚗</span><span className="clean-name">לובאים חניון</span></div>
+          <div className="clean-days" style={{flexDirection:'column',alignItems:'flex-end',gap:'5px'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'5px'}}><span style={{fontSize:'11px',color:'var(--muted)'}}>סריקה ואשפה</span><span className="day-badge daily">כל יום</span></div>
+            <div style={{display:'flex',alignItems:'center',gap:'5px'}}><span style={{fontSize:'11px',color:'var(--muted)'}}>שטיפה</span><span className="day-badge wash">שלישי</span><span className="day-badge wash">שישי</span></div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div className="divider"></div>
-
-    <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px'}}>
-      <div className="icon" style={{width:'36px',height:'36px',fontSize:'18px',flexShrink:0}}>🌿</div>
-      <div style={{fontWeight:'800', fontSize:'16px', color:'var(--primary)'}}>פינוי גזם ופסולת גדולה</div>
-    </div>
-
-    <div className="info-block green" style={{marginBottom:'12px'}}>
-      עיריית קריית אונו מפנה גזם ופסולת גדולה <strong>פעמיים בשבוע בלבד</strong> — בימי <strong>ראשון</strong> ו<strong>רביעי</strong>.<br/><br/>
-      יש להניח את הגזם והפסולת הגדולה באזור המסומן בירוק בתמונה למטה — ליד הכניסה לחניון — <strong>רק בימים אלה</strong>, ולא לאורך כל השבוע.
-    </div>
-
-    <div style={{display:'flex', gap:'10px', marginBottom:'16px'}}>
-      <div style={{flex:1, background:'#f0fbf4', border:'1.5px solid #bce8cc', borderRadius:'12px', padding:'14px', textAlign:'center'}}>
-        <div style={{fontSize:'22px', marginBottom:'4px'}}>☀️</div>
-        <div style={{fontWeight:'800', fontSize:'15px', color:'#1a5c38'}}>ראשון</div>
-      </div>
-      <div style={{flex:1, background:'#f0fbf4', border:'1.5px solid #bce8cc', borderRadius:'12px', padding:'14px', textAlign:'center'}}>
-        <div style={{fontSize:'22px', marginBottom:'4px'}}>☀️</div>
-        <div style={{fontWeight:'800', fontSize:'15px', color:'#1a5c38'}}>רביעי</div>
-      </div>
-    </div>
-
-    <div style={{fontSize:'13px', color:'var(--muted)', marginBottom:'10px', fontWeight:'600'}}>📍 אזור ההנחה המאושר:</div>
-    <div style={{borderRadius:'12px', overflow:'hidden', border:'1px solid var(--border)'}}>
-      <img
-        src={import.meta.env.BASE_URL + 'gazem-area.png'}
-        alt="אזור פינוי גזם"
-        style={{width:'100%', display:'block'}}
-      />
-    </div>
-    <div style={{fontSize:'12px', color:'var(--muted)', marginTop:'8px', textAlign:'center'}}>
-      האזור המסומן בירוק — ליד הכניסה לחניון
-    </div>
-  </div>
-  )
-}
-
-export function Trash() {
-  return (
-    <div className="card">
-      <div className="panel-title"><div className="icon">🗑️</div>פחים ומחזור</div>
-      <div className="section-label">🗑️ פיר אשפה קומתי</div>
-      <div className="info-block">
-        בכל קומה יש פיר אשפה. <strong>ביציאה מהמעלית פונים ימינה</strong>, שוב ימינה – יש דלת קטנה לפיר האשפה.
-      </div>
-      <div className="divider"></div>
-      <div className="section-label">♻️ פחי מחזור</div>
-      <div className="info-block amber">
-        ♻️ המחזור הוא <strong>ידני</strong> – הפחים הכתום והכחול נמצאים <strong>בחזית הבניין</strong>.<br/>
-        נא להוריד בעצמכם ולמיין לפח המתאים.
-      </div>
+      </>}
+      {tab === 'gazem' && <>
+        <div className="info-block green" style={{marginBottom:'12px'}}>
+          עיריית קריית אונו מפנה גזם ופסולת גדולה <strong>פעמיים בשבוע בלבד</strong> — בימי <strong>ראשון</strong> ו<strong>רביעי</strong>.<br/><br/>
+          יש להניח את הגזם באזור המסומן בירוק — ליד הכניסה לחניון — <strong>רק בימים אלה</strong>.
+        </div>
+        <div style={{display:'flex', gap:'10px', marginBottom:'16px'}}>
+          <div style={{flex:1, background:'#f0fbf4', border:'1.5px solid #bce8cc', borderRadius:'12px', padding:'14px', textAlign:'center'}}><div style={{fontSize:'22px', marginBottom:'4px'}}>☀️</div><div style={{fontWeight:'800', fontSize:'15px', color:'#1a5c38'}}>ראשון</div></div>
+          <div style={{flex:1, background:'#f0fbf4', border:'1.5px solid #bce8cc', borderRadius:'12px', padding:'14px', textAlign:'center'}}><div style={{fontSize:'22px', marginBottom:'4px'}}>☀️</div><div style={{fontWeight:'800', fontSize:'15px', color:'#1a5c38'}}>רביעי</div></div>
+        </div>
+        <div style={{fontSize:'13px', color:'var(--muted)', marginBottom:'10px', fontWeight:'600'}}>📍 אזור ההנחה המאושר:</div>
+        <div style={{borderRadius:'12px', overflow:'hidden', border:'1px solid var(--border)'}}>
+          <img src={import.meta.env.BASE_URL + 'gazem-area.png'} alt="אזור פינוי גזם" style={{width:'100%', display:'block'}} />
+        </div>
+        <div style={{fontSize:'12px', color:'var(--muted)', marginTop:'8px', textAlign:'center'}}>האזור המסומן בירוק — ליד הכניסה לחניון</div>
+      </>}
+      {tab === 'pit' && <div className="info-block">בכל קומה יש פיר אשפה. <strong>ביציאה מהמעלית פונים ימינה</strong>, שוב ימינה – יש דלת קטנה לפיר האשפה.</div>}
+      {tab === 'recycle' && <div className="info-block amber">♻️ המחזור הוא <strong>ידני</strong> – הפחים הכתום והכחול נמצאים <strong>בחזית הבניין</strong>.<br/>נא להוריד בעצמכם ולמיין לפח המתאים.</div>}
     </div>
   )
 }
+
+export function Trash() { return null }
