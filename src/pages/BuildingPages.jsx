@@ -195,6 +195,42 @@ export function Cleaning() {
         </div>
       </div>
     </div>
+
+    <div className="divider"></div>
+
+    <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px'}}>
+      <div className="icon" style={{width:'36px',height:'36px',fontSize:'18px',flexShrink:0}}>🌿</div>
+      <div style={{fontWeight:'800', fontSize:'16px', color:'var(--primary)'}}>פינוי גזם ופסולת גדולה</div>
+    </div>
+
+    <div className="info-block green" style={{marginBottom:'12px'}}>
+      עיריית קריית אונו מפנה גזם ופסולת גדולה <strong>פעמיים בשבוע בלבד</strong> — בימי <strong>ראשון</strong> ו<strong>רביעי</strong>.<br/><br/>
+      יש להניח את הגזם והפסולת הגדולה באזור המסומן בירוק בתמונה למטה — ליד הכניסה לחניון — <strong>רק בימים אלה</strong>, ולא לאורך כל השבוע.
+    </div>
+
+    <div style={{display:'flex', gap:'10px', marginBottom:'16px'}}>
+      <div style={{flex:1, background:'#f0fbf4', border:'1.5px solid #bce8cc', borderRadius:'12px', padding:'14px', textAlign:'center'}}>
+        <div style={{fontSize:'22px', marginBottom:'4px'}}>☀️</div>
+        <div style={{fontWeight:'800', fontSize:'15px', color:'#1a5c38'}}>ראשון</div>
+      </div>
+      <div style={{flex:1, background:'#f0fbf4', border:'1.5px solid #bce8cc', borderRadius:'12px', padding:'14px', textAlign:'center'}}>
+        <div style={{fontSize:'22px', marginBottom:'4px'}}>☀️</div>
+        <div style={{fontWeight:'800', fontSize:'15px', color:'#1a5c38'}}>רביעי</div>
+      </div>
+    </div>
+
+    <div style={{fontSize:'13px', color:'var(--muted)', marginBottom:'10px', fontWeight:'600'}}>📍 אזור ההנחה המאושר:</div>
+    <div style={{borderRadius:'12px', overflow:'hidden', border:'1px solid var(--border)'}}>
+      <img
+        src={import.meta.env.BASE_URL + 'gazem-area.png'}
+        alt="אזור פינוי גזם"
+        style={{width:'100%', display:'block'}}
+      />
+    </div>
+    <div style={{fontSize:'12px', color:'var(--muted)', marginTop:'8px', textAlign:'center'}}>
+      האזור המסומן בירוק — ליד הכניסה לחניון
+    </div>
+  </div>
   )
 }
 
