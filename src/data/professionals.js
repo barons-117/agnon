@@ -4,6 +4,7 @@
 export const categories = [
   { id: 'clean',     label: '🧹 ניקיון' },
   { id: 'handyman',  label: '🔨 הנדימן' },
+  { id: 'ac',        label: '❄️ מיזוג אוויר' },
   { id: 'carpenter', label: '🪚 נגרות' },
   { id: 'shower',    label: '🚿 מקלחונים' },
   { id: 'door',      label: '🚪 דלת ממ״ד' },
@@ -39,7 +40,12 @@ export const professionals = [
     link: { label: 'alexhandyman.info', url: 'https://www.alexhandyman.info/' },
   },
   {
-    category: 'carpenter',
+    category: 'ac',
+    name: 'שחר לוי – טכנאי מיזוג וקירור',
+    desc: 'ניסיון של למעלה מ-20 שנה בתחום. גר בבניין 14.',
+    phone: '058-665-5455',
+  },
+  {
     name: 'אמג׳ד – נגר',
     desc: 'נגרות כללית, תוספות ארונות. המלצת סיגל ועוד דיירים.',
     phone: '050-786-7119',
