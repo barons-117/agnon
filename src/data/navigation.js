@@ -3,6 +3,12 @@
 
 export const navSections = [
   {
+    label: 'כללי',
+    items: [
+      { id: 'home',         icon: '🏠', label: 'דף הבית' },
+    ],
+  },
+  {
     label: 'ניהול',
     items: [
       { id: 'manage',       icon: '🏢', label: 'חברת ניהול' },

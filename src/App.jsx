@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Sidebar from './components/Sidebar.jsx'
-import Manage from './pages/Manage.jsx'
+import Home from './pages/Home.jsx'
 import Contractors from './pages/Contractors.jsx'
 import Pros from './pages/Pros.jsx'
 import {
@@ -11,6 +11,7 @@ import {
 } from './pages/InfoPages.jsx'
 
 const pages = {
+  'home':           <Home />,
   'manage':         <Manage />,
   'vaad':           <Vaad />,
   'vaad-notices':   <VaadNotices />,
@@ -30,7 +31,7 @@ const pages = {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
-    return window.location.hash.replace('#','') || 'manage'
+    return window.location.hash.replace('#','') || 'home'
   })
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
