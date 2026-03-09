@@ -1,3 +1,5 @@
+import SearchBox from '../components/SearchBox.jsx'
+
 export default function Home({ onNavigate }) {
   return (
     <div className="card" style={{maxWidth:'680px'}}>
@@ -20,6 +22,9 @@ export default function Home({ onNavigate }) {
           פרטי ועד, חברת ניהול, קבלנים, בעלי מקצוע מומלצים ועוד.
         </div>
       </div>
+
+      {/* Search */}
+      <SearchBox />
 
       {/* How to use */}
       <div className="info-block green" style={{marginBottom: '16px'}}>
