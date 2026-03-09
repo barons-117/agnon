@@ -79,10 +79,10 @@ export const professionals = [
   },
   {
     category: 'beauty',
-    name: 'אוליאנה – קוסמטיקאית מוסמכת',
-    desc: 'טיפולי גוף. גרה בבניין 12, קומה 6.',
-    phone: null,
-    link: { label: '📷 אינסטגרם', url: 'https://www.instagram.com/uliana_skin_care' },
+    name: 'יוליאנה – קוסמטיקאית מוסמכת',
+    desc: 'טיפולי פנים, גבות ושיזוף בהתזה. גרה בבניין 12, קומה 6.',
+    phone: '054-4817652',
+    link: { label: '📷 אינסטגרם', url: 'https://www.instagram.com/uliana_skin_expert?igsh=c25waTU2MDVja2V5&utm_source=qr' },
   },
   {
     category: 'nails',
