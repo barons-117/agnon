@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
+import { sendDoneEmail } from '../lib/emailjs.js'
 
 const ADMIN_PASSWORD = 'hightower2026'
 
@@ -28,6 +29,10 @@ export default function Admin() {
 
   const toggleDone = async (id, current) => {
     await supabase.from('requests').update({ done: !current }).eq('id', id)
+    const updated = requests.find(x => x.id === id)
+    if (!current && updated) {
+      try { await sendDoneEmail(updated) } catch(e) { console.warn('email error', e) }
+    }
     setRequests(r => r.map(x => x.id === id ? { ...x, done: !current } : x))
   }
 
