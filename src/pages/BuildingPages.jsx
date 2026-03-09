@@ -130,58 +130,6 @@ export function VaadNotices() {
   )
 }
 
-  return (
-    <div className="card">
-      <div className="panel-title"><div className="icon">📣</div>הודעות וועד הבית</div>
-
-      <div style={{display:'flex', gap:'8px', marginBottom:'20px', flexWrap:'wrap'}}>
-        {buildingTabs.map(tab => (
-          <button
-            key={tab.id}
-            className={`pro-tab-btn${activeBuilding === tab.id ? ' active' : ''}`}
-            onClick={() => setActiveBuilding(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {loading && <div style={{color:'var(--muted)',fontSize:'14px'}}>טוען...</div>}
-
-      {!loading && filtered.length === 0 && (
-        <div className="info-block" style={{textAlign:'center',color:'var(--muted)',fontSize:'15px',padding:'32px 18px'}}>
-          📭 אין הודעות כרגע.
-        </div>
-      )}
-
-      {filtered.map((n, i) => (
-        <div key={n.id} style={{
-          borderBottom: i < filtered.length-1 ? '1px solid var(--border)' : 'none',
-          paddingBottom:'16px', marginBottom:'16px'
-        }}>
-          <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'6px', gap:'8px'}}>
-            <div style={{fontWeight:'700', fontSize:'15px', color:'var(--primary)'}}>{n.title}</div>
-            <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'4px', flexShrink:0}}>
-              <div style={{fontSize:'12px', color:'var(--muted)'}}>{n.date}</div>
-              {n.building === 'both' ? (
-                <div style={{display:'flex', gap:'4px'}}>
-                  <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>עגנון 12</div>
-                  <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>עגנון 14</div>
-                </div>
-              ) : (
-                <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>
-                  עגנון {n.building}
-                </div>
-              )}
-            </div>
-          </div>
-          <div style={{fontSize:'14px', lineHeight:'1.7', color:'var(--text)', whiteSpace:'pre-line'}}>{n.text}</div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export function Wifi() {
   return (
     <div className="card">
