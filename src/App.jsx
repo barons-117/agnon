@@ -29,8 +29,15 @@ const pages = {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('manage')
+  const [activeTab, setActiveTab] = useState(() => {
+    return window.location.hash.replace('#','') || 'manage'
+  })
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    window.location.hash = tab
+  }
 
   return (
     <>
@@ -55,7 +62,7 @@ export default function App() {
       <div className="layout">
         <Sidebar
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabChange}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />

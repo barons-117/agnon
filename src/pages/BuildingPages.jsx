@@ -54,7 +54,13 @@ export function VaadNotices() {
   React.useEffect(() => {
     fetch(import.meta.env.BASE_URL + 'notices.json')
       .then(r => r.json())
-      .then(data => { setNotices(data); setLoading(false) })
+      .then(data => {
+          const sorted = data.slice().sort((a, b) => {
+            const parse = d => { const [day,month,year] = d.split('/'); return new Date(year,month-1,day) }
+            return parse(b.date) - parse(a.date)
+          })
+          setNotices(sorted); setLoading(false)
+        })
       .catch(() => setLoading(false))
   }, [])
 
@@ -70,7 +76,7 @@ export function VaadNotices() {
         </div>
       )}
 
-      {notices.slice().reverse().map(n => (
+      {notices.map(n => (
         <div key={n.id} style={{borderBottom:'1px solid var(--border)',paddingBottom:'16px',marginBottom:'16px'}}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'6px'}}>
             <div style={{fontWeight:'700',fontSize:'15px',color:'var(--primary)'}}>{n.title}</div>
