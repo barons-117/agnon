@@ -174,7 +174,7 @@ export default function Admin() {
               borderRadius:'12px', padding:'16px 18px', marginBottom:'10px',
             }}>
               <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'12px'}}>
-                <div style={{flex:1}}>
+                <div style={{flex:1, minWidth:0}}>
                   <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'6px', flexWrap:'wrap'}}>
                     <span style={{fontWeight:'700', fontSize:'15px', color:'var(--primary)'}}>{r.name}</span>
                     <span style={{fontSize:'12px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>
@@ -197,7 +197,7 @@ export default function Admin() {
 
                   {/* Admin note */}
                   {!isEditingNote && (
-                    <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                    <div style={{display:'flex', alignItems:'center', gap:'8px', marginTop:'8px'}}>
                       {r.admin_note && (
                         <div style={{fontSize:'13px', color:'#7a5c00', background:'#fffbf0',
                           border:'1px solid #f5c97a', borderRadius:'8px', padding:'6px 10px', flex:1}}>
@@ -213,7 +213,7 @@ export default function Admin() {
                     </div>
                   )}
                   {isEditingNote && (
-                    <div style={{display:'flex', gap:'8px', alignItems:'flex-start'}}>
+                    <div style={{display:'flex', gap:'8px', alignItems:'flex-start', marginTop:'8px'}}>
                       <textarea value={noteText} onChange={e => setNoteText(e.target.value)}
                         placeholder="הערה פנימית..." rows={2}
                         style={{flex:1, padding:'8px', borderRadius:'8px', border:'1px solid var(--border)',
@@ -224,26 +224,26 @@ export default function Admin() {
                       </div>
                     </div>
                   )}
-                </div>
 
-                {/* Action buttons */}
-                <div style={{display:'flex', flexDirection:'column', gap:'6px', flexShrink:0}}>
-                  <button onClick={() => setStatus(r.id, 'inprogress')}
-                    disabled={r.status === 'inprogress'}
-                    style={{...actionBtn, background: r.status === 'inprogress' ? '#fff3b0' : '#f7f5f1',
-                      border: r.status === 'inprogress' ? '1.5px solid #f5c97a' : '1px solid var(--border)'}}>
-                    🔄 בטיפול
-                  </button>
-                  <button onClick={() => setStatus(r.id, 'done')}
-                    disabled={r.status === 'done'}
-                    style={{...actionBtn, background: r.status === 'done' ? '#d6f0e4' : '#f7f5f1',
-                      border: r.status === 'done' ? '1.5px solid #8ecfad' : '1px solid var(--border)'}}>
-                    ✓ טופל
-                  </button>
-                  <button onClick={() => deleteRequest(r.id)}
-                    style={{...actionBtn, background:'#fdf0f0', border:'1px solid #f0b8b8', color:'#c04444'}}>
-                    🗑️
-                  </button>
+                  {/* Action buttons - below content on mobile */}
+                  <div style={{display:'flex', gap:'8px', marginTop:'12px', flexWrap:'wrap'}}>
+                    <button onClick={() => setStatus(r.id, 'inprogress')}
+                      disabled={r.status === 'inprogress'}
+                      style={{...actionBtn, background: r.status === 'inprogress' ? '#fff3b0' : '#f7f5f1',
+                        border: r.status === 'inprogress' ? '1.5px solid #f5c97a' : '1px solid var(--border)'}}>
+                      🔄 בטיפול
+                    </button>
+                    <button onClick={() => setStatus(r.id, 'done')}
+                      disabled={r.status === 'done'}
+                      style={{...actionBtn, background: r.status === 'done' ? '#d6f0e4' : '#f7f5f1',
+                        border: r.status === 'done' ? '1.5px solid #8ecfad' : '1px solid var(--border)'}}>
+                      ✓ טופל
+                    </button>
+                    <button onClick={() => deleteRequest(r.id)}
+                      style={{...actionBtn, background:'#fdf0f0', border:'1px solid #f0b8b8', color:'#c04444'}}>
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
