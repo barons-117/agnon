@@ -1,59 +1,39 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
 
-const CATEGORY_LABELS = {
-  handyman:  '🔨 הנדימן',
-  ac:        '❄️ מיזוג אוויר',
-  carpenter: '🪚 נגרות',
-  shower:    '🚿 מקלחונים',
-  door:      '🚪 דלת ממ״ד',
-  shelves:   '📦 מדפים',
-  taxi:      '🚕 מונית',
-  beauty:    '💆 קוסמטיקה',
-  nails:     '💅 לק ג׳ל',
-  pilates:   '🧘 פילאטיס',
-}
-
 export default function Pros() {
   const [pros, setPros] = useState([])
+  const [cats, setCats] = useState([])
   const [loading, setLoading] = useState(true)
   const [activecat, setActivecat] = useState(null)
 
   useEffect(() => {
-    supabase.from('professionals').select('*')
-      .eq('active', true).order('id')
-      .then(({ data }) => {
-        setPros(data || [])
-        if (data && data.length > 0) {
-          const first = data[0].category
-          setActivecat(first)
-        }
-        setLoading(false)
-      })
+    Promise.all([
+      supabase.from('pro_categories').select('*').order('label'),
+      supabase.from('professionals').select('*').eq('active', true).order('id'),
+    ]).then(([{ data: catData }, { data: proData }]) => {
+      setCats(catData || [])
+      setPros(proData || [])
+      // Set first category that has professionals
+      if (catData && proData) {
+        const first = catData.find(c => proData.some(p => p.categories?.includes(c.id)))
+        if (first) setActivecat(first.id)
+      }
+      setLoading(false)
+    })
   }, [])
 
-  // Build categories list from actual data, preserving order
-  const cats = []
-  const seen = new Set()
-  pros.forEach(p => {
-    if (!seen.has(p.category)) {
-      seen.add(p.category)
-      cats.push({ id: p.category, label: CATEGORY_LABELS[p.category] || p.category })
-    }
-  })
-
-  const filtered = pros.filter(p => p.category === activecat)
+  const filtered = pros.filter(p => p.categories?.includes(activecat))
+  const catsWithPros = cats.filter(c => pros.some(p => p.categories?.includes(c.id)))
 
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">⭐</div>בעלי מקצוע מומלצים</div>
       <p style={{fontSize:'13px', color:'var(--muted)', marginBottom:'16px'}}>המלצות שעלו מדיירי הבניין בקבוצת הוואטסאפ.</p>
 
-      {loading ? (
-        <div style={{color:'var(--muted)', fontSize:'14px'}}>טוען...</div>
-      ) : <>
+      {loading ? <div style={{color:'var(--muted)', fontSize:'14px'}}>טוען...</div> : <>
         <div className="pros-tabs">
-          {cats.map(cat => (
+          {catsWithPros.map(cat => (
             <button key={cat.id}
               className={`pro-tab-btn${activecat === cat.id ? ' active' : ''}`}
               onClick={() => setActivecat(cat.id)}>
