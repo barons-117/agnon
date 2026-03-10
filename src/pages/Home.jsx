@@ -124,26 +124,37 @@ export default function Home({ onNavigate }) {
       {/* Hero header */}
       <div style={{
         background: 'linear-gradient(135deg, #0f2540 0%, #1a3a5c 60%, #1e4a7a 100%)',
-        borderRadius: '20px', padding: '36px 28px 32px', marginBottom: '20px',
-        color: 'white', textAlign: 'center', position: 'relative', overflow: 'hidden',
+        borderRadius: '20px', marginBottom: '20px',
+        color: 'white', position: 'relative', overflow: 'hidden',
+        display: 'flex', alignItems: 'stretch', minHeight: '130px',
       }}>
-        {/* decorative circles */}
-        <div style={{position:'absolute', top:'-40px', left:'-40px', width:'160px', height:'160px',
-          borderRadius:'50%', background:'rgba(255,255,255,0.04)'}}/>
-        <div style={{position:'absolute', bottom:'-30px', right:'-30px', width:'120px', height:'120px',
-          borderRadius:'50%', background:'rgba(245,184,106,0.1)'}}/>
-        <div style={{position:'relative', zIndex:1}}>
-          <div style={{fontSize:'48px', marginBottom:'10px'}}>🏢</div>
-          <div style={{fontSize:'23px', fontWeight:'800', marginBottom:'6px', letterSpacing:'-0.5px'}}>
-            ברוכים הבאים
+        {/* Text side */}
+        <div style={{flex: 1, padding: '24px 22px', position: 'relative', zIndex: 1, display:'flex', flexDirection:'column', justifyContent:'center'}}>
+          <div style={{fontSize:'11px', color:'#f5c97a', fontWeight:'700', letterSpacing:'1px', marginBottom:'6px', textTransform:'uppercase'}}>
+            קריית אונו · Ono One
           </div>
-          <div style={{fontSize:'15px', color:'#f5c97a', fontWeight:'700', marginBottom:'14px'}}>
-            שי עגנון 12 ו-14 · קריית אונו
+          <div style={{fontSize:'20px', fontWeight:'800', marginBottom:'4px', lineHeight:'1.3'}}>
+            שי עגנון 12 ו-14
           </div>
-          <div style={{fontSize:'13px', opacity:'0.7', lineHeight:'1.8', maxWidth:'340px', margin:'0 auto'}}>
-            כל המידע החשוב על הבניין במקום אחד —
-            ועד הבית, חברת ניהול, קבלנים ועוד.
+          <div style={{fontSize:'13px', opacity:'0.7', lineHeight:'1.6'}}>
+            כל המידע החשוב לדיירים במקום אחד
           </div>
+        </div>
+        {/* Image side */}
+        <div style={{width:'130px', flexShrink:0, position:'relative', overflow:'hidden', borderRadius:'0 20px 20px 0'}}>
+          <img
+            src={import.meta.env.BASE_URL + 'building.png'}
+            alt="הבניין"
+            style={{
+              position:'absolute', inset:0, width:'100%', height:'100%',
+              objectFit:'cover', objectPosition:'center top',
+              opacity: 0.85,
+            }}
+          />
+          <div style={{
+            position:'absolute', inset:0,
+            background:'linear-gradient(to right, #1a3a5c 0%, transparent 40%)',
+          }}/>
         </div>
       </div>
 

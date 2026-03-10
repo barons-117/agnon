@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { sendDoneEmail } from '../lib/emailjs.js'
 import RoomBookings from './RoomBookings.jsx'
 import AdminNotices from './AdminNotices.jsx'
+import FileAttachment from '../components/FileAttachment.jsx'
 
 export default function Admin() {
   const [session, setSession] = useState(null)
@@ -192,12 +193,7 @@ export default function Admin() {
 
                   <div style={{fontSize:'14px', lineHeight:'1.7', color:'var(--text)', whiteSpace:'pre-line', marginBottom:'8px'}}>{r.content}</div>
 
-                  {r.file_url && (
-                    <a href={r.file_url} target="_blank" rel="noopener" style={{
-                      display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px',
-                      color:'var(--accent2)', fontWeight:'600', marginBottom:'8px'
-                    }}>📎 קובץ מצורף</a>
-                  )}
+                  <FileAttachment url={r.file_url} name={r.file_url?.split('/').pop()} />
 
                   {/* Admin note */}
                   {!isEditingNote && (
