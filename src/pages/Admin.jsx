@@ -15,6 +15,8 @@ export default function Admin() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('all')
+  const [search, setSearch] = useState('')
+  const [buildingFilter, setBuildingFilter] = useState('all')
   const [noteEditing, setNoteEditing] = useState(null)
   const [noteText, setNoteText] = useState('')
 
@@ -65,9 +67,19 @@ export default function Admin() {
   }
 
   const filtered = requests.filter(r => {
-    if (filter === 'new') return r.status === 'new' || !r.status
-    if (filter === 'inprogress') return r.status === 'inprogress'
-    if (filter === 'done') return r.status === 'done'
+    if (filter === 'new' && !(r.status === 'new' || !r.status)) return false
+    if (filter === 'inprogress' && r.status !== 'inprogress') return false
+    if (filter === 'done' && r.status !== 'done') return false
+    if (buildingFilter !== 'all' && r.building !== buildingFilter) return false
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      return (
+        r.name?.toLowerCase().includes(q) ||
+        r.apartment?.toString().includes(q) ||
+        r.content?.toLowerCase().includes(q) ||
+        r.id?.toString().includes(q)
+      )
+    }
     return true
   })
 
@@ -148,7 +160,7 @@ export default function Admin() {
         </div>
 
         {/* Filter tabs */}
-        <div style={{display:'flex', gap:'8px', marginBottom:'20px', flexWrap:'wrap'}}>
+        <div style={{display:'flex', gap:'8px', marginBottom:'12px', flexWrap:'wrap'}}>
           {[
             { id:'all', label:`הכל (${count('all')})` },
             { id:'new', label:`חדשות (${count('new')})` },
@@ -158,6 +170,25 @@ export default function Admin() {
             <button key={t.id} className={`pro-tab-btn${filter === t.id ? ' active' : ''}`}
               onClick={() => setFilter(t.id)}>{t.label}</button>
           ))}
+        </div>
+
+        {/* Search + building filter */}
+        <div style={{display:'flex', gap:'8px', marginBottom:'20px', flexWrap:'wrap'}}>
+          <input
+            value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="🔍  חיפוש לפי שם, דירה, מספר פנייה או תוכן..."
+            style={{flex:1, minWidth:'180px', padding:'9px 14px', borderRadius:'10px',
+              border:'1.5px solid var(--border)', fontSize:'13px',
+              fontFamily:'Heebo, sans-serif', background:'#fafaf8', outline:'none'}}
+          />
+          <select value={buildingFilter} onChange={e => setBuildingFilter(e.target.value)}
+            style={{padding:'9px 12px', borderRadius:'10px', border:'1.5px solid var(--border)',
+              fontSize:'13px', fontFamily:'Heebo, sans-serif', background:'#fafaf8',
+              color:'var(--text)', cursor:'pointer'}}>
+            <option value="all">כל הבניינים</option>
+            <option value="12">עגנון 12</option>
+            <option value="14">עגנון 14</option>
+          </select>
         </div>
 
         {loading && <div style={{color:'var(--muted)'}}>טוען...</div>}
@@ -176,6 +207,9 @@ export default function Admin() {
               <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'12px'}}>
                 <div style={{flex:1, minWidth:0}}>
                   <div style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'6px', flexWrap:'wrap'}}>
+                    <span style={{fontSize:'11px', background:'#f0ede8', color:'var(--muted)', padding:'2px 8px', borderRadius:'100px', fontWeight:'700', fontVariantNumeric:'tabular-nums'}}>
+                      #{r.id}
+                    </span>
                     <span style={{fontWeight:'700', fontSize:'15px', color:'var(--primary)'}}>{r.name}</span>
                     <span style={{fontSize:'12px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>
                       עגנון {r.building} · דירה {r.apartment}
