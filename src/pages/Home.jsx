@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import SearchBox from '../components/SearchBox.jsx'
 import { supabase } from '../lib/supabase.js'
+import FileAttachment from '../components/FileAttachment.jsx'
 
 function NoticesWidget({ onNavigate }) {
   const [notices, setNotices] = useState([])
@@ -98,14 +99,7 @@ function NoticesWidget({ onNavigate }) {
             </div>
             {/* Content */}
             <div style={{fontSize:'13px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line'}}>{n.text}</div>
-            {n.file_url && (
-              <a href={n.file_url} target="_blank" rel="noopener" style={{
-                display:'inline-flex', alignItems:'center', gap:'5px', fontSize:'12px',
-                color:'var(--accent2)', fontWeight:'600', textDecoration:'none',
-                background:'#eef4fb', padding:'4px 10px', borderRadius:'7px',
-                border:'1px solid #c8dcf0', marginTop:'8px'
-              }}>📎 {n.file_name}</a>
-            )}
+            <FileAttachment url={n.file_url} name={n.file_name} />
           </div>
         ))}
 
