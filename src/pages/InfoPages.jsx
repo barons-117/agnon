@@ -110,16 +110,15 @@ export function AC() {
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">❄️</div>מיזוג אוויר בדירות</div>
-      <div className="section-label">סרטון הדרכה: ביטול נעילה</div>
-      <div className="video-fallback">
-        <div className="play-icon">▶</div>
-        <p style={{fontSize:'15px',fontWeight:'700',opacity:'1'}}>סרטון הדרכה על המזגן</p>
-        <p>הסרטון מאוחסן ב-Dropbox. לחצו לצפייה:</p>
-        <a href="https://www.dropbox.com/scl/fi/48p0xgorvum3od7ry4lv7/.mp4?rlkey=wgdwm12iimcu3tqag36ab74t9&dl=0" target="_blank" rel="noopener">
-          ▶ &nbsp; פתח סרטון
-        </a>
-      </div>
-      <div className="divider" style={{marginTop:'24px'}}></div>
+      <div className="section-label">סרטון הדרכה: ביטול נעילת ילדים בלוח הבקרה</div>
+      <video
+        controls
+        style={{ width: '100%', borderRadius: '12px', marginBottom: '8px', background: '#000' }}
+        src={import.meta.env.BASE_URL + 'מדריך_ביטול_נעילת_ילדים_בלוח_בקרה_קירי.mp4'}
+      >
+        הדפדפן שלך אינו תומך בהפעלת וידאו.
+      </video>
+      <div className="divider" style={{marginTop:'16px'}}></div>
       <div className="section-label">קישור לשלט למזגן (AliExpress)</div>
       <div className="info-block">🎛️ שלט שהומלץ על ידי דיירים – <strong>עובד מעולה בלי קידוד</strong>.</div>
       <a className="link-btn" href="https://a.aliexpress.com/_c3MVh3yL" target="_blank" rel="noopener">
