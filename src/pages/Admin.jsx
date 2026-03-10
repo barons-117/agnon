@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { sendDoneEmail } from '../lib/emailjs.js'
 import RoomBookings from './RoomBookings.jsx'
 import AdminNotices from './AdminNotices.jsx'
+import AdminPros from './AdminPros.jsx'
 import FileAttachment from '../components/FileAttachment.jsx'
 
 export default function Admin() {
@@ -144,10 +145,12 @@ export default function Admin() {
         <button className={`pro-tab-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>📝 מערכת פניות</button>
         <button className={`pro-tab-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>🛋️ הזמנת חדרי דיירים</button>
         <button className={`pro-tab-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>📣 הודעות ועד בית</button>
+        <button className={`pro-tab-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>⭐ בעלי מקצוע</button>
       </div>
 
       {adminTab === 'rooms' && <RoomBookings />}
       {adminTab === 'notices' && <AdminNotices />}
+      {adminTab === 'pros' && <AdminPros />}
 
       {adminTab === 'requests' && <>
         <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px'}}>
