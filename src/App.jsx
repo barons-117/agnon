@@ -61,7 +61,6 @@ export default function App() {
     <>
       {/* Mobile topbar */}
       <div className="topbar">
-        <div className="topbar-title">שי עגנון <span>12 ו-14</span></div>
         <button
           className={`hamburger${sidebarOpen ? ' open' : ''}`}
           onClick={() => setSidebarOpen(o => !o)}
@@ -69,6 +68,11 @@ export default function App() {
         >
           <span/><span/><span/>
         </button>
+        <div
+          className="topbar-title"
+          onClick={() => handleTabChange('home')}
+          style={{cursor:'pointer'}}
+        >שי עגנון <span>12 ו-14</span></div>
       </div>
 
       {/* Overlay */}

@@ -1,9 +1,10 @@
 import { navSections } from '../data/navigation.js'
 
 export default function Sidebar({ activeTab, onTabChange, isOpen, onClose }) {
+  const goHome = () => { onTabChange('home'); onClose() }
   return (
     <aside className={`sidebar${isOpen ? ' open' : ''}`} id="sidebar">
-      <div className="sidebar-header">
+      <div className="sidebar-header" onClick={goHome} style={{cursor:'pointer'}}>
         <div className="sidebar-badge">פרויקט Ono One</div>
         <div className="sidebar-title">שי עגנון <span>12 ו-14</span></div>
         <div className="sidebar-sub">מידע לדיירים</div>

@@ -97,31 +97,43 @@ export function VaadNotices() {
 
       {filtered.map((n, i) => (
         <div key={n.id} style={{
-          borderBottom: i < filtered.length-1 ? '1px solid var(--border)' : 'none',
-          paddingBottom:'16px', marginBottom:'16px'
+          background: 'white',
+          border: '1px solid var(--border)',
+          borderRadius: '14px',
+          padding: '18px 20px',
+          marginBottom: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         }}>
-          <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'6px', gap:'8px'}}>
-            <div style={{fontWeight:'700', fontSize:'15px', color:'var(--primary)'}}>{n.title}</div>
+          {/* Header row */}
+          <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:'10px', gap:'8px'}}>
+            <div style={{fontWeight:'800', fontSize:'15px', color:'var(--primary)', lineHeight:'1.4'}}>{n.title}</div>
             <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'4px', flexShrink:0}}>
-              <div style={{fontSize:'12px', color:'var(--muted)'}}>{n.date}</div>
+              <div style={{
+                fontSize:'11px', background:'#f0ede8', color:'var(--muted)',
+                padding:'3px 9px', borderRadius:'100px', fontWeight:'600', whiteSpace:'nowrap'
+              }}>📅 {n.date}</div>
               {n.building === 'both' ? (
                 <div style={{display:'flex', gap:'4px'}}>
-                  <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>עגנון 12</div>
-                  <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>עגנון 14</div>
+                  <div style={{fontSize:'10px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 7px', borderRadius:'100px', fontWeight:'700'}}>עגנון 12</div>
+                  <div style={{fontSize:'10px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 7px', borderRadius:'100px', fontWeight:'700'}}>עגנון 14</div>
                 </div>
               ) : (
-                <div style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>
+                <div style={{fontSize:'10px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 7px', borderRadius:'100px', fontWeight:'700'}}>
                   עגנון {n.building}
                 </div>
               )}
             </div>
           </div>
-          <div style={{fontSize:'14px', lineHeight:'1.7', color:'var(--text)', whiteSpace:'pre-line', marginBottom: n.file_url ? '10px' : 0}}>{n.text}</div>
+          {/* Divider */}
+          <div style={{height:'1px', background:'var(--border)', marginBottom:'10px'}}></div>
+          {/* Content */}
+          <div style={{fontSize:'14px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line'}}>{n.text}</div>
           {n.file_url && (
             <a href={n.file_url} target="_blank" rel="noopener" style={{
               display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'13px',
               color:'var(--accent2)', fontWeight:'600', textDecoration:'none',
-              background:'#eef4fb', padding:'6px 12px', borderRadius:'8px', border:'1px solid #c8dcf0'
+              background:'#eef4fb', padding:'6px 12px', borderRadius:'8px',
+              border:'1px solid #c8dcf0', marginTop:'12px'
             }}>📎 {n.file_name}</a>
           )}
         </div>

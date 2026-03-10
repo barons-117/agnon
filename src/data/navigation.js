@@ -1,18 +1,12 @@
 // src/data/navigation.js
 export const navSections = [
   {
-    label: 'כללי',
-    items: [
-      { id: 'home',         icon: '🏠', label: 'דף הבית' },
-    ],
-  },
-  {
     label: 'ניהול',
     items: [
+      { id: 'vaad-notices', icon: '📣', label: 'הודעות וועד' },
       { id: 'manage',       icon: '🏢', label: 'חברת ניהול' },
       { id: 'vaad',         icon: '👥', label: 'ועד הבית' },
       { id: 'boni',         icon: '🏗️', label: 'בוני התיכון' },
-      { id: 'vaad-notices', icon: '📣', label: 'הודעות וועד' },
       { id: 'requests',     icon: '📝', label: 'פניות לחברת הניהול' },
     ],
   },
@@ -22,7 +16,7 @@ export const navSections = [
       { id: 'wifi',           icon: '📶', label: 'WiFi וקודים' },
       { id: 'cleaning',       icon: '🧹', label: 'לוח ניקיון' },
       { id: 'residents-room', icon: '🛋️', label: 'חדר דיירים' },
-      { id: 'parking',        icon: '🚗', label: 'חניון' },
+      { id: 'parking',        icon: '🚗', label: 'חניות וחניון' },
     ],
   },
   {
