@@ -117,9 +117,9 @@ export default function ResidentsRoomCalendar() {
 
       <div className="divider"></div>
       <div style={{fontSize:'13px', color:'var(--muted)', marginBottom:'10px', fontWeight:'700'}}>📄 מסמכים</div>
-      <a className="link-btn outline" href={import.meta.env.BASE_URL + 'תקנון_חדר_דיירים_עגנון_קרית_אונו.pdf'}
+      <a className="link-btn outline" href={import.meta.env.BASE_URL + 'תקנון_חדר_דיירים_עגנון.pdf'}
         target="_blank" rel="noopener" style={{display:'flex'}}>
-        📄 &nbsp; תקנון חדר דיירים – עגנון 12
+        📄 &nbsp; תקנון שימוש בחדר דיירים
       </a>
     </div>
   )
