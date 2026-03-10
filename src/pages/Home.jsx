@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react'
 import SearchBox from '../components/SearchBox.jsx'
 import { supabase } from '../lib/supabase.js'
 
-function NoticesWidget() {
+function NoticesWidget({ onNavigate }) {
   const [notices, setNotices] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeBuilding, setActiveBuilding] = useState('both')
-  const [expanded, setExpanded] = useState(null)
 
   useEffect(() => {
     supabase.from('notices').select('*').order('date', { ascending: false })
@@ -22,18 +21,19 @@ function NoticesWidget() {
 
   const filtered = notices.filter(n =>
     activeBuilding === 'both' ? n.building === 'both' : (n.building === activeBuilding || n.building === 'both')
-  )
+  ).slice(0, 2)
+
+  const total = notices.filter(n =>
+    activeBuilding === 'both' ? n.building === 'both' : (n.building === activeBuilding || n.building === 'both')
+  ).length
 
   return (
     <div style={{
-      background: 'white',
-      border: '1px solid var(--border)',
-      borderRadius: '16px',
-      overflow: 'hidden',
-      marginBottom: '20px',
+      background: 'white', border: '1px solid var(--border)',
+      borderRadius: '16px', overflow: 'hidden', marginBottom: '20px',
       boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
     }}>
-      {/* Widget header */}
+      {/* Header */}
       <div style={{
         background: 'linear-gradient(135deg, #e8943a, #f5b86a)',
         padding: '16px 20px',
@@ -43,14 +43,15 @@ function NoticesWidget() {
           <span style={{fontSize:'22px'}}>📣</span>
           <div>
             <div style={{fontWeight:'800', fontSize:'15px', color:'white'}}>הודעות ועד הבית</div>
-            <div style={{fontSize:'12px', color:'rgba(255,255,255,0.8)'}}>עדכונים אחרונים מהוועד</div>
+            <div style={{fontSize:'12px', color:'rgba(255,255,255,0.8)'}}>2 הודעות אחרונות</div>
           </div>
         </div>
-        {!loading && <div style={{
-          background:'rgba(255,255,255,0.25)', color:'white',
-          fontSize:'12px', fontWeight:'700', padding:'4px 10px',
-          borderRadius:'100px',
-        }}>{filtered.length} הודעות</div>}
+        <button onClick={() => onNavigate('vaad-notices')} style={{
+          background:'rgba(255,255,255,0.25)', color:'white', border:'none',
+          fontSize:'12px', fontWeight:'700', padding:'6px 12px',
+          borderRadius:'100px', cursor:'pointer', fontFamily:'Heebo, sans-serif',
+          display:'flex', alignItems:'center', gap:'4px',
+        }}>כל ההודעות ←</button>
       </div>
 
       {/* Building tabs */}
@@ -66,52 +67,57 @@ function NoticesWidget() {
         ))}
       </div>
 
-      {/* Notices list */}
-      <div style={{padding:'12px 16px', maxHeight:'360px', overflowY:'auto'}}>
-        {loading && <div style={{textAlign:'center', color:'var(--muted)', padding:'24px', fontSize:'13px'}}>טוען...</div>}
+      {/* Notices */}
+      <div style={{padding:'14px 18px'}}>
+        {loading && <div style={{textAlign:'center', color:'var(--muted)', padding:'20px', fontSize:'13px'}}>טוען...</div>}
         {!loading && filtered.length === 0 && (
-          <div style={{textAlign:'center', color:'var(--muted)', padding:'24px', fontSize:'13px'}}>📭 אין הודעות כרגע</div>
+          <div style={{textAlign:'center', color:'var(--muted)', padding:'20px', fontSize:'13px'}}>📭 אין הודעות כרגע</div>
         )}
-        {filtered.map((n, i) => {
-          const isOpen = expanded === n.id
-          return (
-            <div key={n.id} style={{
-              borderBottom: i < filtered.length-1 ? '1px solid var(--border)' : 'none',
-              paddingBottom:'12px', marginBottom:'12px',
-            }}>
-              <div
-                onClick={() => setExpanded(isOpen ? null : n.id)}
-                style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', cursor:'pointer'}}
-              >
-                <div style={{flex:1}}>
-                  <div style={{fontWeight:'700', fontSize:'14px', color:'var(--primary)', marginBottom:'3px'}}>{n.title}</div>
-                  {!isOpen && <div style={{fontSize:'12px', color:'var(--muted)', lineHeight:'1.5',
-                    overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:'220px'}}>
-                    {n.text}
-                  </div>}
-                </div>
-                <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'4px', flexShrink:0}}>
-                  <div style={{fontSize:'11px', color:'var(--muted)'}}>{n.date}</div>
-                  <div style={{fontSize:'11px', color:'#888'}}>{isOpen ? '▲' : '▼'}</div>
-                </div>
-              </div>
-              {isOpen && (
-                <div style={{fontSize:'13px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line', marginTop:'8px',
-                  background:'#fafaf8', padding:'10px 12px', borderRadius:'8px', border:'1px solid var(--border)'}}>
-                  {n.text}
-                  {n.file_url && (
-                    <a href={n.file_url} target="_blank" rel="noopener" style={{
-                      display:'inline-flex', alignItems:'center', gap:'6px', fontSize:'12px',
-                      color:'var(--accent2)', fontWeight:'600', textDecoration:'none',
-                      background:'#eef4fb', padding:'5px 10px', borderRadius:'7px',
-                      border:'1px solid #c8dcf0', marginTop:'8px'
-                    }}>📎 {n.file_name}</a>
+        {filtered.map((n, i) => (
+          <div key={n.id} style={{
+            borderBottom: i < filtered.length-1 ? '1px solid var(--border)' : 'none',
+            paddingBottom: i < filtered.length-1 ? '14px' : 0,
+            marginBottom: i < filtered.length-1 ? '14px' : 0,
+          }}>
+            {/* Title row */}
+            <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'8px', marginBottom:'8px'}}>
+              <div style={{fontWeight:'800', fontSize:'14px', color:'var(--primary)', lineHeight:'1.4'}}>{n.title}</div>
+              <div style={{display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'4px', flexShrink:0}}>
+                <div style={{fontSize:'11px', color:'var(--muted)', whiteSpace:'nowrap'}}>{n.date}</div>
+                <div style={{display:'flex', gap:'3px'}}>
+                  {n.building === 'both' ? (
+                    <>
+                      <span style={{fontSize:'10px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 7px', borderRadius:'100px', fontWeight:'700'}}>עגנון 12</span>
+                      <span style={{fontSize:'10px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 7px', borderRadius:'100px', fontWeight:'700'}}>עגנון 14</span>
+                    </>
+                  ) : (
+                    <span style={{fontSize:'10px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 7px', borderRadius:'100px', fontWeight:'700'}}>עגנון {n.building}</span>
                   )}
                 </div>
-              )}
+              </div>
             </div>
-          )
-        })}
+            {/* Content */}
+            <div style={{fontSize:'13px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line'}}>{n.text}</div>
+            {n.file_url && (
+              <a href={n.file_url} target="_blank" rel="noopener" style={{
+                display:'inline-flex', alignItems:'center', gap:'5px', fontSize:'12px',
+                color:'var(--accent2)', fontWeight:'600', textDecoration:'none',
+                background:'#eef4fb', padding:'4px 10px', borderRadius:'7px',
+                border:'1px solid #c8dcf0', marginTop:'8px'
+              }}>📎 {n.file_name}</a>
+            )}
+          </div>
+        ))}
+
+        {/* Link to all */}
+        {total > 2 && (
+          <button onClick={() => onNavigate('vaad-notices')} style={{
+            marginTop:'12px', width:'100%', background:'#f7f4f0',
+            border:'1px solid var(--border)', borderRadius:'10px',
+            padding:'9px', fontSize:'12px', fontWeight:'700',
+            color:'var(--muted)', cursor:'pointer', fontFamily:'Heebo, sans-serif',
+          }}>עוד {total - 2} הודעות ישנות יותר ←</button>
+        )}
       </div>
     </div>
   )
@@ -151,7 +157,7 @@ export default function Home({ onNavigate }) {
       <SearchBox />
 
       {/* Notices widget */}
-      <NoticesWidget />
+      <NoticesWidget onNavigate={onNavigate} />
 
       {/* Request button */}
       <button onClick={() => { window.location.hash = 'requests' }} style={{
