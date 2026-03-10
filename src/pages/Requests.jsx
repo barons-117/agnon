@@ -31,11 +31,11 @@ export default function Requests() {
       }
     }
 
-    const { data, error } = await supabase.from('requests')
-      .insert([{ ...form, file_url, status: 'new' }]).select().single()
+    const { error } = await supabase.from('requests')
+      .insert([{ ...form, file_url, status: 'new' }])
 
     if (error) { setStatus('error'); return }
-    try { await sendNewRequestEmail(data) } catch(e) { console.warn(e) }
+    try { await sendNewRequestEmail({ ...form, file_url }) } catch(e) { console.warn(e) }
     setStatus('success')
     setForm({ name: '', phone: '', email: '', building: '', apartment: '', content: '' })
     setFile(null)
