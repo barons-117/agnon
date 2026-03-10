@@ -26,6 +26,35 @@ export default function Home({ onNavigate }) {
       {/* Search */}
       <SearchBox />
 
+      {/* Quick action buttons */}
+      <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px', marginBottom:'24px'}}>
+        <button onClick={() => { window.location.hash = 'requests' }} style={{
+          background:'linear-gradient(135deg, var(--primary), #1a3a5c)',
+          color:'white', border:'none', borderRadius:'14px', padding:'18px 12px',
+          cursor:'pointer', fontFamily:'Heebo, sans-serif', textAlign:'center',
+          boxShadow:'0 4px 16px rgba(15,37,64,0.2)', transition:'transform 0.15s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'}
+          onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}
+        >
+          <div style={{fontSize:'28px', marginBottom:'8px'}}>📝</div>
+          <div style={{fontSize:'14px', fontWeight:'700', lineHeight:'1.4'}}>פתיחת פנייה<br/>לחברת הניהול</div>
+        </button>
+
+        <button onClick={() => { window.location.hash = 'vaad-notices' }} style={{
+          background:'linear-gradient(135deg, #e8943a, #f5b86a)',
+          color:'white', border:'none', borderRadius:'14px', padding:'18px 12px',
+          cursor:'pointer', fontFamily:'Heebo, sans-serif', textAlign:'center',
+          boxShadow:'0 4px 16px rgba(232,148,58,0.25)', transition:'transform 0.15s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.transform='translateY(-2px)'}
+          onMouseLeave={e => e.currentTarget.style.transform='translateY(0)'}
+        >
+          <div style={{fontSize:'28px', marginBottom:'8px'}}>📣</div>
+          <div style={{fontSize:'14px', fontWeight:'700', lineHeight:'1.4'}}>הודעות<br/>ועד הבית</div>
+        </button>
+      </div>
+
       {/* How to use */}
       <div className="info-block green" style={{marginBottom: '16px'}}>
         <strong>📱 איך משתמשים באתר?</strong><br/>

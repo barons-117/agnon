@@ -27,6 +27,14 @@ export default function Manage() {
           <div className="contact-arrow">←</div>
         </a>
 
+        <div className="contact-card" style={{cursor:'default'}}>
+          <div className="contact-icon" style={{background:'linear-gradient(135deg,#c0392b,#e74c3c)'}}>🚨</div>
+          <div className="contact-info">
+            <div className="contact-label">מוקד חירום 24/7 – HIGH TOWER</div>
+            <div className="contact-number" style={{color:'var(--muted)', fontSize:'13px'}}>בקרוב</div>
+          </div>
+        </div>
+
         <div className="divider"></div>
         <div className="section-label">🏦 חשבון בנק לתשלום דמי ניהול</div>
         <div className="info-block">

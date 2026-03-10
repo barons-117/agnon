@@ -93,22 +93,26 @@ export default function Admin() {
         <div style={{fontSize:'12px', fontWeight:'700', color:'var(--muted)', marginBottom:'6px'}}>דוא״ל</div>
         <input value={email} onChange={e => { setEmail(e.target.value); setLoginError('') }}
           onKeyDown={e => e.key === 'Enter' && login()}
-          placeholder="admin@agnon.net" type="email" dir="ltr"
+          placeholder="" type="email" dir="ltr"
           style={loginInput(!!loginError)} />
       </div>
       <div style={{marginBottom:'12px'}}>
         <div style={{fontSize:'12px', fontWeight:'700', color:'var(--muted)', marginBottom:'6px'}}>סיסמה</div>
         <input value={pw} onChange={e => { setPw(e.target.value); setLoginError('') }}
           onKeyDown={e => e.key === 'Enter' && login()}
-          placeholder="••••••••" type="password" dir="ltr"
+          placeholder="" type="password" dir="ltr"
           style={loginInput(!!loginError)} />
       </div>
       {loginError && <div style={{color:'#e05555', fontSize:'13px', marginBottom:'10px'}}>{loginError}</div>}
       <button onClick={login} disabled={loggingIn} style={{
         background:'var(--primary)', color:'white', border:'none',
         borderRadius:'100px', padding:'10px 24px', fontSize:'14px',
-        fontWeight:'700', cursor:'pointer', fontFamily:'Heebo, sans-serif', width:'100%'
+        fontWeight:'700', cursor:'pointer', fontFamily:'Heebo, sans-serif', width:'100%',
+        marginBottom:'14px'
       }}>{loggingIn ? 'מתחבר...' : 'כניסה'}</button>
+      <div style={{fontSize:'12px', color:'var(--muted)', textAlign:'center', lineHeight:'1.6'}}>
+        עמוד זה מיועד לחברת הניהול ולוועד הבית בלבד.<br/>דיירים — אנא השתמשו בטאב "פנייה לניהול".
+      </div>
     </div>
   )
 

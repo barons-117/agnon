@@ -2,7 +2,6 @@
 // ✏️ כאן מוסיפים / מעדכנים בעלי מקצוע בקלות
 
 export const categories = [
-  { id: 'clean',     label: '🧹 ניקיון' },
   { id: 'handyman',  label: '🔨 הנדימן' },
   { id: 'ac',        label: '❄️ מיזוג אוויר' },
   { id: 'carpenter', label: '🪚 נגרות' },
@@ -16,12 +15,6 @@ export const categories = [
 ]
 
 export const professionals = [
-  {
-    category: 'clean',
-    name: 'עופר ניקיון',
-    desc: 'ניקיון לאחר שיפוץ, פוליש וקרצוף. ממולץ בחום ע״י מספר דיירים.',
-    phone: null,
-  },
   {
     category: 'handyman',
     name: 'אביחי ראובנס',
