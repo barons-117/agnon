@@ -141,11 +141,11 @@ export default function Admin() {
       </div>
 
       {/* Main tabs */}
-      <div style={{display:'flex', gap:'8px', marginBottom:'24px', borderBottom:'1px solid var(--border)', paddingBottom:'16px', flexWrap:'wrap'}}>
-        <button className={`pro-tab-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>📝 מערכת פניות</button>
-        <button className={`pro-tab-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>🛋️ הזמנת חדרי דיירים</button>
-        <button className={`pro-tab-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>📣 הודעות ועד בית</button>
-        <button className={`pro-tab-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>⭐ בעלי מקצוע</button>
+      <div className="admin-nav">
+        <button className={`admin-nav-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>פניות דיירים</button>
+        <button className={`admin-nav-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>הזמנת חדרים</button>
+        <button className={`admin-nav-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>הודעות ועד</button>
+        <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>בעלי מקצוע</button>
       </div>
 
       {adminTab === 'rooms' && <RoomBookings />}

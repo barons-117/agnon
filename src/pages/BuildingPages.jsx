@@ -62,9 +62,9 @@ export function VaadNotices() {
   }, [])
 
   const buildingTabs = [
-    { id: 'both', label: '🏢 שני הבניינים' },
-    { id: '12',   label: '🏠 עגנון 12' },
-    { id: '14',   label: '🏠 עגנון 14' },
+    { id: 'both', label: 'שני הבניינים' },
+    { id: '12',   label: 'עגנון 12' },
+    { id: '14',   label: 'עגנון 14' },
   ]
 
   const filtered = notices.filter(n => {
@@ -76,17 +76,18 @@ export function VaadNotices() {
     <div className="card">
       <div className="panel-title"><div className="icon">📣</div>הודעות וועד הבית</div>
 
-      <div style={{display:'flex', gap:'8px', marginBottom:'20px', flexWrap:'wrap'}}>
+      <div className="ctab-bar">
         {buildingTabs.map(tab => (
           <button
             key={tab.id}
-            className={`pro-tab-btn${activeBuilding === tab.id ? ' active' : ''}`}
+            className={`ctab-btn${activeBuilding === tab.id ? ' active' : ''}`}
             onClick={() => setActiveBuilding(tab.id)}
           >
             {tab.label}
           </button>
         ))}
       </div>
+      <div className="ctab-body" style={{marginBottom:'8px'}}>
 
       {loading && <div style={{color:'var(--muted)',fontSize:'14px'}}>טוען...</div>}
 
@@ -132,6 +133,7 @@ export function VaadNotices() {
           <FileAttachment url={n.file_url} name={n.file_name} />
         </div>
       ))}
+      </div>
     </div>
   )
 }
@@ -173,16 +175,17 @@ export function Cleaning() {
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">🧹</div>ניקיון ואשפה</div>
-      <div style={{display:'flex', gap:'6px', marginBottom:'20px', flexWrap:'wrap'}}>
+      <div className="ctab-bar">
         {[
-          { id:'schedule', label:'📅 ימי ניקיון' },
-          { id:'gazem',    label:'🌿 פינוי גזם' },
-          { id:'pit',      label:'🗑️ פיר אשפה' },
-          { id:'recycle',  label:'♻️ פחי מחזור' },
+          { id:'schedule', label:'ימי ניקיון' },
+          { id:'gazem',    label:'פינוי גזם' },
+          { id:'pit',      label:'פיר אשפה' },
+          { id:'recycle',  label:'פחי מחזור' },
         ].map(t => (
-          <button key={t.id} className={`pro-tab-btn${tab === t.id ? ' active' : ''}`} onClick={() => setTab(t.id)}>{t.label}</button>
+          <button key={t.id} className={`ctab-btn${tab === t.id ? ' active' : ''}`} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </div>
+      <div className="ctab-body">
       {tab === 'schedule' && <>
         <div className="clean-row"><div className="clean-area"><span className="clean-icon">🚪</span><span className="clean-name">לובי</span></div><div className="clean-days"><span className="day-badge daily">כל יום</span></div></div>
         <div className="clean-row"><div className="clean-area"><span className="clean-icon">🏠</span><span className="clean-name">קומות 1–10</span></div><div className="clean-days"><span className="day-badge">ראשון</span><span className="day-badge">רביעי</span></div></div>
@@ -213,6 +216,7 @@ export function Cleaning() {
       </>}
       {tab === 'pit' && <div className="info-block">בכל קומה יש פיר אשפה. <strong>ביציאה מהמעלית פונים ימינה</strong>, שוב ימינה – יש דלת קטנה לפיר האשפה.</div>}
       {tab === 'recycle' && <div className="info-block amber">♻️ המחזור הוא <strong>ידני</strong> – הפחים הכתום והכחול נמצאים <strong>בחזית הבניין</strong>.<br/>נא להוריד בעצמכם ולמיין לפח המתאים.</div>}
+      </div>
     </div>
   )
 }
