@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
 
-const EMPTY = { title: '', text: '', date: '', building: 'both', file_url: null, file_name: null }
+const EMPTY = { title: '', text: '', date: '', building: 'both', file_url: null, file_name: null, urgent: false }
 
 export default function AdminNotices() {
   const [notices, setNotices] = useState([])
@@ -65,6 +65,7 @@ export default function AdminNotices() {
       title: form.title, text: form.text, date: form.date, building: form.building,
       file_url: uploadedFile?.url || null,
       file_name: uploadedFile?.name || null,
+      urgent: form.urgent || false,
     }
     if (editingId) {
       await supabase.from('notices').update(payload).eq('id', editingId)
@@ -80,6 +81,11 @@ export default function AdminNotices() {
     if (!window.confirm('למחוק הודעה זו?')) return
     await supabase.from('notices').delete().eq('id', id)
     setNotices(n => n.filter(x => x.id !== id))
+  }
+
+  const toggleUrgent = async (n) => {
+    await supabase.from('notices').update({ urgent: !n.urgent }).eq('id', n.id)
+    setNotices(ns => ns.map(x => x.id === n.id ? { ...x, urgent: !n.urgent } : x))
   }
 
   const buildingLabel = (b) => b === 'both' ? 'שני הבניינים' : `עגנון ${b}`
@@ -121,13 +127,35 @@ export default function AdminNotices() {
           <div style={{marginBottom:'12px'}}>
             <div style={lbl}>לאיזה בניין?</div>
             <div style={{display:'flex', gap:'8px'}}>
-              {[{v:'both',l:'🏢 שני הבניינים'},{v:'12',l:'🏠 עגנון 12'},{v:'14',l:'🏠 עגנון 14'}].map(opt => (
+              {[{v:'both',l:'שני הבניינים'},{v:'12',l:'עגנון 12'},{v:'14',l:'עגנון 14'}].map(opt => (
                 <button key={opt.v}
                   className={`pro-tab-btn${form.building === opt.v ? ' active' : ''}`}
                   onClick={() => setForm(f=>({...f, building:opt.v}))}
                 >{opt.l}</button>
               ))}
             </div>
+          </div>
+
+          {/* Urgent */}
+          <div style={{marginBottom:'14px'}}>
+            <label style={{
+              display:'flex', alignItems:'center', gap:'12px', cursor:'pointer',
+              background: form.urgent ? 'linear-gradient(135deg,#fff0f0,#ffe4e4)' : '#fafaf8',
+              border: form.urgent ? '1.5px solid #f0a0a0' : '1.5px solid var(--border)',
+              borderRadius:'10px', padding:'12px 16px', transition:'all 0.2s',
+            }}>
+              <input type="checkbox" checked={form.urgent}
+                onChange={e => setForm(f=>({...f, urgent: e.target.checked}))}
+                style={{width:'18px', height:'18px', accentColor:'#e05555', cursor:'pointer'}} />
+              <div>
+                <div style={{fontWeight:'700', fontSize:'14px', color: form.urgent ? '#c03030' : 'var(--text)'}}>
+                  🔴 הודעה דחופה
+                </div>
+                <div style={{fontSize:'12px', color:'var(--muted)', marginTop:'2px'}}>
+                  תופיע בראש הדף הבית עם הדגשה ופופאפ עם הכניסה לאתר
+                </div>
+              </div>
+            </label>
           </div>
 
           {/* Text */}
@@ -183,11 +211,16 @@ export default function AdminNotices() {
       )}
 
       {notices.map(n => (
-        <div key={n.id} style={{background:'#fafaf8', border:'1px solid var(--border)', borderRadius:'12px', padding:'14px 18px', marginBottom:'10px'}}>
+        <div key={n.id} style={{
+          background: n.urgent ? 'linear-gradient(135deg,#fff5f5,#fff0f0)' : '#fafaf8',
+          border: n.urgent ? '1.5px solid #f0a0a0' : '1px solid var(--border)',
+          borderRadius:'12px', padding:'14px 18px', marginBottom:'10px'
+        }}>
           <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'12px'}}>
             <div style={{flex:1}}>
               <div style={{display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', marginBottom:'5px'}}>
-                <span style={{fontWeight:'700', fontSize:'15px', color:'var(--primary)'}}>{n.title}</span>
+                {n.urgent && <span style={{fontSize:'11px', background:'#e05555', color:'white', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>🔴 דחוף</span>}
+                <span style={{fontWeight:'700', fontSize:'15px', color: n.urgent ? '#c03030' : 'var(--primary)'}}>{n.title}</span>
                 <span style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>{buildingLabel(n.building)}</span>
                 <span style={{fontSize:'12px', color:'var(--muted)'}}>{n.date}</span>
               </div>
@@ -199,8 +232,13 @@ export default function AdminNotices() {
                 }}>📎 {n.file_name}</a>
               )}
             </div>
-            <div style={{display:'flex', gap:'8px', flexShrink:0}}>
+            <div style={{display:'flex', flexDirection:'column', gap:'6px', flexShrink:0}}>
               <button onClick={() => openEdit(n)} style={{background:'#e4edf8', border:'none', borderRadius:'8px', padding:'7px 12px', cursor:'pointer', fontSize:'13px', fontFamily:'Heebo, sans-serif'}}>✏️</button>
+              <button onClick={() => toggleUrgent(n)}
+                title={n.urgent ? 'בטל דחיפות' : 'סמן כדחוף'}
+                style={{background: n.urgent ? '#fde8e8' : '#f0ede8', border: n.urgent ? '1px solid #f0a0a0' : '1px solid var(--border)', borderRadius:'8px', padding:'7px 12px', cursor:'pointer', fontSize:'13px', fontFamily:'Heebo, sans-serif'}}>
+                {n.urgent ? '🔴' : '⚪'}
+              </button>
               <button onClick={() => deleteNotice(n.id)} style={{background:'#fdf0f0', border:'none', borderRadius:'8px', padding:'7px 12px', cursor:'pointer', fontSize:'13px', fontFamily:'Heebo, sans-serif'}}>🗑️</button>
             </div>
           </div>
