@@ -32,17 +32,16 @@ export default function Pros() {
       <p style={{fontSize:'13px', color:'var(--muted)', marginBottom:'16px'}}>המלצות שעלו מדיירי הבניין בקבוצת הוואטסאפ.</p>
 
       {loading ? <div style={{color:'var(--muted)', fontSize:'14px'}}>טוען...</div> : <>
-        <div className="pros-tabs">
+        <div className="ctab-bar">
           {catsWithPros.map(cat => (
             <button key={cat.id}
-              className={`pro-tab-btn${activecat === cat.id ? ' active' : ''}`}
+              className={`ctab-btn${activecat === cat.id ? ' active' : ''}`}
               onClick={() => setActivecat(cat.id)}>
               {cat.label}
             </button>
           ))}
         </div>
-
-        <div className="pro-panel active">
+        <div className="ctab-body">
           {filtered.length === 0 ? (
             <div className="info-block" style={{color:'var(--muted)', fontSize:'14px'}}>
               עדיין אין המלצות בקטגוריה זו.

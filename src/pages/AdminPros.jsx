@@ -113,10 +113,11 @@ export default function AdminPros() {
   return (
     <div>
       {/* Sub-tabs */}
-      <div style={{display:'flex', gap:'8px', marginBottom:'18px'}}>
-        <button className={`pro-tab-btn${view === 'pros' ? ' active' : ''}`} onClick={() => setView('pros')}>⭐ בעלי מקצוע</button>
-        <button className={`pro-tab-btn${view === 'cats' ? ' active' : ''}`} onClick={() => setView('cats')}>🏷️ קטגוריות</button>
+      <div className="ctab-bar">
+        <button className={`ctab-btn${view === 'pros' ? ' active' : ''}`} onClick={() => setView('pros')}>⭐ בעלי מקצוע</button>
+        <button className={`ctab-btn${view === 'cats' ? ' active' : ''}`} onClick={() => setView('cats')}>🏷️ קטגוריות</button>
       </div>
+      <div className="ctab-body">
 
       {/* ── CATEGORIES VIEW ── */}
       {view === 'cats' && <>
@@ -278,6 +279,7 @@ export default function AdminPros() {
           </div>
         ))}
       </>}
+      </div>
     </div>
   )
 }

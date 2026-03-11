@@ -115,16 +115,18 @@ export default function ContactsPage({ initialTab }) {
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">📇</div>אנשי קשר</div>
-      <div style={{display:'flex', gap:'6px', marginBottom:'20px', flexWrap:'wrap', borderBottom:'1px solid var(--border)', paddingBottom:'14px'}}>
+      <div className="ctab-bar">
         {tabs.map(t => (
-          <button key={t.id} className={`pro-tab-btn${active === t.id ? ' active' : ''}`}
+          <button key={t.id} className={`ctab-btn${active === t.id ? ' active' : ''}`}
             onClick={() => setActive(t.id)}>{t.label}</button>
         ))}
       </div>
-      {active === 'manage'   && <ManageTab />}
-      {active === 'vaad'     && <VaadTab />}
-      {active === 'boni'     && <BoniTab />}
-      {active === 'whatsapp' && <WhatsappTab />}
+      <div className="ctab-body">
+        {active === 'manage'   && <ManageTab />}
+        {active === 'vaad'     && <VaadTab />}
+        {active === 'boni'     && <BoniTab />}
+        {active === 'whatsapp' && <WhatsappTab />}
+      </div>
     </div>
   )
 }

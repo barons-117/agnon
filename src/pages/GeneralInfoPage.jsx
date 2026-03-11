@@ -94,18 +94,20 @@ export default function GeneralInfoPage() {
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">ℹ️</div>מידע כללי נוסף</div>
-      <div style={{display:'flex', gap:'6px', marginBottom:'20px', flexWrap:'wrap', borderBottom:'1px solid var(--border)', paddingBottom:'14px'}}>
+      <div className="ctab-bar">
         {tabs.map(t => (
-          <button key={t.id} className={`pro-tab-btn${active === t.id ? ' active' : ''}`}
+          <button key={t.id} className={`ctab-btn${active === t.id ? ' active' : ''}`}
             onClick={() => setActive(t.id)}>{t.label}</button>
         ))}
       </div>
-      {active === 'postal'   && <PostalTab />}
-      {active === 'gush'     && <GushTab />}
-      {active === 'address'  && <AddressTab />}
-      {active === 'elevator' && <ElevatorTab />}
-      {active === 'arnona'   && <ArnonaTab />}
-      {active === 'ac'       && <ACTab />}
+      <div className="ctab-body">
+        {active === 'postal'   && <PostalTab />}
+        {active === 'gush'     && <GushTab />}
+        {active === 'address'  && <AddressTab />}
+        {active === 'elevator' && <ElevatorTab />}
+        {active === 'arnona'   && <ArnonaTab />}
+        {active === 'ac'       && <ACTab />}
+      </div>
     </div>
   )
 }
