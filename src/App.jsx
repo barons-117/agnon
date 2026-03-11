@@ -13,22 +13,29 @@ import { VaadNotices, Wifi, Cleaning } from './pages/BuildingPages.jsx'
 import { Parking } from './pages/InfoPages.jsx'
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState(() => {
-    return window.location.hash.replace('#','') || 'home'
-  })
+  const parseHash = () => {
+    const raw = window.location.hash.replace('#','') || 'home'
+    const [tab, subtab] = raw.split('~')
+    return { tab, subtab: subtab || null }
+  }
+
+  const [activeTab, setActiveTab] = useState(() => parseHash().tab)
+  const [activeSubtab, setActiveSubtab] = useState(() => parseHash().subtab)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const onHash = () => {
-      const tab = window.location.hash.replace('#','') || 'home'
+      const { tab, subtab } = parseHash()
       setActiveTab(tab)
+      setActiveSubtab(subtab)
     }
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
   const handleTabChange = (tab) => {
-    setActiveTab(tab)
+    setActiveTab(tab.split('~')[0])
+    setActiveSubtab(tab.split('~')[1] || null)
     window.location.hash = tab
   }
 
@@ -36,7 +43,7 @@ export default function App() {
     'home':           <Home onNavigate={handleTabChange} />,
     'vaad-notices':   <VaadNotices />,
     'requests':       <Requests />,
-    'contacts':       <ContactsPage />,
+    'contacts':       <ContactsPage initialTab={activeSubtab} />,
     'parking':        <Parking />,
     'residents-room': <ResidentsRoomCalendar />,
     'cleaning':       <Cleaning />,

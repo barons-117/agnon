@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SecretField from '../components/SecretField.jsx'
 
 const tabs = [
@@ -112,6 +112,10 @@ function WhatsappTab() {
 
 export default function ContactsPage({ initialTab }) {
   const [active, setActive] = useState(initialTab || 'manage')
+
+  useEffect(() => {
+    if (initialTab) setActive(initialTab)
+  }, [initialTab])
   return (
     <div className="card">
       <div className="panel-title"><div className="icon">📇</div>אנשי קשר</div>
