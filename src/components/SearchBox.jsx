@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { searchIndex } from '../data/searchIndex.js'
 
-export default function SearchBox() {
+export default function SearchBox({ onNavigate }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [open, setOpen] = useState(false)
   const [focused, setFocused] = useState(false)
+  const [activeIdx, setActiveIdx] = useState(-1)
   const inputRef = useRef(null)
   const boxRef = useRef(null)
 
@@ -19,21 +20,43 @@ export default function SearchBox() {
 
   const search = (val) => {
     setQuery(val)
+    setActiveIdx(-1)
     if (!val.trim()) { setResults([]); setOpen(false); return }
     const q = val.toLowerCase()
     const found = searchIndex.filter(item =>
       item.text.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
     ).slice(0, 6)
     setResults(found)
-    setOpen(found.length > 0)
+    setOpen(true) // always open when typing, even with 0 results
   }
 
   const navigate = (tab) => {
     window.location.hash = tab
+    if (onNavigate) onNavigate(tab)
     setQuery('')
     setResults([])
     setOpen(false)
     inputRef.current?.blur()
+  }
+
+  const handleKeyDown = (e) => {
+    if (!open) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIdx(i => Math.min(i + 1, results.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIdx(i => Math.max(i - 1, -1))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (activeIdx >= 0 && results[activeIdx]) {
+        navigate(results[activeIdx].tab)
+      } else if (results.length > 0) {
+        navigate(results[0].tab)
+      }
+    } else if (e.key === 'Escape') {
+      setOpen(false)
+    }
   }
 
   const highlight = (text) => {
@@ -66,8 +89,9 @@ export default function SearchBox() {
           ref={inputRef}
           value={query}
           onChange={e => search(e.target.value)}
-          onFocus={() => { setFocused(true); if (results.length) setOpen(true) }}
+          onFocus={() => { setFocused(true); if (query) setOpen(true) }}
           onBlur={() => setFocused(false)}
+          onKeyDown={handleKeyDown}
           placeholder="חפשו בעל מקצוע, מידע, קוד כניסה..."
           style={{
             flex: 1, border: 'none', outline: 'none', fontSize: '14px',
@@ -84,7 +108,7 @@ export default function SearchBox() {
       </div>
 
       {/* Dropdown */}
-      {open && results.length > 0 && (
+      {open && query.trim() && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 6px)', right: 0, left: 0,
           background: 'white', borderRadius: '14px',
@@ -92,20 +116,25 @@ export default function SearchBox() {
           boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
           zIndex: 100, overflow: 'hidden',
         }}>
-          {results.map((r, i) => (
+          {results.length === 0 ? (
+            <div style={{ padding: '16px', textAlign: 'center', fontSize: '13px', color: 'var(--muted)' }}>
+              לא נמצאו תוצאות
+            </div>
+          ) : results.map((r, i) => (
             <button
               key={i}
               onMouseDown={() => navigate(r.tab)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 width: '100%', padding: '11px 16px', border: 'none',
-                background: 'transparent', cursor: 'pointer', textAlign: 'right',
+                background: i === activeIdx ? '#f0f4f8' : 'transparent',
+                cursor: 'pointer', textAlign: 'right',
                 fontFamily: 'Heebo, sans-serif',
                 borderBottom: i < results.length - 1 ? '1px solid var(--border)' : 'none',
                 transition: 'background 0.1s',
               }}
               onMouseEnter={e => e.currentTarget.style.background = '#f7f5f1'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              onMouseLeave={e => e.currentTarget.style.background = i === activeIdx ? '#f0f4f8' : 'transparent'}
             >
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text)' }}>
