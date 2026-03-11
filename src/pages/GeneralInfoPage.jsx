@@ -2,12 +2,12 @@ import { useState } from 'react'
 import SecretField from '../components/SecretField.jsx'
 
 const tabs = [
-  { id: 'postal',    label: '📮 מיקוד' },
-  { id: 'gush',      label: '📐 גוש וחלקה' },
-  { id: 'address',   label: '🛣️ כתובות' },
-  { id: 'elevator',  label: '🛗 מעלית' },
-  { id: 'arnona',    label: '🏙️ ארנונה' },
-  { id: 'ac',        label: '❄️ מיזוג' },
+  { id: 'postal',    label: 'מיקוד' },
+  { id: 'gush',      label: 'גוש וחלקה' },
+  { id: 'address',   label: 'כתובות' },
+  { id: 'elevator',  label: 'מעלית' },
+  { id: 'arnona',    label: 'ארנונה' },
+  { id: 'ac',        label: 'מיזוג אוויר' },
 ]
 
 function PostalTab() {

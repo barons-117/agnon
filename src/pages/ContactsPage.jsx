@@ -2,10 +2,10 @@ import { useState } from 'react'
 import SecretField from '../components/SecretField.jsx'
 
 const tabs = [
-  { id: 'manage',   label: '🏢 חברת ניהול' },
-  { id: 'vaad',     label: '👥 ועד הבית' },
-  { id: 'boni',     label: '🏗️ בוני התיכון' },
-  { id: 'whatsapp', label: '💬 וואטסאפ' },
+  { id: 'manage',   label: 'חברת ניהול' },
+  { id: 'vaad',     label: 'ועד הבית' },
+  { id: 'boni',     label: 'בוני התיכון' },
+  { id: 'whatsapp', label: 'וואטסאפ' },
 ]
 
 function ManageTab() {

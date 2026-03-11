@@ -114,8 +114,8 @@ export default function AdminPros() {
     <div>
       {/* Sub-tabs */}
       <div className="ctab-bar">
-        <button className={`ctab-btn${view === 'pros' ? ' active' : ''}`} onClick={() => setView('pros')}>⭐ בעלי מקצוע</button>
-        <button className={`ctab-btn${view === 'cats' ? ' active' : ''}`} onClick={() => setView('cats')}>🏷️ קטגוריות</button>
+        <button className={`ctab-btn${view === 'pros' ? ' active' : ''}`} onClick={() => setView('pros')}>בעלי מקצוע</button>
+        <button className={`ctab-btn${view === 'cats' ? ' active' : ''}`} onClick={() => setView('cats')}>קטגוריות</button>
       </div>
       <div className="ctab-body">
 
