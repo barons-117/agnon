@@ -28,12 +28,15 @@ function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResid
       >
         {/* Apt number */}
         <div style={{
-          minWidth: '42px', height: '42px', borderRadius: '10px',
+          minWidth: '52px', height: '42px', borderRadius: '10px',
           background: apt.is_unsold ? '#f0ede8' : 'var(--primary)',
           color: apt.is_unsold ? 'var(--muted)' : 'white',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: '800', fontSize: '15px', flexShrink: 0,
-        }}>{apt.apt}</div>
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          fontWeight: '800', flexShrink: 0,
+        }}>
+          <div style={{ fontSize: '15px', lineHeight: '1.1' }}>{apt.apt}</div>
+          <div style={{ fontSize: '10px', fontWeight: '600', opacity: 0.75 }}>בנ׳ {apt.building}</div>
+        </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -238,7 +241,10 @@ function ProjectsTab({ apartments, residents }) {
 
   const getItem = (building, apt) => items.find(i => i.building === building && i.apt === apt)
 
-  const paidCount = items.filter(i => i.status === 'paid' || i.status === 'done').length
+  const paidItems = items.filter(i => i.status === 'paid' || i.status === 'done')
+  const paidCount = paidItems.length
+  const totalRemotes = paidItems.reduce((sum, i) => sum + (i.quantity || 1), 0)
+  const totalMoney = paidItems.reduce((sum, i) => sum + (i.amount_paid || 0), 0)
   const totalApts = filteredApts.filter(a => !a.is_unsold).length
 
   if (!activeProject && !showNewProject) {
@@ -287,15 +293,17 @@ function ProjectsTab({ apartments, residents }) {
       {activeProject && (
         <>
           {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '16px' }}>
             {[
-              { label: 'שילמו', val: paidCount, color: '#1a7a3a', bg: '#e8f9ee' },
-              { label: 'טרם שילמו', val: totalApts - paidCount, color: '#b35c00', bg: '#fff3e0' },
-              { label: 'סה"כ דירות', val: totalApts, color: 'var(--primary)', bg: '#e4edf8' },
+              { label: 'דירות שהזמינו', val: paidCount, sub: `מתוך ${totalApts}`, color: '#1a7a3a', bg: '#e8f9ee' },
+              { label: 'טרם הזמינו', val: totalApts - paidCount, sub: 'דירות', color: '#b35c00', bg: '#fff3e0' },
+              { label: 'סה"כ שלטים', val: totalRemotes, sub: 'יחידות', color: 'var(--primary)', bg: '#e4edf8' },
+              { label: 'סה"כ גבייה', val: `₪${totalMoney.toLocaleString()}`, sub: `צפי: ₪${(totalApts * 90).toLocaleString()}`, color: '#7a1a5c', bg: '#f5e8f4' },
             ].map(x => (
-              <div key={x.label} style={{ background: x.bg, borderRadius: '12px', padding: '12px', textAlign: 'center' }}>
-                <div style={{ fontWeight: '800', fontSize: '22px', color: x.color }}>{x.val}</div>
-                <div style={{ fontSize: '11px', color: x.color, fontWeight: '600' }}>{x.label}</div>
+              <div key={x.label} style={{ background: x.bg, borderRadius: '12px', padding: '12px 14px' }}>
+                <div style={{ fontWeight: '900', fontSize: '22px', color: x.color }}>{x.val}</div>
+                <div style={{ fontSize: '12px', color: x.color, fontWeight: '700' }}>{x.label}</div>
+                <div style={{ fontSize: '11px', color: x.color, opacity: 0.6, marginTop: '1px' }}>{x.sub}</div>
               </div>
             ))}
           </div>
@@ -352,16 +360,18 @@ function ProjectsTab({ apartments, residents }) {
                       <span style={{ fontWeight: '800', fontSize: '15px', color: paid ? '#1a7a3a' : 'var(--primary)' }}>
                         {a.building}/{a.apt}
                       </span>
-                      {paid && <span style={{ fontSize: '14px' }}>✅</span>}
+                      {paid
+                        ? <span style={{ fontWeight: '800', fontSize: '13px', color: '#1a7a3a' }}>×{item.quantity || 1}</span>
+                        : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>—</span>
+                      }
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: '1.4' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: '1.4', marginBottom: paid ? '4px' : 0 }}>
                       {clean(mainRes?.name || '—').split(' ').slice(0, 2).join(' ')}
                     </div>
-                    {paid && item.quantity > 1 && (
-                      <div style={{ fontSize: '11px', color: '#1a7a3a', fontWeight: '700' }}>x{item.quantity}</div>
-                    )}
-                    {paid && item.amount_paid && (
-                      <div style={{ fontSize: '11px', color: '#1a7a3a' }}>₪{item.amount_paid}</div>
+                    {paid && (
+                      <div style={{ fontSize: '11px', color: '#1a7a3a', fontWeight: '700' }}>
+                        ₪{(item.quantity || 1) * 90}
+                      </div>
                     )}
                   </div>
                 )
@@ -465,19 +475,24 @@ function SmartAddInput({ onSearch, onSelect, projectId, items }) {
 }
 
 // ─── ItemModal ─────────────────────────────────────────────
+const PRICE_PER_UNIT = 90
+
 function ItemModal({ apt, projectId, residents, existingItem, onSave, onClose }) {
-  const [form, setForm] = useState(existingItem || { status: 'paid', quantity: 1, amount_paid: '', notes: '' })
+  const [quantity, setQuantity] = useState(existingItem?.quantity || 1)
+  const [notes, setNotes] = useState(existingItem?.notes || '')
   const [saving, setSaving] = useState(false)
   const mainRes = residents.find(r => r.role === 'tenant') || residents.find(r => r.role === 'owner')
+  const total = quantity * PRICE_PER_UNIT
 
   const save = async () => {
     setSaving(true)
     const payload = {
       project_id: projectId, building: apt.building, apt: apt.apt,
-      status: form.status, quantity: parseInt(form.quantity) || 1,
-      amount_paid: form.amount_paid ? parseFloat(form.amount_paid) : null,
-      notes: form.notes || null,
-      paid_at: (form.status === 'paid' || form.status === 'done') ? new Date().toISOString() : null,
+      status: 'paid',
+      quantity: parseInt(quantity) || 1,
+      amount_paid: (parseInt(quantity) || 1) * PRICE_PER_UNIT,
+      notes: notes || null,
+      paid_at: new Date().toISOString(),
     }
     if (existingItem?.id) {
       await supabase.from('apt_project_items').update(payload).eq('id', existingItem.id)
@@ -490,43 +505,67 @@ function ItemModal({ apt, projectId, residents, existingItem, onSave, onClose })
 
   const del = async () => {
     if (!existingItem?.id) return
+    if (!window.confirm('למחוק רשומה זו?')) return
     await supabase.from('apt_project_items').delete().eq('id', existingItem.id)
     onSave()
   }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={onClose}>
-      <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '380px', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '360px', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        {/* Header */}
         <div style={{ background: 'var(--primary)', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontWeight: '700', fontSize: '15px', color: 'white' }}>בניין {apt.building} · דירה {apt.apt}</div>
-            {mainRes && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', marginTop: '2px' }}>{mainRes.name} · {mainRes.phone}</div>}
+            {mainRes && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)', marginTop: '2px' }}>{mainRes.name}{mainRes.phone ? ` · ${mainRes.phone}` : ''}</div>}
           </div>
           <button onClick={onClose} style={btn({ background: 'rgba(255,255,255,0.2)', color: 'white', padding: '4px 10px' })}>✕</button>
         </div>
-        <div style={{ padding: '18px' }}>
-          {[
-            { key: 'status', label: 'סטטוס', type: 'select', options: [['paid', 'שולם ✅'], ['pending', 'ממתין ⏳'], ['done', 'הושלם ✓'], ['cancelled', 'בוטל']] },
-            { key: 'quantity', label: 'כמות', placeholder: '1', type: 'number', dir: 'ltr' },
-            { key: 'amount_paid', label: 'סכום ששולם (₪)', placeholder: '0', type: 'number', dir: 'ltr' },
-            { key: 'notes', label: 'הערות', placeholder: '' },
-          ].map(f => (
-            <div key={f.key} style={{ marginBottom: '12px' }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '5px' }}>{f.label}</div>
-              {f.type === 'select' ? (
-                <select value={form[f.key]} onChange={e => setForm(x => ({ ...x, [f.key]: e.target.value }))}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '9px', border: '1.5px solid var(--border)', fontSize: '14px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8' }}>
-                  {f.options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              ) : (
-                <input value={form[f.key] || ''} type={f.type || 'text'} dir={f.dir || 'rtl'}
-                  onChange={e => setForm(x => ({ ...x, [f.key]: e.target.value }))} placeholder={f.placeholder}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '9px', border: '1.5px solid var(--border)', fontSize: '14px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8', boxSizing: 'border-box' }} />
-              )}
+
+        <div style={{ padding: '20px' }}>
+          {/* Quantity picker */}
+          <div style={{ marginBottom: '18px' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '10px' }}>כמה שלטים הוזמנו?</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0', border: '1.5px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
+              {[1,2,3,4].map(n => (
+                <button key={n} onClick={() => setQuantity(n)} style={{
+                  flex: 1, padding: '14px 0', border: 'none',
+                  background: quantity === n ? 'var(--primary)' : 'white',
+                  color: quantity === n ? 'white' : 'var(--text)',
+                  fontWeight: '800', fontSize: '18px', cursor: 'pointer',
+                  fontFamily: 'Heebo, sans-serif',
+                  borderLeft: n > 1 ? '1px solid var(--border)' : 'none',
+                  transition: 'all 0.15s',
+                }}>{n}</button>
+              ))}
             </div>
-          ))}
-          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-            <button onClick={save} disabled={saving} style={btn({ background: 'var(--primary)', color: 'white', flex: 1, padding: '10px' })}>{saving ? 'שומר...' : '💾 שמור'}</button>
+          </div>
+
+          {/* Auto-calculated total */}
+          <div style={{
+            background: 'linear-gradient(135deg, #e8f9ee, #f0fbf4)',
+            border: '1.5px solid #bce8cc', borderRadius: '12px',
+            padding: '14px 18px', marginBottom: '16px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <div>
+              <div style={{ fontSize: '12px', color: '#1a7a3a', fontWeight: '600' }}>{quantity} שלטים × ₪{PRICE_PER_UNIT}</div>
+              <div style={{ fontSize: '11px', color: '#1a7a3a', opacity: 0.7, marginTop: '2px' }}>סכום לתשלום</div>
+            </div>
+            <div style={{ fontWeight: '900', fontSize: '26px', color: '#1a7a3a' }}>₪{total}</div>
+          </div>
+
+          {/* Notes */}
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '6px' }}>הערות (רשות)</div>
+            <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="למשל: שולם במזומן, ממתין לאיסוף..."
+              style={{ width: '100%', padding: '9px 12px', borderRadius: '9px', border: '1.5px solid var(--border)', fontSize: '14px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8', boxSizing: 'border-box' }} />
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={save} disabled={saving} style={btn({ background: 'var(--primary)', color: 'white', flex: 1, padding: '11px', fontSize: '14px' })}>
+              {saving ? 'שומר...' : `✅ אישור תשלום ₪${total}`}
+            </button>
             {existingItem?.id && <button onClick={del} style={btn({ background: '#fdf0f0', color: '#e05555' })}>🗑️</button>}
           </div>
         </div>
