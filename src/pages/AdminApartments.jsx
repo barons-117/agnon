@@ -288,6 +288,8 @@ function ProjectsTab({ apartments, residents }) {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  const createProject = async () => {
     if (!newProjectName.trim()) return
     const { data } = await supabase.from('apt_projects').insert([{ name: newProjectName, description: newProjectDesc }]).select().single()
     setShowNewProject(false); setNewProjectName(''); setNewProjectDesc('')
@@ -418,15 +420,30 @@ function ProjectsTab({ apartments, residents }) {
             {filteredApts
               .filter(a => {
                 if (!search.trim()) return true
-                const q = search.toLowerCase()
-                const item = getItem(a.building, a.apt)
+                const q = search.toLowerCase().trim()
+                if (String(a.apt).includes(q)) return true
                 const res = residents.filter(r => r.building === a.building && r.apt === a.apt)
-                return String(a.apt).includes(q) || res.some(r => clean(r.name).toLowerCase().includes(q) || clean(r.phone).includes(q))
+                return res.some(r =>
+                  clean(r.name).toLowerCase().includes(q) ||
+                  clean(r.phone).replace(/-/g,'').includes(q.replace(/-/g,'')) ||
+                  clean(r.phone2).replace(/-/g,'').includes(q.replace(/-/g,''))
+                )
               })
               .map(a => {
                 const item = getItem(a.building, a.apt)
                 const res = residents.filter(r => r.building === a.building && r.apt === a.apt)
-                const mainRes = res.find(r => r.role === 'tenant') || res.find(r => r.role === 'owner')
+                // prefer tenant name, fall back to owner; skip company-only entries for display
+                const tenant = res.find(r => r.role === 'tenant')
+                const owner = res.find(r => r.role === 'owner' && !r.is_company)
+                const companyOwner = res.find(r => r.role === 'owner' && r.is_company)
+                const mainRes = tenant || owner || companyOwner || res[0]
+                const displayName = (() => {
+                  if (!mainRes) return a.is_unsold ? 'לא מכורה' : '—'
+                  if (mainRes.is_company) return mainRes.company_name || mainRes.name || '—'
+                  // show last name only (first word, or last word if Hebrew convention)
+                  const parts = clean(mainRes.name || '').split(' ').filter(Boolean)
+                  return parts.slice(0, 2).join(' ') || '—'
+                })()
                 const paid = item && (item.status === 'paid' || item.status === 'done')
                 return (
                   <div key={`${a.building}-${a.apt}`}
@@ -441,7 +458,7 @@ function ProjectsTab({ apartments, residents }) {
                     onMouseLeave={e => e.currentTarget.style.transform = 'none'}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <span style={{ fontWeight: '800', fontSize: '15px', color: paid ? '#1a7a3a' : 'var(--primary)' }}>
+                      <span style={{ fontWeight: '800', fontSize: '15px', color: paid ? '#1a7a3a' : a.is_unsold ? 'var(--muted)' : 'var(--primary)' }}>
                         {a.building}/{a.apt}
                       </span>
                       {paid
@@ -449,8 +466,8 @@ function ProjectsTab({ apartments, residents }) {
                         : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>—</span>
                       }
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--muted)', lineHeight: '1.4', marginBottom: paid ? '4px' : 0 }}>
-                      {clean(mainRes?.name || '—').split(' ').slice(0, 2).join(' ')}
+                    <div style={{ fontSize: '11px', color: a.is_unsold ? '#bbb' : 'var(--muted)', lineHeight: '1.4', marginBottom: paid ? '4px' : 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {displayName}
                     </div>
                     {paid && (
                       <div style={{ fontSize: '11px', color: '#1a7a3a', fontWeight: '700' }}>

@@ -53,13 +53,13 @@ export default function Manage() {
         <div className="divider"></div>
         <div className="section-label">📄 מסמכים</div>
 
-        <a className="link-btn outline" href="הסכם הי טאוור דיירים מתחם C.pdf" target="_blank" rel="noopener" style={{display:'flex',marginBottom:'10px'}}>
-          📄 &nbsp; הסכם הי טאוור דיירים מתחם C
+        <a className="link-btn outline" href="הסכם_ניהול.pdf" target="_blank" rel="noopener" style={{display:'flex',marginBottom:'10px'}}>
+          📄 &nbsp; הסכם ניהול היי טאואר
         </a>
-        <a className="link-btn outline" href="נוהל התנהגות במתחם.pdf" target="_blank" rel="noopener" style={{display:'flex',marginBottom:'10px'}}>
+        <a className="link-btn outline" href="נוהל_התנהגות.pdf" target="_blank" rel="noopener" style={{display:'flex',marginBottom:'10px'}}>
           📄 &nbsp; נוהל התנהגות במתחם
         </a>
-        <a className="link-btn outline" href="נוהל קבלנים.pdf" target="_blank" rel="noopener" style={{display:'flex'}}>
+        <a className="link-btn outline" href="נוהל_קבלנים.pdf" target="_blank" rel="noopener" style={{display:'flex'}}>
           📄 &nbsp; נוהל קבלנים
         </a>
       </div>
