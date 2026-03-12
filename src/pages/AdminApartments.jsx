@@ -703,9 +703,7 @@ function ItemModal({ apt, projectId, residents, existingItem, onSave, onClose })
   )
 }
 
-// ─── Main Component ────────────────────────────────────────
 export default function AdminApartments() {
-  const [tab, setTab] = useState('projects')
   const [apartments, setApartments] = useState([])
   const [residents, setResidents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -742,52 +740,32 @@ export default function AdminApartments() {
 
   return (
     <div>
-      {/* Sub-tab nav */}
-      <div className="ctab-bar" style={{ marginBottom: 0 }}>
-        {[['projects', 'פרויקטים'], ['apartments', 'דירות ודיירים']].map(([id, label]) => (
-          <button key={id} className={`ctab-btn${tab === id ? ' active' : ''}`} onClick={() => setTab(id)}>{label}</button>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+        <select value={buildingFilter} onChange={e => setBuildingFilter(e.target.value)}
+          style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8' }}>
+          <option value="all">שני הבניינים</option>
+          <option value="12">עגנון 12</option>
+          <option value="14">עגנון 14</option>
+        </select>
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="חיפוש שם / דירה / טלפון / חניה / מחסן..."
+          style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8', minWidth: '140px' }} />
+        <div style={{ fontSize: '12px', color: 'var(--muted)', alignSelf: 'center', whiteSpace: 'nowrap' }}>{filteredApts.length} דירות</div>
+      </div>
+
+      <div style={{ border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
+        {filteredApts.map(apt => (
+          <ApartmentRow
+            key={`${apt.building}-${apt.apt}`}
+            apt={apt}
+            residents={residents.filter(r => r.building === apt.building && r.apt === apt.apt)}
+            projectItems={[]}
+            onEditResident={(r) => setEditResident(r)}
+            onAddResident={(a) => setAddResidentApt(a)}
+          />
         ))}
       </div>
-      <div className="ctab-body">
 
-        {/* ── PROJECTS TAB ── */}
-        {tab === 'projects' && (
-          <ProjectsTab apartments={apartments} residents={residents} />
-        )}
-
-        {/* ── APARTMENTS TAB ── */}
-        {tab === 'apartments' && (
-          <>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
-              <select value={buildingFilter} onChange={e => setBuildingFilter(e.target.value)}
-                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8' }}>
-                <option value="all">שני הבניינים</option>
-                <option value="12">עגנון 12</option>
-                <option value="14">עגנון 14</option>
-              </select>
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="חיפוש שם / דירה / טלפון..."
-                style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8', minWidth: '140px' }} />
-              <div style={{ fontSize: '12px', color: 'var(--muted)', alignSelf: 'center', whiteSpace: 'nowrap' }}>{filteredApts.length} דירות</div>
-            </div>
-
-            <div style={{ border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
-              {filteredApts.map(apt => (
-                <ApartmentRow
-                  key={`${apt.building}-${apt.apt}`}
-                  apt={apt}
-                  residents={residents.filter(r => r.building === apt.building && r.apt === apt.apt)}
-                  projectItems={[]}
-                  onEditResident={(r) => setEditResident(r)}
-                  onAddResident={(a) => setAddResidentApt(a)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Modals */}
       {editResident && (
         <ResidentModal resident={editResident} apt={null}
           onSave={() => { setEditResident(null); loadAll() }}

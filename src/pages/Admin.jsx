@@ -5,6 +5,7 @@ import RoomBookings from './RoomBookings.jsx'
 import AdminNotices from './AdminNotices.jsx'
 import AdminPros from './AdminPros.jsx'
 import AdminApartments from './AdminApartments.jsx'
+import AdminProjects from './AdminProjects.jsx'
 import FileAttachment from '../components/FileAttachment.jsx'
 
 export default function Admin() {
@@ -147,13 +148,15 @@ export default function Admin() {
         <button className={`admin-nav-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>הזמנת חדרים</button>
         <button className={`admin-nav-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>הודעות ועד</button>
         <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>בעלי מקצוע</button>
-        <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>דירות ופרויקטים</button>
+        <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>דירות</button>
+        <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>פרויקטים</button>
       </div>
 
       {adminTab === 'rooms' && <RoomBookings />}
       {adminTab === 'notices' && <AdminNotices />}
       {adminTab === 'pros' && <AdminPros />}
       {adminTab === 'apartments' && <AdminApartments />}
+      {adminTab === 'projects' && <AdminProjects />}}
 
       {adminTab === 'requests' && <>
         <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px'}}>
