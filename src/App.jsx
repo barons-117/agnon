@@ -9,6 +9,7 @@ import Contractors from './pages/Contractors.jsx'
 import Pros from './pages/Pros.jsx'
 import ContactsPage from './pages/ContactsPage.jsx'
 import GeneralInfoPage from './pages/GeneralInfoPage.jsx'
+import UpdateProfile from './pages/UpdateProfile.jsx'
 import { VaadNotices, Wifi, Cleaning } from './pages/BuildingPages.jsx'
 import { Parking } from './pages/InfoPages.jsx'
 
@@ -50,9 +51,10 @@ export default function App() {
     'wifi':           <Wifi />,
     'pros':           <Pros />,
     'contractors':    <Contractors />,
-    'general-info':   <GeneralInfoPage />,
-    'emergency':      <Emergency />,
-    'admin':          <Admin />,
+    'general-info':     <GeneralInfoPage />,
+    'emergency':        <Emergency />,
+    'admin':            <Admin />,
+    'update-profile':   <UpdateProfile />,
   }
 
   return (

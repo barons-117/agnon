@@ -5,6 +5,7 @@ export const navSections = [
       { id: 'vaad-notices', icon: '📣', label: 'הודעות וועד' },
       { id: 'requests',     icon: '📝', label: 'פניות לחברת הניהול' },
       { id: 'contacts',     icon: '📇', label: 'אנשי קשר' },
+      { id: 'update-profile', icon: '✏️', label: 'עדכון פרטי שוכר' },
     ],
   },
   {

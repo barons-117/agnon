@@ -711,18 +711,47 @@ export default function AdminApartments() {
   const [search, setSearch] = useState('')
   const [editResident, setEditResident] = useState(null)
   const [addResidentApt, setAddResidentApt] = useState(null)
+  const [pendingRequests, setPendingRequests] = useState([])
+  const [showPending, setShowPending] = useState(false)
+  const [editingRequest, setEditingRequest] = useState(null)
 
   useEffect(() => { loadAll() }, [])
 
   const loadAll = async () => {
     setLoading(true)
-    const [{ data: apts }, { data: res }] = await Promise.all([
+    const [{ data: apts }, { data: res }, { data: reqs }] = await Promise.all([
       supabase.from('apartments').select('*').order('building').order('apt'),
       supabase.from('residents').select('*').order('building').order('apt'),
+      supabase.from('profile_update_requests').select('*').eq('status', 'pending').order('created_at'),
     ])
     setApartments(apts || [])
     setResidents(res || [])
+    setPendingRequests(reqs || [])
     setLoading(false)
+  }
+
+  const approveRequest = async (req, overrides = null) => {
+    const data = overrides || req
+    // Upsert as tenant
+    if (req.request_type === 'replace_tenant') {
+      // Delete existing tenants for this apt
+      await supabase.from('residents').delete()
+        .eq('building', req.building).eq('apt', req.apt).eq('role', 'tenant')
+    }
+    await supabase.from('residents').insert([{
+      building: req.building, apt: req.apt, role: 'tenant',
+      name: data.name, phone: data.phone, phone2: data.phone2 || null,
+      email: data.email, email2: data.email2 || null,
+      is_company: false,
+    }])
+    await supabase.from('profile_update_requests').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', req.id)
+    await loadAll()
+    setEditingRequest(null)
+  }
+
+  const dismissRequest = async (req) => {
+    await supabase.from('profile_update_requests').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', req.id)
+    await loadAll()
   }
 
   const filteredApts = apartments.filter(a => {
@@ -740,6 +769,55 @@ export default function AdminApartments() {
 
   return (
     <div>
+      {/* ── Pending requests banner ── */}
+      <div onClick={() => setShowPending(v => !v)} style={{
+        background: pendingRequests.length > 0 ? '#fffbea' : '#f7f5f1',
+        border: `1.5px solid ${pendingRequests.length > 0 ? '#f0d060' : 'var(--border)'}`,
+        borderRadius: '12px', padding: '13px 16px', marginBottom: '16px',
+        cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        transition: 'all 0.15s',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '18px' }}>📬</span>
+          <div>
+            <div style={{ fontWeight: '700', fontSize: '14px', color: pendingRequests.length > 0 ? '#7a6000' : 'var(--muted)' }}>
+              {pendingRequests.length > 0
+                ? `${pendingRequests.length} בקשות עדכון ממתינות לאישור`
+                : 'אין כרגע בקשות עדכון ממתינות'}
+            </div>
+            {pendingRequests.length > 0 && <div style={{ fontSize: '11px', color: '#a08000', marginTop: '1px' }}>לחץ לפתיחה</div>}
+          </div>
+        </div>
+        {pendingRequests.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ background: '#e05', color: 'white', borderRadius: '100px', padding: '1px 8px', fontSize: '13px', fontWeight: '800' }}>
+              {pendingRequests.length}
+            </span>
+            <span style={{ fontSize: '12px', color: '#a08000' }}>{showPending ? '▲' : '▼'}</span>
+          </div>
+        )}
+      </div>
+
+      {/* ── Pending list ── */}
+      {showPending && pendingRequests.length > 0 && (
+        <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {pendingRequests.map(req => (
+            <PendingRequestCard key={req.id} req={req}
+              onApprove={() => approveRequest(req)}
+              onEdit={() => setEditingRequest(req)}
+              onDismiss={() => dismissRequest(req)} />
+          ))}
+        </div>
+      )}
+
+      {/* ── Edit request modal ── */}
+      {editingRequest && (
+        <EditRequestModal req={editingRequest}
+          onApprove={(data) => approveRequest(editingRequest, data)}
+          onClose={() => setEditingRequest(null)} />
+      )}
+
+      {/* ── Apartment list ── */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
         <select value={buildingFilter} onChange={e => setBuildingFilter(e.target.value)}
           style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8' }}>
@@ -778,6 +856,84 @@ export default function AdminApartments() {
           onDelete={() => {}}
           onClose={() => setAddResidentApt(null)} />
       )}
+    </div>
+  )
+}
+
+// ─── PendingRequestCard ────────────────────────────────────
+function PendingRequestCard({ req, onApprove, onEdit, onDismiss }) {
+  const date = new Date(req.created_at).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
+  return (
+    <div style={{ background: 'white', border: '1.5px solid #f0d060', borderRadius: '12px', padding: '14px 16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+        <div>
+          <div style={{ fontWeight: '800', fontSize: '15px', color: 'var(--primary)' }}>
+            בניין {req.building} · דירה {req.apt}
+            <span style={{ marginRight: '8px', fontSize: '11px', background: req.request_type === 'replace_tenant' ? '#e8f4fd' : '#e8f9ee', color: req.request_type === 'replace_tenant' ? '#1a5c8c' : '#1a7a3a', padding: '2px 7px', borderRadius: '100px', fontWeight: '700' }}>
+              {req.request_type === 'replace_tenant' ? '🔄 החלפת שוכר' : '➕ שוכר חדש'}
+            </span>
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>{date}</div>
+        </div>
+      </div>
+      <div style={{ background: '#f7f5f1', borderRadius: '9px', padding: '10px 13px', fontSize: '13px', marginBottom: '12px' }}>
+        <div style={{ fontWeight: '700' }}>{req.name}</div>
+        <div style={{ color: 'var(--muted)', marginTop: '3px' }}>
+          📞 {req.phone}{req.phone2 ? ` · ${req.phone2}` : ''}
+        </div>
+        <div style={{ color: 'var(--muted)' }}>
+          ✉️ {req.email}{req.email2 ? ` · ${req.email2}` : ''}
+        </div>
+        {req.notes && <div style={{ color: 'var(--muted)', borderTop: '1px solid var(--border)', marginTop: '8px', paddingTop: '8px', fontStyle: 'italic' }}>"{req.notes}"</div>}
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={onApprove} style={btn({ background: '#1a7a3a', color: 'white', flex: 1, padding: '9px' })}>✅ אישור</button>
+        <button onClick={onEdit} style={btn({ background: '#e8f4fd', color: '#1a5c8c', flex: 1, padding: '9px' })}>✏️ עריכה לפני אישור</button>
+        <button onClick={onDismiss} style={btn({ background: '#fdf0f0', color: '#e05555', padding: '9px 12px' })}>✕</button>
+      </div>
+    </div>
+  )
+}
+
+// ─── EditRequestModal ──────────────────────────────────────
+function EditRequestModal({ req, onApprove, onClose }) {
+  const [form, setForm] = useState({
+    name: req.name || '', phone: req.phone || '', phone2: req.phone2 || '',
+    email: req.email || '', email2: req.email2 || '', notes: req.notes || '',
+  })
+  const f = k => e => setForm(x => ({ ...x, [k]: e.target.value }))
+  const inp = (extra = {}) => ({
+    width: '100%', padding: '9px 12px', borderRadius: '9px', border: '1.5px solid var(--border)',
+    fontSize: '14px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8', boxSizing: 'border-box', ...extra
+  })
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={onClose}>
+      <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '400px', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        <div style={{ background: 'var(--primary)', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ color: 'white', fontWeight: '700', fontSize: '15px' }}>עריכת בקשה — בניין {req.building} דירה {req.apt}</div>
+          <button onClick={onClose} style={btn({ background: 'rgba(255,255,255,0.2)', color: 'white', padding: '4px 10px' })}>✕</button>
+        </div>
+        <div style={{ padding: '18px' }}>
+          {[
+            { k: 'name',   l: 'שם מלא',      dir: 'rtl' },
+            { k: 'phone',  l: 'טלפון ראשי',   dir: 'ltr' },
+            { k: 'phone2', l: 'טלפון נוסף',   dir: 'ltr' },
+            { k: 'email',  l: 'מייל ראשי',    dir: 'ltr' },
+            { k: 'email2', l: 'מייל נוסף',    dir: 'ltr' },
+            { k: 'notes',  l: 'הערות',        dir: 'rtl' },
+          ].map(({ k, l, dir }) => (
+            <div key={k} style={{ marginBottom: '11px' }}>
+              <div style={{ fontSize: '11px', fontWeight: '700', color: 'var(--muted)', marginBottom: '4px' }}>{l}</div>
+              <input value={form[k]} onChange={f(k)} dir={dir} style={inp()} />
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+            <button onClick={() => onApprove(form)} style={btn({ background: '#1a7a3a', color: 'white', flex: 1, padding: '10px', fontSize: '14px' })}>✅ אשר ושמור</button>
+            <button onClick={onClose} style={btn({ background: '#fdf0f0', color: '#e05555' })}>ביטול</button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
