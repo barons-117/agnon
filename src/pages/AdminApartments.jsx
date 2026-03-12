@@ -46,9 +46,14 @@ function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResid
             {tenants.length > 0 && (
               <span style={{ fontSize: '10px', background: '#e8f4fd', color: '#1a5c8c', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>שוכר</span>
             )}
-            {owners[0]?.is_company && (
-              <span style={{ fontSize: '10px', background: '#fff3e0', color: '#b35c00', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>{owners[0].company_name || 'חברה'}</span>
-            )}
+            {owners[0]?.is_company && (() => {
+              const cname = clean(owners[0].company_name || owners[0].name || '')
+              const isHaziHinam = cname.includes('חצי חינם') || cname.includes('חצי-חינם')
+              const isMagorit = cname.includes('מגוריט')
+              if (isHaziHinam) return <span style={{ fontSize: '10px', background: '#fef3e0', color: '#b35c00', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>חצי חינם</span>
+              if (isMagorit) return <span style={{ fontSize: '10px', background: '#e8f4fd', color: '#1a5c8c', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>מגוריט</span>
+              return <span style={{ fontSize: '10px', background: '#fff3e0', color: '#b35c00', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>{cname || 'חברה'}</span>
+            })()}
             {projectItems.length > 0 && projectItems.map(pi => (
               <span key={pi.id} style={{
                 fontSize: '10px', padding: '1px 7px', borderRadius: '100px', fontWeight: '700',
