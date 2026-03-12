@@ -8,6 +8,20 @@ const btn = (extra = {}) => ({
   padding: '7px 14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', ...extra
 })
 function clean(v) { return v === null || v === undefined ? '' : String(v) }
+// Remove trailing .0 from numbers like "138.0" → "138"
+function fmtNum(v) {
+  if (!v) return ''
+  return String(v).replace(/\.0$/, '')
+}
+// Normalize floor: "-1" stays "-1", "1-" becomes "-1" (for display keep as-is since DB is now fixed)
+function fmtFloor(v) {
+  if (!v) return ''
+  v = String(v).trim()
+  // "1-" → "-1"
+  const m = v.match(/^(\d+)-$/)
+  if (m) return `-${m[1]}`
+  return v
+}
 
 // ─── ApartmentRow ──────────────────────────────────────────
 function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResident }) {
@@ -47,9 +61,9 @@ function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResid
               <span style={{ fontSize: '10px', background: '#e8f4fd', color: '#1a5c8c', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>שוכר</span>
             )}
             {owners[0]?.is_company && (() => {
-              const cname = clean(owners[0].company_name || owners[0].name || '')
+              const cname = clean(owners[0].name || owners[0].company_name || '')
               const isHaziHinam = cname.includes('חצי חינם') || cname.includes('חצי-חינם')
-              const isMagorit = cname.includes('מגוריט')
+              const isMagorit = cname.includes('מגוריט') || cname.includes('אמפא')
               if (isHaziHinam) return <span style={{ fontSize: '10px', background: '#fef3e0', color: '#b35c00', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>חצי חינם</span>
               if (isMagorit) return <span style={{ fontSize: '10px', background: '#e8f4fd', color: '#1a5c8c', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>מגוריט</span>
               return <span style={{ fontSize: '10px', background: '#fff3e0', color: '#b35c00', padding: '1px 7px', borderRadius: '100px', fontWeight: '700' }}>{cname || 'חברה'}</span>
@@ -67,6 +81,7 @@ function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResid
           <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '2px' }}>
             קומה {apt.floor} · {apt.rooms} חדרים · {apt.area} מ"ר
             {mainPerson?.phone && ` · ${mainPerson.phone}`}
+            {mainPerson?.phone2 && ` · ${mainPerson.phone2}`}
           </div>
         </div>
         <div style={{ fontSize: '12px', color: 'var(--muted)', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▼</div>
@@ -92,9 +107,11 @@ function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResid
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
                   {r.phone && <span>📞 {r.phone}</span>}
-                  {r.phone && r.email && <span> · </span>}
+                  {r.phone2 && <span> · 📞 {r.phone2}</span>}
+                  {(r.phone || r.phone2) && (r.email || r.email2) && <span> · </span>}
                   {r.email && <span>✉️ {r.email}</span>}
-                  {!r.phone && !r.email && <span>אין פרטי קשר</span>}
+                  {r.email2 && <span> · ✉️ {r.email2}</span>}
+                  {!r.phone && !r.phone2 && !r.email && !r.email2 && <span>אין פרטי קשר</span>}
                 </div>
               </div>
               <button onClick={() => onEditResident(r)} style={btn({ background: '#e4edf8', color: 'var(--primary)' })}>✏️</button>
@@ -110,17 +127,23 @@ function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResid
               {apt.parking1 && (
                 <div style={{ background: '#e8f0fb', border: '1px solid #c4d4f0', borderRadius: '8px', padding: '7px 12px', fontSize: '12px' }}>
                   <span style={{ fontWeight: '700', color: '#1a3a5c' }}>🚗 חניה </span>
-                  <span style={{ color: '#1a3a5c' }}>{apt.parking1}</span>
-                  {apt.parking1_floor && <span style={{ color: 'var(--muted)' }}> · קומה {apt.parking1_floor}</span>}
-                  {apt.parking2 && <span style={{ color: '#1a3a5c' }}> + {apt.parking2}{apt.parking2_floor ? ` (ק׳ ${apt.parking2_floor})` : ''}</span>}
+                  <span style={{ color: '#1a3a5c' }}>{fmtNum(apt.parking1)}</span>
+                  {apt.parking1_floor && <span style={{ color: 'var(--muted)' }}> · קומה {fmtFloor(apt.parking1_floor)}</span>}
+                  {apt.parking2 && <>
+                    <span style={{ color: '#1a3a5c' }}> + {fmtNum(apt.parking2)}</span>
+                    {apt.parking2_floor && <span style={{ color: 'var(--muted)' }}> · קומה {fmtFloor(apt.parking2_floor)}</span>}
+                  </>}
                 </div>
               )}
               {apt.storage1 && (
                 <div style={{ background: '#f5f0fb', border: '1px solid #d4c4f0', borderRadius: '8px', padding: '7px 12px', fontSize: '12px' }}>
                   <span style={{ fontWeight: '700', color: '#3a1a5c' }}>📦 מחסן </span>
-                  <span style={{ color: '#3a1a5c' }}>{apt.storage1}</span>
-                  {apt.storage1_floor && <span style={{ color: 'var(--muted)' }}> · קומה {apt.storage1_floor}</span>}
-                  {apt.storage2 && <span style={{ color: '#3a1a5c' }}> + {apt.storage2}{apt.storage2_floor ? ` (ק׳ ${apt.storage2_floor})` : ''}</span>}
+                  <span style={{ color: '#3a1a5c' }}>{fmtNum(apt.storage1)}</span>
+                  {apt.storage1_floor && <span style={{ color: 'var(--muted)' }}> · קומה {fmtFloor(apt.storage1_floor)}</span>}
+                  {apt.storage2 && <>
+                    <span style={{ color: '#3a1a5c' }}> + {fmtNum(apt.storage2)}</span>
+                    {apt.storage2_floor && <span style={{ color: 'var(--muted)' }}> · קומה {fmtFloor(apt.storage2_floor)}</span>}
+                  </>}
                 </div>
               )}
             </div>
