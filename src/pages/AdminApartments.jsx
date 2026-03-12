@@ -98,6 +98,29 @@ function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResid
           <button onClick={() => onAddResident(apt)} style={btn({ background: 'var(--primary)', color: 'white', marginTop: '4px' })}>
             + הוסף דייר / בעלים
           </button>
+
+          {/* Parking & Storage */}
+          {(apt.parking1 || apt.storage1) && (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+              {apt.parking1 && (
+                <div style={{ background: '#e8f0fb', border: '1px solid #c4d4f0', borderRadius: '8px', padding: '7px 12px', fontSize: '12px' }}>
+                  <span style={{ fontWeight: '700', color: '#1a3a5c' }}>🚗 חניה </span>
+                  <span style={{ color: '#1a3a5c' }}>{apt.parking1}</span>
+                  {apt.parking1_floor && <span style={{ color: 'var(--muted)' }}> · קומה {apt.parking1_floor}</span>}
+                  {apt.parking2 && <span style={{ color: '#1a3a5c' }}> + {apt.parking2}{apt.parking2_floor ? ` (ק׳ ${apt.parking2_floor})` : ''}</span>}
+                </div>
+              )}
+              {apt.storage1 && (
+                <div style={{ background: '#f5f0fb', border: '1px solid #d4c4f0', borderRadius: '8px', padding: '7px 12px', fontSize: '12px' }}>
+                  <span style={{ fontWeight: '700', color: '#3a1a5c' }}>📦 מחסן </span>
+                  <span style={{ color: '#3a1a5c' }}>{apt.storage1}</span>
+                  {apt.storage1_floor && <span style={{ color: 'var(--muted)' }}> · קומה {apt.storage1_floor}</span>}
+                  {apt.storage2 && <span style={{ color: '#3a1a5c' }}> + {apt.storage2}{apt.storage2_floor ? ` (ק׳ ${apt.storage2_floor})` : ''}</span>}
+                </div>
+              )}
+            </div>
+          )}
+
           {apt.notes && (
             <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '8px', fontStyle: 'italic' }}>📝 {apt.notes}</div>
           )}
@@ -209,7 +232,63 @@ function ProjectsTab({ apartments, residents }) {
     if (activeProject) loadItems(activeProject.id)
   }, [activeProject])
 
-  const createProject = async () => {
+  const exportToExcel = () => {
+    if (!activeProject) return
+    const PRICE = 90
+    const rows = []
+
+    // Header
+    rows.push(['בניין', 'דירה', 'קומה', 'שם', 'טלפון', 'הזמין', 'כמות שלטים', 'סכום (₪)', 'הערות', 'תאריך תשלום'])
+
+    apartments
+      .filter(a => !a.is_unsold)
+      .sort((a, b) => a.building - b.building || a.apt - b.apt)
+      .forEach(a => {
+        const item = getItem(a.building, a.apt)
+        const res = residents.filter(r => r.building === a.building && r.apt === a.apt)
+        const mainRes = res.find(r => r.role === 'tenant') || res.find(r => r.role === 'owner')
+        const paid = item && (item.status === 'paid' || item.status === 'done')
+        const qty = paid ? (item.quantity || 1) : 0
+        const paidDate = item?.paid_at ? new Date(item.paid_at).toLocaleDateString('he-IL') : ''
+        rows.push([
+          `עגנון ${a.building}`,
+          a.apt,
+          a.floor,
+          clean(mainRes?.name || ''),
+          clean(mainRes?.phone || ''),
+          paid ? 'כן' : 'לא',
+          paid ? qty : '',
+          paid ? qty * PRICE : '',
+          clean(item?.notes || ''),
+          paidDate,
+        ])
+      })
+
+    // Summary rows
+    const paidRows = rows.slice(1).filter(r => r[5] === 'כן')
+    const totalQty = paidRows.reduce((s, r) => s + (r[6] || 0), 0)
+    const totalMoney = paidRows.reduce((s, r) => s + (r[7] || 0), 0)
+    rows.push([])
+    rows.push(['', '', '', '', 'סה"כ שילמו:', paidRows.length, totalQty, totalMoney, '', ''])
+    rows.push(['', '', '', '', 'טרם שילמו:', rows.slice(1, -2).filter(r => r[5] === 'לא').length, '', '', '', ''])
+
+    // Build CSV (TSV actually — Excel opens it fine with .csv)
+    const csv = rows.map(r =>
+      r.map(cell => {
+        const s = String(cell ?? '')
+        return s.includes(',') || s.includes('"') ? `"${s.replace(/"/g, '""')}"` : s
+      }).join(',')
+    ).join('\n')
+
+    const BOM = '\uFEFF' // UTF-8 BOM for Hebrew in Excel
+    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${activeProject.name}_${new Date().toLocaleDateString('he-IL').replace(/\//g, '-')}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
     if (!newProjectName.trim()) return
     const { data } = await supabase.from('apt_projects').insert([{ name: newProjectName, description: newProjectDesc }]).select().single()
     setShowNewProject(false); setNewProjectName(''); setNewProjectDesc('')
@@ -292,20 +371,27 @@ function ProjectsTab({ apartments, residents }) {
 
       {activeProject && (
         <>
-          {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '16px' }}>
-            {[
-              { label: 'דירות שהזמינו', val: paidCount, sub: `מתוך ${totalApts}`, color: '#1a7a3a', bg: '#e8f9ee' },
-              { label: 'טרם הזמינו', val: totalApts - paidCount, sub: 'דירות', color: '#b35c00', bg: '#fff3e0' },
-              { label: 'סה"כ שלטים', val: totalRemotes, sub: 'יחידות', color: 'var(--primary)', bg: '#e4edf8' },
-              { label: 'סה"כ גבייה', val: `₪${totalMoney.toLocaleString()}`, sub: `צפי: ₪${(totalApts * 90).toLocaleString()}`, color: '#7a1a5c', bg: '#f5e8f4' },
-            ].map(x => (
-              <div key={x.label} style={{ background: x.bg, borderRadius: '12px', padding: '12px 14px' }}>
-                <div style={{ fontWeight: '900', fontSize: '22px', color: x.color }}>{x.val}</div>
-                <div style={{ fontSize: '12px', color: x.color, fontWeight: '700' }}>{x.label}</div>
-                <div style={{ fontSize: '11px', color: x.color, opacity: 0.6, marginTop: '1px' }}>{x.sub}</div>
-              </div>
-            ))}
+          {/* Stats + export */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', flex: 1 }}>
+              {[
+                { label: 'דירות שהזמינו', val: paidCount, sub: `מתוך ${totalApts}`, color: '#1a7a3a', bg: '#e8f9ee' },
+                { label: 'טרם הזמינו', val: totalApts - paidCount, sub: 'דירות', color: '#b35c00', bg: '#fff3e0' },
+                { label: 'סה"כ שלטים', val: totalRemotes, sub: 'יחידות', color: 'var(--primary)', bg: '#e4edf8' },
+                { label: 'סה"כ גבייה', val: `₪${totalMoney.toLocaleString()}`, sub: `צפי: ₪${(totalApts * 90).toLocaleString()}`, color: '#7a1a5c', bg: '#f5e8f4' },
+              ].map(x => (
+                <div key={x.label} style={{ background: x.bg, borderRadius: '12px', padding: '12px 14px' }}>
+                  <div style={{ fontWeight: '900', fontSize: '22px', color: x.color }}>{x.val}</div>
+                  <div style={{ fontSize: '12px', color: x.color, fontWeight: '700' }}>{x.label}</div>
+                  <div style={{ fontSize: '11px', color: x.color, opacity: 0.6, marginTop: '1px' }}>{x.sub}</div>
+                </div>
+              ))}
+            </div>
+            <button onClick={exportToExcel}
+              title="ייצוא לאקסל"
+              style={btn({ background: '#f0fbf4', color: '#1a7a3a', border: '1.5px solid #bce8cc', padding: '10px 14px', fontSize: '20px', flexShrink: 0 })}>
+              📊
+            </button>
           </div>
 
           {/* Add payment input */}
@@ -603,8 +689,10 @@ export default function AdminApartments() {
     if (!search.trim()) return true
     const q = search.toLowerCase()
     if (String(a.apt).includes(q)) return true
+    if (clean(a.parking1).includes(q) || clean(a.parking2).includes(q)) return true
+    if (clean(a.storage1).includes(q) || clean(a.storage2).includes(q)) return true
     const res = residents.filter(r => r.building === a.building && r.apt === a.apt)
-    return res.some(r => clean(r.name).toLowerCase().includes(q) || clean(r.phone).includes(q))
+    return res.some(r => clean(r.name).toLowerCase().includes(q) || clean(r.phone).includes(q) || clean(r.phone2).includes(q))
   })
 
   if (loading) return <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px', fontSize: '14px' }}>טוען...</div>
