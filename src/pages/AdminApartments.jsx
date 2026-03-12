@@ -241,7 +241,6 @@ function ProjectsTab({ apartments, residents }) {
     rows.push(['בניין', 'דירה', 'קומה', 'שם', 'טלפון', 'הזמין', 'כמות שלטים', 'סכום (₪)', 'הערות', 'תאריך תשלום'])
 
     apartments
-      .filter(a => !a.is_unsold)
       .sort((a, b) => a.building - b.building || a.apt - b.apt)
       .forEach(a => {
         const item = getItem(a.building, a.apt)
@@ -324,7 +323,7 @@ function ProjectsTab({ apartments, residents }) {
   const paidCount = paidItems.length
   const totalRemotes = paidItems.reduce((sum, i) => sum + (i.quantity || 1), 0)
   const totalMoney = paidItems.reduce((sum, i) => sum + (i.amount_paid || 0), 0)
-  const totalApts = filteredApts.filter(a => !a.is_unsold).length
+  const totalApts = filteredApts.length
 
   if (!activeProject && !showNewProject) {
     return (
@@ -417,7 +416,6 @@ function ProjectsTab({ apartments, residents }) {
           {/* Apartment grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '8px' }}>
             {filteredApts
-              .filter(a => !a.is_unsold)
               .filter(a => {
                 if (!search.trim()) return true
                 const q = search.toLowerCase()
@@ -434,9 +432,9 @@ function ProjectsTab({ apartments, residents }) {
                   <div key={`${a.building}-${a.apt}`}
                     onClick={() => paid ? setEditModal({ item, apt: a }) : setAddModal(a)}
                     style={{
-                      border: `1.5px solid ${paid ? '#bce8cc' : 'var(--border)'}`,
+                      border: `1.5px solid ${paid ? '#bce8cc' : a.is_unsold ? '#e0dbd4' : 'var(--border)'}`,
                       borderRadius: '12px', padding: '10px 12px', cursor: 'pointer',
-                      background: paid ? '#f0fbf4' : 'white',
+                      background: paid ? '#f0fbf4' : a.is_unsold ? '#f7f5f1' : 'white',
                       transition: 'all 0.15s',
                     }}
                     onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
