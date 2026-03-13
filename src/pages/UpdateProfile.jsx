@@ -37,10 +37,10 @@ export default function UpdateProfile() {
     setAptError('')
     const aptInt = parseInt(aptNum)
     const { data: apt } = await supabase.from('apartments')
-      .select('*').eq('building', parseInt(building)).eq('apt', aptInt).single()
+      .select('apt, building').eq('building', parseInt(building)).eq('apt', aptInt).single()
     if (!apt) { setAptError('לא נמצאה דירה — בדוק מספר דירה ובניין'); setLoadingApt(false); return }
     const { data: res } = await supabase.from('residents')
-      .select('*').eq('building', parseInt(building)).eq('apt', aptInt)
+      .select('id, building, apt, role, name').eq('building', parseInt(building)).eq('apt', aptInt)
     setAptData(apt)
     setOwners((res || []).filter(r => r.role === 'owner'))
     setTenants((res || []).filter(r => r.role === 'tenant'))
@@ -146,38 +146,31 @@ export default function UpdateProfile() {
       {/* ── STEP: CONFIRM ── */}
       {step === 'confirm' && aptData && (
         <div style={{ maxWidth: '420px' }}>
-          {/* Apt header */}
-          <div style={{ background: 'var(--primary)', borderRadius: '12px', padding: '14px 18px', marginBottom: '16px', color: 'white' }}>
-            <div style={{ fontWeight: '800', fontSize: '16px' }}>בניין {building} · דירה {aptNum}</div>
-            <div style={{ fontSize: '12px', opacity: 0.75, marginTop: '2px' }}>קומה {aptData.floor} · {aptData.rooms} חדרים · {aptData.area} מ"ר</div>
+
+          {/* Ownership confirmation - names only */}
+          <div style={{ background: '#f7f5f1', borderRadius: '12px', padding: '16px 18px', marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '10px' }}>אימות דירה</div>
+            {owners.length === 0 ? (
+              <div style={{ fontSize: '14px', color: 'var(--text)', lineHeight: '1.7' }}>
+                לא נמצא בעל דירה רשום לדירה <strong>{aptNum}</strong> בבניין <strong>{building}</strong>.
+              </div>
+            ) : (
+              <div style={{ fontSize: '15px', color: 'var(--text)', lineHeight: '1.8' }}>
+                האם הדירה שייכת ל
+                <strong> {owners.map(o => clean(o.name)).join(' ו-')}</strong>?
+              </div>
+            )}
           </div>
 
-          {/* Owners (read-only) */}
-          <div style={{ marginBottom: '14px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>בעל/י הדירה (לא ניתן לעריכה)</div>
-            {owners.length === 0
-              ? <div style={{ fontSize: '13px', color: '#bbb', padding: '10px 14px', background: '#f7f5f1', borderRadius: '9px' }}>אין בעלים רשום</div>
-              : owners.map(o => (
-                <div key={o.id} style={{ background: '#f7f5f1', borderRadius: '9px', padding: '10px 14px', marginBottom: '6px', fontSize: '13px' }}>
-                  <div style={{ fontWeight: '700' }}>{clean(o.name)}</div>
-                  {o.phone && <div style={{ color: 'var(--muted)', marginTop: '2px' }}>📞 {o.phone}{o.phone2 ? ` · ${o.phone2}` : ''}</div>}
-                  {o.email && <div style={{ color: 'var(--muted)' }}>✉️ {o.email}</div>}
-                </div>
-              ))
-            }
-          </div>
-
-          {/* Current tenant */}
+          {/* Current tenant - name only */}
           {tenants.length > 0 && (
-            <div style={{ marginBottom: '14px' }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>שוכר נוכחי</div>
-              {tenants.map(t => (
-                <div key={t.id} style={{ background: '#edf4fb', border: '1px solid #c4d4f0', borderRadius: '9px', padding: '10px 14px', fontSize: '13px' }}>
-                  <div style={{ fontWeight: '700' }}>{clean(t.name)}</div>
-                  {t.phone && <div style={{ color: 'var(--muted)', marginTop: '2px' }}>📞 {t.phone}{t.phone2 ? ` · ${t.phone2}` : ''}</div>}
-                  {t.email && <div style={{ color: 'var(--muted)' }}>✉️ {t.email}</div>}
-                </div>
-              ))}
+            <div style={{ background: '#edf4fb', border: '1px solid #c4d4f0', borderRadius: '12px', padding: '16px 18px', marginBottom: '16px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '10px' }}>שוכר/ים נוכחי/ים</div>
+              <div style={{ fontSize: '15px', color: 'var(--text)', lineHeight: '1.8' }}>
+                האם{tenants.length > 1 ? ' שוכרים ' : ' שוכר/ת '}
+                <strong>{tenants.map(t => clean(t.name)).join(' ו-')}</strong>
+                {' '}מוחל{tenants.length > 1 ? 'פים' : 'ף/ת'}?
+              </div>
             </div>
           )}
 
@@ -193,7 +186,7 @@ export default function UpdateProfile() {
                 background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '10px',
                 padding: '13px', fontFamily: 'Heebo, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
               }}>
-                🔄 החלפת שוכר
+                🔄 כן, רוצה להחליף את השוכר/ים
               </button>
             )}
             {tenants.length === 0 && (
@@ -201,7 +194,7 @@ export default function UpdateProfile() {
                 background: 'var(--primary)', color: 'white', border: 'none', borderRadius: '10px',
                 padding: '13px', fontFamily: 'Heebo, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer',
               }}>
-                ➕ הוספת שוכר חדש
+                ➕ כן, רוצה להוסיף שוכר לדירה זו
               </button>
             )}
           </div>
@@ -210,7 +203,7 @@ export default function UpdateProfile() {
             background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
             borderRadius: '10px', padding: '10px', fontFamily: 'Heebo, sans-serif', fontSize: '13px',
             cursor: 'pointer', width: '100%',
-          }}>← חזרה</button>
+          }}>← לא, חפש דירה אחרת</button>
         </div>
       )}
 

@@ -156,7 +156,8 @@ export default function Admin() {
       {adminTab === 'notices' && <AdminNotices />}
       {adminTab === 'pros' && <AdminPros />}
       {adminTab === 'apartments' && <AdminApartments />}
-      {adminTab === 'projects' && <AdminProjects />}}
+      {adminTab === 'projects' && <AdminProjects />}
+
 
       {adminTab === 'requests' && <>
         <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px'}}>
