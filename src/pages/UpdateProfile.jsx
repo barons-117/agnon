@@ -35,15 +35,18 @@ export default function UpdateProfile() {
     if (!building || !aptNum.trim()) return
     setLoadingApt(true)
     setAptError('')
-    const aptInt = parseInt(aptNum)
-    const { data: apt } = await supabase.from('apartments')
-      .select('apt, building').eq('building', parseInt(building)).eq('apt', aptInt).single()
-    if (!apt) { setAptError('לא נמצאה דירה — בדוק מספר דירה ובניין'); setLoadingApt(false); return }
-    const { data: res } = await supabase.from('residents')
-      .select('id, building, apt, role, name').eq('building', parseInt(building)).eq('apt', aptInt)
-    setAptData(apt)
-    setOwners((res || []).filter(r => r.role === 'owner'))
-    setTenants((res || []).filter(r => r.role === 'tenant'))
+    const { data, error } = await supabase.rpc('get_apt_names', {
+      p_building: parseInt(building),
+      p_apt: parseInt(aptNum),
+    })
+    if (error || !data?.exists) {
+      setAptError('לא נמצאה דירה — בדוק מספר דירה ובניין')
+      setLoadingApt(false)
+      return
+    }
+    setAptData({ building: parseInt(building), apt: parseInt(aptNum) })
+    setOwners((data.owners || []).map((name, i) => ({ id: i, name })))
+    setTenants((data.tenants || []).map((name, i) => ({ id: i, name })))
     setStep('confirm')
     setLoadingApt(false)
   }
