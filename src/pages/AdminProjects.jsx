@@ -383,10 +383,15 @@ export default function AdminProjects() {
                   onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
                   onMouseLeave={e => e.currentTarget.style.transform = 'none'}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <span style={{ fontWeight: '800', fontSize: '15px', color: paid ? '#1a7a3a' : a.is_unsold ? 'var(--muted)' : 'var(--primary)' }}>
-                      {a.building}/{a.apt}
-                    </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                    <div>
+                      <div style={{ fontWeight: '800', fontSize: '14px', color: paid ? '#1a7a3a' : a.is_unsold ? 'var(--muted)' : a.building === 12 ? 'var(--primary)' : '#1a6b4a' }}>
+                        דירה {a.apt}
+                      </div>
+                      <div style={{ fontSize: '10px', fontWeight: '600', color: a.building === 12 ? '#7a9ec0' : '#4a9a7a', marginTop: '1px' }}>
+                        בניין {a.building}
+                      </div>
+                    </div>
                     {paid
                       ? <span style={{ fontWeight: '800', fontSize: '13px', color: '#1a7a3a' }}>×{item.quantity || 1}</span>
                       : <span style={{ fontSize: '13px', color: 'var(--muted)' }}>—</span>
