@@ -176,6 +176,7 @@ export default function AdminProjects() {
   const [search, setSearch] = useState('')
   const [addModal, setAddModal] = useState(null)
   const [editModal, setEditModal] = useState(null)
+  const [showArchive, setShowArchive] = useState(false)
 
   useEffect(() => { loadAll() }, [])
 
@@ -189,8 +190,31 @@ export default function AdminProjects() {
     setApartments(apts || [])
     setResidents(res || [])
     setProjects(projs || [])
-    if (projs?.length > 0) setActiveProject(p => p || projs[0])
+    if (projs?.length > 0) {
+      const active = projs.filter(p => !p.archived)
+      setActiveProject(p => p || active[0] || null)
+    }
     setLoading(false)
+  }
+
+  const archiveProject = async (p) => {
+    if (!window.confirm(`להעביר את "${p.name}" לארכיון?`)) return
+    await supabase.from('apt_projects').update({ archived: true }).eq('id', p.id)
+    setActiveProject(null)
+    await loadAll()
+  }
+
+  const unarchiveProject = async (p) => {
+    if (!window.confirm(`להוציא את "${p.name}" מהארכיון?`)) return
+    await supabase.from('apt_projects').update({ archived: false }).eq('id', p.id)
+    await loadAll()
+  }
+
+  const deleteProjectPermanently = async (p) => {
+    if (!window.confirm(`למחוק לצמיתות את "${p.name}"? פעולה זו אינה ניתנת לשחזור!`)) return
+    await supabase.from('apt_project_items').delete().eq('project_id', p.id)
+    await supabase.from('apt_projects').delete().eq('id', p.id)
+    await loadAll()
   }
 
   const loadItems = async (projectId) => {
@@ -276,17 +300,48 @@ export default function AdminProjects() {
 
   if (loading) return <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px', fontSize: '14px' }}>טוען...</div>
 
+  const activeProjects = projects.filter(p => !p.archived)
+  const archivedProjects = projects.filter(p => p.archived)
+
+  if (showArchive) return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <button onClick={() => setShowArchive(false)} style={btn({ background: '#f0ede8', color: 'var(--muted)' })}>← חזרה</button>
+        <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--primary)' }}>🗄️ ארכיון פרויקטים</div>
+      </div>
+      {archivedProjects.length === 0 && (
+        <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '40px', fontSize: '14px' }}>הארכיון ריק.</div>
+      )}
+      {archivedProjects.map(p => (
+        <div key={p.id} style={{ background: '#f7f5f1', border: '1px solid var(--border)', borderRadius: '12px', padding: '16px', marginBottom: '10px' }}>
+          <div style={{ fontWeight: '700', fontSize: '15px', color: 'var(--muted)', marginBottom: '4px' }}>📦 {p.name}</div>
+          {p.description && <div style={{ fontSize: '13px', color: 'var(--muted)', marginBottom: '8px' }}>{p.description}</div>}
+          <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '12px' }}>
+            ₪{p.price_per_unit} / {p.unit_label}
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button onClick={() => unarchiveProject(p)} style={btn({ background: '#e8f9ee', color: '#1a6b3a' })}>↩️ הוצא מארכיון</button>
+            <button onClick={() => deleteProjectPermanently(p)} style={btn({ background: '#fdf0f0', color: '#e05555' })}>🗑️ מחק לצמיתות</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+
   return (
     <div>
       {/* Project selector */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-        {projects.map(p => (
+        {activeProjects.map(p => (
           <button key={p.id} onClick={() => setActiveProject(p)}
             style={btn({ background: activeProject?.id === p.id ? 'var(--primary)' : '#f0ede8', color: activeProject?.id === p.id ? 'white' : 'var(--text)', fontSize: '13px' })}>
             {p.name}
           </button>
         ))}
         <button onClick={() => setShowNewProject(v => !v)} style={btn({ background: '#e8f4fd', color: '#1a5c8c' })}>+ פרויקט חדש</button>
+        <button onClick={() => setShowArchive(true)} style={btn({ background: '#f0ede8', color: 'var(--muted)', fontSize: '12px' })}>
+          🗄️ ארכיון {archivedProjects.length > 0 ? `(${archivedProjects.length})` : ''}
+        </button>
       </div>
 
       {/* New project form */}
@@ -342,6 +397,10 @@ export default function AdminProjects() {
             <button onClick={exportToExcel} title="ייצוא לאקסל"
               style={btn({ background: '#f0fbf4', color: '#1a7a3a', border: '1.5px solid #bce8cc', padding: '10px 14px', fontSize: '20px', flexShrink: 0 })}>
               📊
+            </button>
+            <button onClick={() => archiveProject(activeProject)} title="העבר לארכיון"
+              style={btn({ background: '#f7f5f1', color: 'var(--muted)', border: '1px solid var(--border)', padding: '10px 12px', fontSize: '16px', flexShrink: 0 })}>
+              🗄️
             </button>
           </div>
 

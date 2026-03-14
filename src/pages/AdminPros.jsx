@@ -8,7 +8,10 @@ export default function AdminPros() {
   const [pros, setPros] = useState([])
   const [cats, setCats] = useState([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState('pros') // 'pros' | 'cats'
+  const [view, setView] = useState('pros') // 'pros' | 'cats' | 'pending'
+  const [pendingRecs, setPendingRecs] = useState([])
+  const [editingRec, setEditingRec] = useState(null)
+  const [recEditForm, setRecEditForm] = useState({})
 
   // Pro form
   const [showProForm, setShowProForm] = useState(false)
@@ -28,13 +31,31 @@ export default function AdminPros() {
 
   const load = async () => {
     setLoading(true)
-    const [{ data: catData }, { data: proData }] = await Promise.all([
+    const [{ data: catData }, { data: proData }, { data: recData }] = await Promise.all([
       supabase.from('pro_categories').select('*').order('label'),
       supabase.from('professionals').select('*').order('id'),
+      supabase.from('pro_recommendations').select('*').eq('status', 'pending').order('created_at'),
     ])
     setCats(catData || [])
     setPros(proData || [])
+    setPendingRecs(recData || [])
     setLoading(false)
+  }
+
+  const approveRec = async (rec, overrides = null) => {
+    const d = overrides || rec
+    await supabase.from('professionals').insert([{
+      name: d.name, "desc": d.desc || null, phone: d.phone || null,
+      lives_in_building: false, active: true, categories: [d.category_id],
+    }])
+    await supabase.from('pro_recommendations').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', rec.id)
+    setEditingRec(null)
+    await load()
+  }
+
+  const rejectRec = async (rec) => {
+    await supabase.from('pro_recommendations').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', rec.id)
+    await load()
   }
 
   // ── Pro CRUD ──
@@ -116,8 +137,55 @@ export default function AdminPros() {
       <div className="ctab-bar">
         <button className={`ctab-btn${view === 'pros' ? ' active' : ''}`} onClick={() => setView('pros')}>בעלי מקצוע</button>
         <button className={`ctab-btn${view === 'cats' ? ' active' : ''}`} onClick={() => setView('cats')}>קטגוריות</button>
+        <button className={`ctab-btn${view === 'pending' ? ' active' : ''}`} onClick={() => setView('pending')}
+          style={pendingRecs.length > 0 ? { position: 'relative' } : {}}>
+          ממתינות לאישור
+          {pendingRecs.length > 0 && (
+            <span style={{ marginRight: '6px', background: '#e05', color: 'white', borderRadius: '100px', padding: '0px 6px', fontSize: '11px', fontWeight: '800' }}>
+              {pendingRecs.length}
+            </span>
+          )}
+        </button>
       </div>
       <div className="ctab-body">
+
+      {/* ── PENDING RECS VIEW ── */}
+      {view === 'pending' && (
+        <div>
+          {pendingRecs.length === 0 && (
+            <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '30px', fontSize: '14px' }}>
+              ✅ אין המלצות ממתינות לאישור.
+            </div>
+          )}
+          {pendingRecs.map(rec => (
+            <div key={rec.id} style={{ background: 'white', border: '1.5px solid #f0d060', borderRadius: '12px', padding: '14px 16px', marginBottom: '10px' }}>
+              {editingRec === rec.id ? (
+                <RecEditForm rec={rec} cats={cats} onApprove={(d) => approveRec(rec, d)} onClose={() => setEditingRec(null)} />
+              ) : (
+                <>
+                  <div style={{ fontWeight: '800', fontSize: '15px', color: 'var(--primary)', marginBottom: '6px' }}>{rec.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '4px' }}>
+                    📂 {cats.find(c => c.id === rec.category_id)?.label || rec.category_id}
+                    {rec.phone && <span style={{ marginRight: '10px' }}>📞 {rec.phone}</span>}
+                  </div>
+                  {rec.desc && <div style={{ fontSize: '13px', color: 'var(--text)', marginBottom: '6px', fontStyle: 'italic' }}>"{rec.desc}"</div>}
+                  {rec.recommender_name && <div style={{ fontSize: '11px', color: 'var(--muted)' }}>ממליץ: {rec.recommender_name}</div>}
+                  <div style={{ fontSize: '11px', color: 'var(--muted)', marginBottom: '10px' }}>
+                    {new Date(rec.created_at).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <button onClick={() => approveRec(rec)} style={addBtn}>✅ אישור</button>
+                    <button onClick={() => { setEditingRec(rec.id); setRecEditForm({ name: rec.name, phone: rec.phone || '', desc: rec.desc || '', category_id: rec.category_id }) }}
+                      style={{ ...addBtn, background: '#e8f4fd', color: '#1a5c8c' }}>✏️ עריכה לפני אישור</button>
+                    <button onClick={() => rejectRec(rec)}
+                      style={{ ...addBtn, background: '#fdf0f0', color: '#e05555' }}>✕ דחייה</button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ── CATEGORIES VIEW ── */}
       {view === 'cats' && <>
@@ -293,3 +361,33 @@ const iconBtn = { background:'#f0ede8', border:'none', borderRadius:'8px', paddi
 const formBox = { background:'#f7f5f1', border:'1.5px solid var(--border)', borderRadius:'13px', padding:'18px', marginBottom:'18px' }
 const rowBox = { display:'flex', alignItems:'center', justifyContent:'space-between', gap:'8px', background:'#fafaf8', border:'1px solid var(--border)', borderRadius:'12px', padding:'12px 16px', marginBottom:'8px' }
 const checkLabel = { display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', fontSize:'14px' }
+
+function RecEditForm({ rec, cats, onApprove, onClose }) {
+  const [form, setForm] = useState({ name: rec.name || '', phone: rec.phone || '', desc: rec.desc || '', category_id: rec.category_id || '' })
+  const f = k => e => setForm(x => ({ ...x, [k]: e.target.value }))
+  return (
+    <div>
+      <div style={{ fontWeight: '700', fontSize: '14px', color: 'var(--primary)', marginBottom: '12px' }}>✏️ עריכה לפני אישור</div>
+      {[
+        { k: 'name',        l: 'שם',       dir: 'rtl' },
+        { k: 'phone',       l: 'טלפון',    dir: 'ltr' },
+        { k: 'desc',        l: 'תיאור',    dir: 'rtl' },
+      ].map(({ k, l, dir }) => (
+        <div key={k} style={{ marginBottom: '9px' }}>
+          <div style={lbl}>{l}</div>
+          <input value={form[k]} onChange={f(k)} dir={dir} style={inp} />
+        </div>
+      ))}
+      <div style={{ marginBottom: '12px' }}>
+        <div style={lbl}>קטגוריה</div>
+        <select value={form.category_id} onChange={f('category_id')} style={{ ...inp, cursor: 'pointer' }}>
+          {cats.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+        </select>
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={() => onApprove(form)} style={addBtn}>✅ אשר ושמור</button>
+        <button onClick={onClose} style={{ ...addBtn, background: '#fdf0f0', color: '#e05555' }}>ביטול</button>
+      </div>
+    </div>
+  )
+}
