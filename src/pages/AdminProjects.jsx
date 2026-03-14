@@ -394,14 +394,16 @@ export default function AdminProjects() {
                 </div>
               ))}
             </div>
-            <button onClick={exportToExcel} title="ייצוא לאקסל"
-              style={btn({ background: '#f0fbf4', color: '#1a7a3a', border: '1.5px solid #bce8cc', padding: '10px 14px', fontSize: '20px', flexShrink: 0 })}>
-              📊
-            </button>
-            <button onClick={() => archiveProject(activeProject)} title="העבר לארכיון"
-              style={btn({ background: '#f7f5f1', color: 'var(--muted)', border: '1px solid var(--border)', padding: '10px 12px', fontSize: '16px', flexShrink: 0 })}>
-              🗄️
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
+              <button onClick={exportToExcel}
+                style={btn({ background: '#f0fbf4', color: '#1a7a3a', border: '1.5px solid #bce8cc', padding: '8px 14px', fontSize: '13px' })}>
+                ייצוא
+              </button>
+              <button onClick={() => archiveProject(activeProject)}
+                style={btn({ background: '#f7f5f1', color: 'var(--muted)', border: '1px solid var(--border)', padding: '8px 14px', fontSize: '13px' })}>
+                לארכיון
+              </button>
+            </div>
           </div>
 
           <SmartAddInput onSearch={findAptByInput} onSelect={apt => setAddModal(apt)} items={items} />
