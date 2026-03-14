@@ -52,9 +52,9 @@ export default function AdminDocuments() {
     if (!form.title.trim() || !form.publish_date || !file) return
     setUploading(true)
     try {
-      // Upload file to storage
-      const ext = file.name.split('.').pop()
-      const safeName = `${Date.now()}-${file.name.replace(/[^א-תa-zA-Z0-9._-]/g, '_')}`
+      // Upload file to storage - ASCII-only filename
+      const ext = file.name.split('.').pop().toLowerCase()
+      const safeName = `${Date.now()}.${ext}`
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents').upload(safeName, file, { contentType: file.type, upsert: false })
       if (uploadError) throw uploadError
