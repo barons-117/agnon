@@ -147,9 +147,9 @@ export default function Admin() {
       {/* Group selector */}
       <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
         {[
-          { id: 'mgmt',  label: '🏢 חברת הניהול', color: '#1a5c8c', bg: '#e8f4fd' },
-          { id: 'board', label: '🏘️ ועד הבית',     color: '#1a6b3a', bg: '#e8f9ee' },
-          { id: 'site',  label: '⚙️ ניהול אתר',    color: '#5c4a3a', bg: '#f0ede8' },
+          { id: 'mgmt',  label: 'חברת הניהול', color: '#1a5c8c' },
+          { id: 'board', label: 'ועד הבית',     color: '#1a6b3a' },
+          { id: 'site',  label: 'ניהול אתר',    color: '#5c4a3a' },
         ].map(g => (
           <button key={g.id} onClick={() => {
             setAdminGroup(g.id)
@@ -168,17 +168,17 @@ export default function Admin() {
       {/* Sub-tabs */}
       <div className="admin-nav" style={{ marginBottom: '18px' }}>
         {adminGroup === 'mgmt' && <>
-          <button className={`admin-nav-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>📝 פניות דיירים</button>
-          <button className={`admin-nav-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>🛋️ חדר דיירים</button>
+          <button className={`admin-nav-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>פניות דיירים</button>
+          <button className={`admin-nav-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>חדר דיירים</button>
         </>}
         {adminGroup === 'board' && <>
-          <button className={`admin-nav-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>📣 הודעות ועד</button>
-          <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>⭐ בעלי מקצוע</button>
-          <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>🔧 פרויקטים</button>
-          <button className={`admin-nav-btn${adminTab === 'documents' ? ' active' : ''}`} onClick={() => setAdminTab('documents')}>📁 מסמכים</button>
+          <button className={`admin-nav-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>הודעות ועד</button>
+          <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>בעלי מקצוע</button>
+          <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>פרויקטים</button>
+          <button className={`admin-nav-btn${adminTab === 'documents' ? ' active' : ''}`} onClick={() => setAdminTab('documents')}>מסמכים</button>
         </>}
         {adminGroup === 'site' && <>
-          <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>🏠 ניהול דיירים</button>
+          <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>ניהול דיירים</button>
         </>}
       </div>
 

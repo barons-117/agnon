@@ -140,14 +140,15 @@ export default function RoomBookings() {
   return (
     <div>
       {/* Building tabs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+      <div className="ctab-bar">
         {['12', '14'].map(b => (
-          <button key={b} className={`pro-tab-btn${activeBuilding === b ? ' active' : ''}`}
+          <button key={b} className={`ctab-btn${activeBuilding === b ? ' active' : ''}`}
             onClick={() => { setActiveBuilding(b); setShowForm(false) }}>
-            🏠 עגנון {b}
+            עגנון {b}
           </button>
         ))}
       </div>
+      <div className="ctab-body" style={{ paddingTop: '16px' }}>
 
       {/* Mini calendar */}
       {!loading && <MiniCalendar bookedDates={bookedDates} />}
@@ -249,6 +250,7 @@ export default function RoomBookings() {
           </div>
         </div>
       ))}
+      </div>
     </div>
   )
 }
