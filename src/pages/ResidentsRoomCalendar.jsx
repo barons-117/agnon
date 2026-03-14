@@ -43,13 +43,23 @@ export default function ResidentsRoomCalendar() {
       <div className="panel-title"><div className="icon">🛋️</div>חדר דיירים – זמינות</div>
 
       {/* Building tabs */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         {['12', '14'].map(b => (
           <button key={b}
             className={`pro-tab-btn${activeBuilding === b ? ' active' : ''}`}
             onClick={() => setActiveBuilding(b)}
           >עגנון {b}</button>
         ))}
+      </div>
+
+      {/* Intro text */}
+      <div style={{ fontSize: '13.5px', color: 'var(--text)', lineHeight: '1.8', marginBottom: '18px', background: '#f7f5f1', borderRadius: '12px', padding: '14px 16px' }}>
+        בבניין קיים חדר דיירים לשימוש הדיירים לאירועים פרטיים.
+        למען שימוש הוגן ומסודר, יש <strong>להירשם מראש מול חברת הניהול</strong>, לחתום על תקנון החדר ולפעול לפיו — התקנון מצורף בתחתית העמוד.
+        <br/>
+        <span style={{ color: 'var(--muted)', fontSize: '12.5px' }}>
+          הלוח מציג זמינות בזמן אמת, אך המידע המהימן ביותר הוא מול חברת הניהול.
+        </span>
       </div>
 
       {/* Month navigation */}
@@ -61,17 +71,14 @@ export default function ResidentsRoomCalendar() {
 
       {/* Calendar grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '16px' }}>
-        {/* Day headers */}
         {days.map(d => (
           <div key={d} style={{ textAlign: 'center', fontSize: '12px', fontWeight: '700', color: 'var(--muted)', padding: '6px 0' }}>{d}</div>
         ))}
 
-        {/* Empty cells before first day */}
         {Array.from({ length: firstDay }).map((_, i) => (
           <div key={`e${i}`} />
         ))}
 
-        {/* Days */}
         {Array.from({ length: daysInMonth }).map((_, i) => {
           const day = i + 1
           const dateStr = toDateStr(day)
@@ -79,20 +86,21 @@ export default function ResidentsRoomCalendar() {
           const today = isToday(day)
           const past = new Date(year, month, day) < new Date(new Date().setHours(0,0,0,0))
 
+          // today+booked: primary bg with "תפוס" in white
+          // booked only: red bg
+          // today only: primary bg
+          const bg = booked ? (today ? 'var(--primary)' : '#fde8e8') : today ? 'var(--primary)' : 'transparent'
+          const color = booked ? (today ? 'white' : '#c04444') : today ? 'white' : past ? '#ccc' : 'var(--text)'
+          const border = !booked && !today ? '1px solid transparent' : booked && !today ? '1.5px solid #f0b8b8' : 'none'
+
           return (
             <div key={day} style={{
-              textAlign: 'center',
-              padding: '8px 4px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: today ? '800' : booked ? '700' : '400',
-              background: booked ? '#fde8e8' : today ? 'var(--primary)' : 'transparent',
-              color: booked ? '#c04444' : today ? 'white' : past ? '#ccc' : 'var(--text)',
-              border: booked ? '1.5px solid #f0b8b8' : today ? 'none' : '1px solid transparent',
-              position: 'relative',
+              textAlign: 'center', padding: '8px 4px', borderRadius: '10px',
+              fontSize: '14px', fontWeight: today || booked ? '700' : '400',
+              background: bg, color, border,
             }}>
               {day}
-              {booked && <div style={{ fontSize: '8px', marginTop: '1px', color: '#c04444' }}>תפוס</div>}
+              {booked && <div style={{ fontSize: '8px', marginTop: '1px', color: today ? 'rgba(255,255,255,0.85)' : '#c04444', fontWeight: '700' }}>תפוס</div>}
             </div>
           )
         })}
@@ -107,6 +115,10 @@ export default function ResidentsRoomCalendar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--muted)' }}>
           <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'var(--primary)' }}></div>
           היום
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--muted)' }}>
+          <div style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'var(--primary)', border: '2px solid #c04444', position: 'relative' }}></div>
+          היום + תפוס
         </div>
       </div>
 
