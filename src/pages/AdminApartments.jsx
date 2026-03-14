@@ -739,11 +739,17 @@ export default function AdminApartments() {
 
   const approveRequest = async (req, overrides = null) => {
     const data = overrides || req
-    // Upsert as tenant
     if (req.request_type === 'replace_tenant') {
-      // Delete existing tenants for this apt
-      await supabase.from('residents').delete()
-        .eq('building', req.building).eq('apt', req.apt).eq('role', 'tenant')
+      if (req.replace_tenant_name) {
+        // Delete only the specific tenant by name
+        await supabase.from('residents').delete()
+          .eq('building', req.building).eq('apt', req.apt)
+          .eq('role', 'tenant').eq('name', req.replace_tenant_name)
+      } else {
+        // Delete all tenants
+        await supabase.from('residents').delete()
+          .eq('building', req.building).eq('apt', req.apt).eq('role', 'tenant')
+      }
     }
     await supabase.from('residents').insert([{
       building: req.building, apt: req.apt, role: 'tenant',
@@ -870,14 +876,22 @@ export default function AdminApartments() {
 // ─── PendingRequestCard ────────────────────────────────────
 function PendingRequestCard({ req, onApprove, onEdit, onDismiss }) {
   const date = new Date(req.created_at).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
+
+  const actionLabel = () => {
+    if (req.request_type === 'add_tenant') return { label: 'הוספת שוכר', bg: '#e8f9ee', color: '#1a7a3a' }
+    if (req.replace_tenant_name) return { label: `החלפת ${req.replace_tenant_name}`, bg: '#fff3e0', color: '#b35c00' }
+    return { label: 'החלפת כל השוכרים', bg: '#e8f4fd', color: '#1a5c8c' }
+  }
+  const al = actionLabel()
+
   return (
     <div style={{ background: 'white', border: '1.5px solid #f0d060', borderRadius: '12px', padding: '14px 16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
         <div>
           <div style={{ fontWeight: '800', fontSize: '15px', color: 'var(--primary)' }}>
             בניין {req.building} · דירה {req.apt}
-            <span style={{ marginRight: '8px', fontSize: '11px', background: req.request_type === 'replace_tenant' ? '#e8f4fd' : '#e8f9ee', color: req.request_type === 'replace_tenant' ? '#1a5c8c' : '#1a7a3a', padding: '2px 7px', borderRadius: '100px', fontWeight: '700' }}>
-              {req.request_type === 'replace_tenant' ? '🔄 החלפת שוכר' : '➕ שוכר חדש'}
+            <span style={{ marginRight: '8px', fontSize: '11px', background: al.bg, color: al.color, padding: '2px 7px', borderRadius: '100px', fontWeight: '700' }}>
+              {al.label}
             </span>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>{date}</div>
