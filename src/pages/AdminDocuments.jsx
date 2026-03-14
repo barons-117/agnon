@@ -30,7 +30,29 @@ export default function AdminDocuments() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [deleting, setDeleting] = useState(null)
+  const [editingDoc, setEditingDoc] = useState(null) // doc being edited
+  const [editForm, setEditForm] = useState({})
+  const [saving, setSaving] = useState(false)
+  const ef = k => e => setEditForm(x => ({ ...x, [k]: e.target.value }))
+
+  const startEdit = (doc) => {
+    setEditingDoc(doc.id)
+    setEditForm({ title: doc.title, publish_date: doc.publish_date, category: doc.category, building: doc.building })
+  }
+
+  const saveEdit = async () => {
+    if (!editForm.title.trim() || !editForm.publish_date) return
+    setSaving(true)
+    await supabase.from('documents').update({
+      title: editForm.title.trim(),
+      publish_date: editForm.publish_date,
+      category: editForm.category,
+      building: editForm.building,
+    }).eq('id', editingDoc)
+    setEditingDoc(null)
+    setSaving(false)
+    await load()
+  }
   const fileRef = useRef()
 
   const [form, setForm] = useState({
@@ -169,30 +191,78 @@ export default function AdminDocuments() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {docs.map(doc => (
           <div key={doc.id} style={{
-            background: 'white', border: '1px solid var(--border)', borderRadius: '10px',
-            padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px',
+            background: 'white', border: `1.5px solid ${editingDoc === doc.id ? '#c4d4f0' : 'var(--border)'}`,
+            borderRadius: '10px', overflow: 'hidden',
+            transition: 'border-color 0.15s',
           }}>
-            <div style={{ fontSize: '22px', flexShrink: 0 }}>
-              {{ vaad: '📣', protocol: '📋', meeting: '🤝', legal: '⚖️', general: '📄' }[doc.category] || '📄'}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--text)', marginBottom: '3px' }}>{doc.title}</div>
-              <div style={{ fontSize: '11px', color: 'var(--muted)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                <span>📅 {formatDate(doc.publish_date)}</span>
-                <span>{CATEGORIES[doc.category] || doc.category}</span>
-                <span>{doc.building === 'both' ? 'שני הבניינים' : `עגנון ${doc.building}`}</span>
+            {/* Row */}
+            <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ fontSize: '22px', flexShrink: 0 }}>
+                {{ vaad: '📣', protocol: '📋', meeting: '🤝', legal: '⚖️', general: '📄' }[doc.category] || '📄'}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--text)', marginBottom: '3px' }}>{doc.title}</div>
+                <div style={{ fontSize: '11px', color: 'var(--muted)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <span>📅 {formatDate(doc.publish_date)}</span>
+                  <span>{CATEGORIES[doc.category] || doc.category}</span>
+                  <span>{doc.building === 'both' ? 'שני הבניינים' : `עגנון ${doc.building}`}</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
+                  style={btn({ background: '#e4edf8', color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' })}>
+                  👁️
+                </a>
+                <button onClick={() => editingDoc === doc.id ? setEditingDoc(null) : startEdit(doc)}
+                  style={btn({ background: editingDoc === doc.id ? '#f0ede8' : '#fff8e0', color: editingDoc === doc.id ? 'var(--muted)' : '#b35c00' })}>
+                  {editingDoc === doc.id ? '✕' : '✏️'}
+                </button>
+                <button onClick={() => deleteDoc(doc)} disabled={deleting === doc.id}
+                  style={btn({ background: '#fdf0f0', color: '#e05555' })}>
+                  {deleting === doc.id ? '...' : '🗑️'}
+                </button>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-              <a href={doc.file_url} target="_blank" rel="noopener noreferrer"
-                style={btn({ background: '#e4edf8', color: 'var(--primary)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center' })}>
-                👁️
-              </a>
-              <button onClick={() => deleteDoc(doc)} disabled={deleting === doc.id}
-                style={btn({ background: '#fdf0f0', color: '#e05555' })}>
-                {deleting === doc.id ? '...' : '🗑️'}
-              </button>
-            </div>
+
+            {/* Inline edit form */}
+            {editingDoc === doc.id && (
+              <div style={{ background: '#f7f9ff', borderTop: '1px solid #c4d4f0', padding: '14px 16px' }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <span style={lbl}>כותרת</span>
+                  <input value={editForm.title} onChange={ef('title')} style={inp()} />
+                </div>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                  <div style={{ flex: 1, minWidth: '130px' }}>
+                    <span style={lbl}>תאריך פרסום</span>
+                    <input type="date" value={editForm.publish_date} onChange={ef('publish_date')} style={inp()} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: '130px' }}>
+                    <span style={lbl}>קטגוריה</span>
+                    <select value={editForm.category} onChange={ef('category')} style={{ ...inp(), cursor: 'pointer' }}>
+                      {Object.entries(CATEGORIES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ flex: 1, minWidth: '120px' }}>
+                    <span style={lbl}>בניין</span>
+                    <select value={editForm.building} onChange={ef('building')} style={{ ...inp(), cursor: 'pointer' }}>
+                      <option value="both">שני הבניינים</option>
+                      <option value="12">עגנון 12</option>
+                      <option value="14">עגנון 14</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={saveEdit} disabled={saving || !editForm.title.trim()}
+                    style={btn({ background: saving ? '#ccc' : '#1a7a3a', color: 'white', padding: '9px 20px', cursor: saving ? 'not-allowed' : 'pointer' })}>
+                    {saving ? 'שומר...' : '💾 שמור שינויים'}
+                  </button>
+                  <button onClick={() => setEditingDoc(null)}
+                    style={btn({ background: '#f0ede8', color: 'var(--muted)' })}>
+                    ביטול
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
