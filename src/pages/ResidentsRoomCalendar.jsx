@@ -48,7 +48,7 @@ export default function ResidentsRoomCalendar() {
           <button key={b}
             className={`pro-tab-btn${activeBuilding === b ? ' active' : ''}`}
             onClick={() => setActiveBuilding(b)}
-          >🏠 עגנון {b}</button>
+          >עגנון {b}</button>
         ))}
       </div>
 
