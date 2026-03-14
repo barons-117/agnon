@@ -2,9 +2,10 @@ export const navSections = [
   {
     label: 'ניהול',
     items: [
-      { id: 'vaad-notices', icon: '📣', label: 'הודעות וועד' },
-      { id: 'requests',     icon: '📝', label: 'פניות לחברת הניהול' },
-      { id: 'contacts',     icon: '📇', label: 'אנשי קשר' },
+      { id: 'vaad-notices',   icon: '📣', label: 'הודעות וועד' },
+      { id: 'documents',      icon: '📁', label: 'פרוטוקולים ומסמכים' },
+      { id: 'requests',       icon: '📝', label: 'פניות לחברת הניהול' },
+      { id: 'contacts',       icon: '📇', label: 'אנשי קשר' },
       { id: 'update-profile', icon: '✏️', label: 'עדכון פרטי שוכר' },
     ],
   },

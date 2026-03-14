@@ -10,6 +10,7 @@ import Pros from './pages/Pros.jsx'
 import ContactsPage from './pages/ContactsPage.jsx'
 import GeneralInfoPage from './pages/GeneralInfoPage.jsx'
 import UpdateProfile from './pages/UpdateProfile.jsx'
+import DocumentsPage from './pages/DocumentsPage.jsx'
 import { VaadNotices, Wifi, Cleaning } from './pages/BuildingPages.jsx'
 import { Parking } from './pages/InfoPages.jsx'
 
@@ -55,6 +56,7 @@ export default function App() {
     'emergency':        <Emergency />,
     'admin':            <Admin />,
     'update-profile':   <UpdateProfile />,
+    'documents':        <DocumentsPage />,
   }
 
   return (

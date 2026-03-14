@@ -6,6 +6,7 @@ import AdminNotices from './AdminNotices.jsx'
 import AdminPros from './AdminPros.jsx'
 import AdminApartments from './AdminApartments.jsx'
 import AdminProjects from './AdminProjects.jsx'
+import AdminDocuments from './AdminDocuments.jsx'
 import FileAttachment from '../components/FileAttachment.jsx'
 
 export default function Admin() {
@@ -150,6 +151,7 @@ export default function Admin() {
         <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>בעלי מקצוע</button>
         <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>דירות</button>
         <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>פרויקטים</button>
+        <button className={`admin-nav-btn${adminTab === 'documents' ? ' active' : ''}`} onClick={() => setAdminTab('documents')}>מסמכים</button>
       </div>
 
       {adminTab === 'rooms' && <RoomBookings />}
@@ -157,6 +159,7 @@ export default function Admin() {
       {adminTab === 'pros' && <AdminPros />}
       {adminTab === 'apartments' && <AdminApartments />}
       {adminTab === 'projects' && <AdminProjects />}
+      {adminTab === 'documents' && <AdminDocuments />}
 
 
       {adminTab === 'requests' && <>

@@ -74,7 +74,21 @@ export function VaadNotices() {
 
   return (
     <div className="card">
-      <div className="panel-title"><div className="icon">📣</div>הודעות וועד הבית</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '8px' }}>
+        <div className="panel-title" style={{ marginBottom: 0 }}><div className="icon">📣</div>הודעות וועד הבית</div>
+        <a href="#documents" style={{
+          display: 'inline-flex', alignItems: 'center', gap: '6px',
+          background: '#f0ede8', border: '1px solid var(--border)',
+          borderRadius: '100px', padding: '6px 14px',
+          fontSize: '12px', fontWeight: '700', color: 'var(--primary)',
+          textDecoration: 'none', transition: 'all 0.15s', whiteSpace: 'nowrap',
+        }}
+          onMouseEnter={e => e.currentTarget.style.background = '#e4edf8'}
+          onMouseLeave={e => e.currentTarget.style.background = '#f0ede8'}
+        >
+          📁 פרוטוקולים ומסמכים
+        </a>
+      </div>
 
       <div className="ctab-bar">
         {buildingTabs.map(tab => (
