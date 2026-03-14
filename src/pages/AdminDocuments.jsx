@@ -30,10 +30,25 @@ export default function AdminDocuments() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [editingDoc, setEditingDoc] = useState(null) // doc being edited
+  const [deleting, setDeleting] = useState(null)
+  const [editingDoc, setEditingDoc] = useState(null)
   const [editForm, setEditForm] = useState({})
   const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState({ title: '', publish_date: '', category: 'general', building: 'both' })
+  const [file, setFile] = useState(null)
+  const fileRef = useRef()
+
+  const f  = k => e => setForm(x => ({ ...x, [k]: e.target.value }))
   const ef = k => e => setEditForm(x => ({ ...x, [k]: e.target.value }))
+
+  useEffect(() => { load() }, [])
+
+  const load = async () => {
+    setLoading(true)
+    const { data } = await supabase.from('documents').select('*').order('publish_date', { ascending: false })
+    setDocs(data || [])
+    setLoading(false)
+  }
 
   const startEdit = (doc) => {
     setEditingDoc(doc.id)
@@ -52,22 +67,6 @@ export default function AdminDocuments() {
     setEditingDoc(null)
     setSaving(false)
     await load()
-  }
-  const fileRef = useRef()
-
-  const [form, setForm] = useState({
-    title: '', publish_date: '', category: 'general', building: 'both'
-  })
-  const [file, setFile] = useState(null)
-  const f = k => e => setForm(x => ({ ...x, [k]: e.target.value }))
-
-  useEffect(() => { load() }, [])
-
-  const load = async () => {
-    setLoading(true)
-    const { data } = await supabase.from('documents').select('*').order('publish_date', { ascending: false })
-    setDocs(data || [])
-    setLoading(false)
   }
 
   const upload = async () => {
