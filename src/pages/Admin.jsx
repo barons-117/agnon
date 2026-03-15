@@ -20,6 +20,9 @@ export default function Admin() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('new')
+
+  // Role: 'mgmt' = חברת הניהול (admin@agnon.net), 'admin' = מנהל מערכת (כולל הכל)
+  const userRole = session?.user?.email === 'admin@agnon.net' ? 'mgmt' : 'admin'
   const [search, setSearch] = useState('')
   const [buildingFilter, setBuildingFilter] = useState('all')
   const [noteEditing, setNoteEditing] = useState(null)
@@ -144,40 +147,42 @@ export default function Admin() {
         }}>יציאה</button>
       </div>
 
-      {/* Group selector */}
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
-        {[
-          { id: 'mgmt',  label: 'חברת הניהול', color: '#1a5c8c' },
-          { id: 'board', label: 'ועד הבית',     color: '#1a6b3a' },
-          { id: 'site',  label: 'ניהול אתר',    color: '#5c4a3a' },
-        ].map(g => (
-          <button key={g.id} onClick={() => {
-            setAdminGroup(g.id)
-            const firstTab = { mgmt: 'requests', board: 'notices', site: 'apartments' }[g.id]
-            setAdminTab(firstTab)
-          }} style={{
-            padding: '7px 16px', borderRadius: '100px', border: 'none', cursor: 'pointer',
-            fontFamily: 'Heebo, sans-serif', fontWeight: '700', fontSize: '13px',
-            background: adminGroup === g.id ? g.color : '#f0ede8',
-            color: adminGroup === g.id ? 'white' : 'var(--muted)',
-            transition: 'all 0.15s',
-          }}>{g.label}</button>
-        ))}
-      </div>
+      {/* Group selector — מוצג רק למנהל מערכת */}
+      {userRole === 'admin' && (
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          {[
+            { id: 'mgmt',  label: 'חברת הניהול', color: '#1a5c8c' },
+            { id: 'board', label: 'ועד הבית',     color: '#1a6b3a' },
+            { id: 'site',  label: 'ניהול אתר',    color: '#5c4a3a' },
+          ].map(g => (
+            <button key={g.id} onClick={() => {
+              setAdminGroup(g.id)
+              const firstTab = { mgmt: 'requests', board: 'notices', site: 'apartments' }[g.id]
+              setAdminTab(firstTab)
+            }} style={{
+              padding: '7px 16px', borderRadius: '100px', border: 'none', cursor: 'pointer',
+              fontFamily: 'Heebo, sans-serif', fontWeight: '700', fontSize: '13px',
+              background: adminGroup === g.id ? g.color : '#f0ede8',
+              color: adminGroup === g.id ? 'white' : 'var(--muted)',
+              transition: 'all 0.15s',
+            }}>{g.label}</button>
+          ))}
+        </div>
+      )}
 
       {/* Sub-tabs */}
       <div className="admin-nav" style={{ marginBottom: '18px' }}>
-        {adminGroup === 'mgmt' && <>
+        {(userRole === 'mgmt' || adminGroup === 'mgmt') && <>
           <button className={`admin-nav-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>פניות דיירים</button>
           <button className={`admin-nav-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>חדר דיירים</button>
         </>}
-        {adminGroup === 'board' && <>
+        {userRole === 'admin' && adminGroup === 'board' && <>
           <button className={`admin-nav-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>הודעות ועד</button>
           <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>בעלי מקצוע</button>
           <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>פרויקטים</button>
           <button className={`admin-nav-btn${adminTab === 'documents' ? ' active' : ''}`} onClick={() => setAdminTab('documents')}>מסמכים</button>
         </>}
-        {adminGroup === 'site' && <>
+        {userRole === 'admin' && adminGroup === 'site' && <>
           <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>ניהול דיירים</button>
         </>}
       </div>
