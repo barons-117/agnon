@@ -2,6 +2,19 @@ import React from 'react'
 import SecretField from '../components/SecretField.jsx'
 import FileAttachment from '../components/FileAttachment.jsx'
 
+// ממיר URLs בטקסט לקישורים לחיצים
+function linkify(text) {
+  if (!text) return null
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const parts = text.split(urlRegex)
+  return parts.map((part, i) =>
+    urlRegex.test(part)
+      ? <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+          style={{ color: 'var(--primary)', textDecoration: 'underline', wordBreak: 'break-all' }}>{part}</a>
+      : part
+  )
+}
+
 export function Boni() {
   return (
     <div className="card">
@@ -143,7 +156,7 @@ export function VaadNotices() {
           {/* Divider */}
           <div style={{height:'1px', background:'var(--border)', marginBottom:'10px'}}></div>
           {/* Content */}
-          <div style={{fontSize:'14px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line'}}>{n.text}</div>
+          <div style={{fontSize:'14px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line'}}>{linkify(n.text)}</div>
           <FileAttachment url={n.file_url} name={n.file_name} />
         </div>
       ))}

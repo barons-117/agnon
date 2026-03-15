@@ -3,6 +3,17 @@ import SearchBox from '../components/SearchBox.jsx'
 import { supabase } from '../lib/supabase.js'
 import FileAttachment from '../components/FileAttachment.jsx'
 
+function linkify(text) {
+  if (!text) return null
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const parts = text.split(urlRegex)
+  return parts.map((part, i) =>
+    urlRegex.test(part)
+      ? <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+          style={{ color: 'var(--primary)', textDecoration: 'underline', wordBreak: 'break-all' }}>{part}</a>
+      : part
+  )
+}
 function UrgentPopup({ notice, onClose }) {
   if (!notice) return null
   return (
@@ -38,7 +49,7 @@ function UrgentPopup({ notice, onClose }) {
         </div>
         <div style={{padding:'20px'}}>
           <div style={{fontWeight:'800', fontSize:'17px', color:'#c03030', marginBottom:'10px', lineHeight:'1.4'}}>{notice.title}</div>
-          <div style={{fontSize:'14px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line', marginBottom:'14px'}}>{notice.text}</div>
+          <div style={{fontSize:'14px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line', marginBottom:'14px'}}>{linkify(notice.text)}</div>
           {notice.file_url && <FileAttachment url={notice.file_url} name={notice.file_name} />}
           <div style={{fontSize:'11px', color:'var(--muted)', marginTop:'10px'}}>{notice.date}</div>
         </div>
@@ -157,7 +168,7 @@ function NoticesWidget({ onNavigate }) {
                   </div>
                 </div>
               </div>
-              <div style={{fontSize:'13px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line'}}>{n.text}</div>
+              <div style={{fontSize:'13px', lineHeight:'1.8', color:'var(--text)', whiteSpace:'pre-line'}}>{linkify(n.text)}</div>
               <FileAttachment url={n.file_url} name={n.file_name} />
             </div>
           </div>
