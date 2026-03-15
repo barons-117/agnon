@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
-import { sendDoneEmail } from '../lib/emailjs.js'
+import { sendDoneEmail, sendInProgressEmail } from '../lib/emailjs.js'
 import RoomBookings from './RoomBookings.jsx'
 import AdminNotices from './AdminNotices.jsx'
 import AdminPros from './AdminPros.jsx'
@@ -27,6 +27,8 @@ export default function Admin() {
   const [buildingFilter, setBuildingFilter] = useState('all')
   const [noteEditing, setNoteEditing] = useState(null)
   const [noteText, setNoteText] = useState('')
+  const [doneModal, setDoneModal] = useState(null)   // request being closed
+  const [resolution, setResolution] = useState('')   // פירוט טיפול
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
@@ -55,11 +57,26 @@ export default function Admin() {
 
   const setStatus = async (id, status) => {
     await supabase.from('requests').update({ status, done: status === 'done' }).eq('id', id)
-    if (status === 'done') {
+    if (status === 'inprogress') {
       const req = requests.find(r => r.id === id)
-      if (req) try { await sendDoneEmail(req) } catch(e) { console.warn(e) }
+      if (req) try { await sendInProgressEmail(req) } catch(e) { console.warn(e) }
     }
     setRequests(r => r.map(x => x.id === id ? { ...x, status, done: status === 'done' } : x))
+  }
+
+  const openDoneModal = (req) => {
+    setDoneModal(req)
+    setResolution('')
+  }
+
+  const confirmDone = async () => {
+    if (!doneModal) return
+    const res = resolution.trim()
+    await supabase.from('requests').update({ status: 'done', done: true, resolution: res || null }).eq('id', doneModal.id)
+    try { await sendDoneEmail(doneModal, res) } catch(e) { console.warn(e) }
+    setRequests(r => r.map(x => x.id === doneModal.id ? { ...x, status: 'done', done: true, resolution: res || null } : x))
+    setDoneModal(null)
+    setResolution('')
   }
 
   const saveNote = async (id) => {
@@ -305,6 +322,14 @@ export default function Admin() {
                     </div>
                   )}
 
+                  {/* Resolution — shown in done requests */}
+                  {r.resolution && (
+                    <div style={{marginTop:'8px', background:'#f0fbf4', border:'1px solid #bce8cc',
+                      borderRadius:'8px', padding:'8px 12px', fontSize:'13px', color:'#1a5c38', lineHeight:'1.6'}}>
+                      <span style={{fontWeight:'700'}}>סיכום טיפול: </span>{r.resolution}
+                    </div>
+                  )}
+
                   {/* Action buttons - below content on mobile */}
                   <div style={{display:'flex', gap:'8px', marginTop:'12px', flexWrap:'wrap'}}>
                     <button onClick={() => setStatus(r.id, 'inprogress')}
@@ -313,7 +338,7 @@ export default function Admin() {
                         border: r.status === 'inprogress' ? '1.5px solid #f5c97a' : '1px solid var(--border)'}}>
                       🔄 בטיפול
                     </button>
-                    <button onClick={() => setStatus(r.id, 'done')}
+                    <button onClick={() => openDoneModal(r)}
                       disabled={r.status === 'done'}
                       style={{...actionBtn, background: r.status === 'done' ? '#d6f0e4' : '#f7f5f1',
                         border: r.status === 'done' ? '1.5px solid #8ecfad' : '1px solid var(--border)'}}>
@@ -330,6 +355,64 @@ export default function Admin() {
           )
         })}
       </>}
+
+      {/* ── Done modal ── */}
+      {doneModal && (
+        <div style={{position:'fixed', inset:0, zIndex:500, background:'rgba(0,0,0,0.45)',
+          display:'flex', alignItems:'center', justifyContent:'center', padding:'20px'}}
+          onClick={() => setDoneModal(null)}>
+          <div style={{background:'white', borderRadius:'16px', width:'100%', maxWidth:'420px', overflow:'hidden'}}
+            onClick={e => e.stopPropagation()}>
+            <div style={{background:'#1a7a3a', padding:'16px 20px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+              <div style={{color:'white', fontWeight:'700', fontSize:'15px'}}>✓ סגירת פנייה</div>
+              <button onClick={() => setDoneModal(null)}
+                style={{background:'rgba(255,255,255,0.2)', border:'none', borderRadius:'8px',
+                  color:'white', padding:'4px 10px', cursor:'pointer', fontFamily:'Heebo, sans-serif'}}>✕</button>
+            </div>
+            <div style={{padding:'20px'}}>
+              <div style={{fontSize:'13px', color:'var(--muted)', marginBottom:'4px'}}>
+                פנייה #{doneModal.id} — {doneModal.name}
+              </div>
+              <div style={{fontSize:'13px', color:'var(--text)', background:'#f7f5f1',
+                borderRadius:'8px', padding:'10px 12px', marginBottom:'16px', lineHeight:'1.6'}}>
+                {doneModal.content}
+              </div>
+              <div style={{fontSize:'12px', fontWeight:'700', color:'var(--muted)', marginBottom:'6px'}}>
+                סיכום טיפול (יישלח למגיש הפנייה)
+              </div>
+              <textarea
+                value={resolution}
+                onChange={e => setResolution(e.target.value)}
+                placeholder="תאר בקצרה כיצד הפנייה טופלה... (רשות)"
+                rows={4}
+                style={{width:'100%', padding:'10px 12px', borderRadius:'10px',
+                  border:'1.5px solid var(--border)', fontSize:'14px',
+                  fontFamily:'Heebo, sans-serif', resize:'vertical',
+                  boxSizing:'border-box', marginBottom:'16px', lineHeight:'1.6'}}
+              />
+              <div style={{fontSize:'11px', color:'var(--muted)', marginBottom:'16px', lineHeight:'1.6'}}>
+                {doneModal.email
+                  ? <>ישלח מייל אוטומטי ל־<strong>{doneModal.email}</strong> עם פרטי הטיפול.</>
+                  : 'לא הוזנה כתובת מייל — לא יישלח מייל.'}
+              </div>
+              <div style={{display:'flex', gap:'10px'}}>
+                <button onClick={confirmDone}
+                  style={{flex:1, background:'#1a7a3a', color:'white', border:'none',
+                    borderRadius:'10px', padding:'12px', fontFamily:'Heebo, sans-serif',
+                    fontWeight:'700', fontSize:'14px', cursor:'pointer'}}>
+                  ✓ אשר וסגור פנייה
+                </button>
+                <button onClick={() => setDoneModal(null)}
+                  style={{background:'#f0ede8', color:'var(--muted)', border:'none',
+                    borderRadius:'10px', padding:'12px 16px', fontFamily:'Heebo, sans-serif',
+                    cursor:'pointer'}}>
+                  ביטול
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
