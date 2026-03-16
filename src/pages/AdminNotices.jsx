@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
 
-const EMPTY = { title: '', text: '', date: '', building: 'both', file_url: null, file_name: null, urgent: false }
+const EMPTY = { title: '', text: '', date: '', building: 'both', file_url: null, file_name: null, urgent: false, show_in_lobby: false }
 
 export default function AdminNotices() {
   const [notices, setNotices] = useState([])
@@ -66,7 +66,13 @@ export default function AdminNotices() {
       file_url: uploadedFile?.url || null,
       file_name: uploadedFile?.name || null,
       urgent: form.urgent || false,
+      show_in_lobby: form.show_in_lobby || false,
     }
+
+  const toggleLobby = async (n) => {
+    await supabase.from('notices').update({ show_in_lobby: !n.show_in_lobby }).eq('id', n.id)
+    setNotices(ns => ns.map(x => x.id === n.id ? { ...x, show_in_lobby: !n.show_in_lobby } : x))
+  }
     if (editingId) {
       await supabase.from('notices').update(payload).eq('id', editingId)
     } else {
@@ -137,7 +143,7 @@ export default function AdminNotices() {
           </div>
 
           {/* Urgent */}
-          <div style={{marginBottom:'14px'}}>
+          <div style={{marginBottom:'10px'}}>
             <label style={{
               display:'flex', alignItems:'center', gap:'12px', cursor:'pointer',
               background: form.urgent ? 'linear-gradient(135deg,#fff0f0,#ffe4e4)' : '#fafaf8',
@@ -153,6 +159,28 @@ export default function AdminNotices() {
                 </div>
                 <div style={{fontSize:'12px', color:'var(--muted)', marginTop:'2px'}}>
                   תופיע בראש הדף הבית עם הדגשה ופופאפ עם הכניסה לאתר
+                </div>
+              </div>
+            </label>
+          </div>
+
+          {/* Show in lobby */}
+          <div style={{marginBottom:'14px'}}>
+            <label style={{
+              display:'flex', alignItems:'center', gap:'12px', cursor:'pointer',
+              background: form.show_in_lobby ? 'linear-gradient(135deg,#f0f4ff,#e4edf8)' : '#fafaf8',
+              border: form.show_in_lobby ? '1.5px solid #a0b8f0' : '1.5px solid var(--border)',
+              borderRadius:'10px', padding:'12px 16px', transition:'all 0.2s',
+            }}>
+              <input type="checkbox" checked={form.show_in_lobby}
+                onChange={e => setForm(f=>({...f, show_in_lobby: e.target.checked}))}
+                style={{width:'18px', height:'18px', accentColor:'var(--primary)', cursor:'pointer'}} />
+              <div>
+                <div style={{fontWeight:'700', fontSize:'14px', color: form.show_in_lobby ? 'var(--primary)' : 'var(--text)'}}>
+                  📺 הצג במסך הלובי
+                </div>
+                <div style={{fontSize:'12px', color:'var(--muted)', marginTop:'2px'}}>
+                  ההודעה תופיע במסך שבלובי הבניין
                 </div>
               </div>
             </label>
@@ -220,6 +248,7 @@ export default function AdminNotices() {
             <div style={{flex:1}}>
               <div style={{display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap', marginBottom:'5px'}}>
                 {n.urgent && <span style={{fontSize:'11px', background:'#e05555', color:'white', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>🔴 דחוף</span>}
+                {n.show_in_lobby && <span style={{fontSize:'11px', background:'#1B3A5C', color:'white', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>📺 לובי</span>}
                 <span style={{fontWeight:'700', fontSize:'15px', color: n.urgent ? '#c03030' : 'var(--primary)'}}>{n.title}</span>
                 <span style={{fontSize:'11px', background:'#e4edf8', color:'#1a3a5c', padding:'2px 8px', borderRadius:'100px', fontWeight:'700'}}>{buildingLabel(n.building)}</span>
                 <span style={{fontSize:'12px', color:'var(--muted)'}}>{n.date}</span>
@@ -238,6 +267,11 @@ export default function AdminNotices() {
                 title={n.urgent ? 'בטל דחיפות' : 'סמן כדחוף'}
                 style={{background: n.urgent ? '#fde8e8' : '#f0ede8', border: n.urgent ? '1px solid #f0a0a0' : '1px solid var(--border)', borderRadius:'8px', padding:'7px 12px', cursor:'pointer', fontSize:'13px', fontFamily:'Heebo, sans-serif'}}>
                 {n.urgent ? '🔴' : '⚪'}
+              </button>
+              <button onClick={() => toggleLobby(n)}
+                title={n.show_in_lobby ? 'הסר מלובי' : 'הצג בלובי'}
+                style={{background: n.show_in_lobby ? '#1B3A5C' : '#f0ede8', border: n.show_in_lobby ? '1px solid #1B3A5C' : '1px solid var(--border)', borderRadius:'8px', padding:'7px 12px', cursor:'pointer', fontSize:'13px', fontFamily:'Heebo, sans-serif', color: n.show_in_lobby ? 'white' : 'inherit'}}>
+                📺
               </button>
               <button onClick={() => deleteNotice(n.id)} style={{background:'#fdf0f0', border:'none', borderRadius:'8px', padding:'7px 12px', cursor:'pointer', fontSize:'13px', fontFamily:'Heebo, sans-serif'}}>🗑️</button>
             </div>
