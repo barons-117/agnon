@@ -103,17 +103,13 @@ function NewsTicker() {
 
   const load = async () => {
     try {
-      // Use rss2json proxy to avoid CORS
-      const url = encodeURIComponent('https://www.ynet.co.il/Integration/StoryRss2.xml')
-      const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${url}&count=20`)
+      const r = await fetch(
+        'https://cwewsfuswiiliritikvh.supabase.co/functions/v1/ynet-rss',
+        { headers: { 'apikey': 'sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0' } }
+      )
       const j = await r.json()
-      if (j.items?.length) {
-        setHeadlines(j.items.map(i => i.title).filter(Boolean))
-      }
-    } catch(e) {
-      // fallback headlines
-      setHeadlines(['בטעינה...'])
-    }
+      if (j.titles?.length) setHeadlines(j.titles)
+    } catch(e) { console.warn('news ticker', e) }
   }
 
   useEffect(() => {
