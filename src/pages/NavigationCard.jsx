@@ -9,33 +9,31 @@ const GUEST_PARKING = '409 – 433 (קומת מינוס 4)'
 // ── מימדי התמונה המקורית ───────────────────────────────────
 const IMG_W = 1600, IMG_H = 1092
 
-// ── מיקום הטקסט על התמונה (% מרוחב/גובה) ─────────────────
-// Purple callout box:  X: 3%–35%, Y: 11%–27%
+// ── מיקום הטקסט על התמונה (% מימין/מלמעלה, fontSize ב-vw) ─
 const POSITIONS = {
-  buildingNum: { x: 58.5, y: 12.5, size: 5.2, color: 'white',  bold: true,  align: 'right' },
-  apt:         { x: 33.5, y: 15.5, size: 3.2, color: 'white',  bold: true,  align: 'right' },
-  floor:       { x: 33.5, y: 19.5, size: 3.2, color: 'white',  bold: true,  align: 'right' },
-  code:        { x: 33.5, y: 23.5, size: 3.2, color: 'white',  bold: true,  align: 'right' },
-  parking:     { x: 50,   y: 94,   size: 2.2, color: '#444',   bold: false, align: 'center' },
+  buildingNum: { x: 11,   y: 13,   size: 2.5, color: 'white', bold: true  },
+  apt:         { x: 31,   y: 15.5, size: 1.5, color: 'white', bold: true  },
+  floor:       { x: 31,   y: 19,   size: 1.5, color: 'white', bold: true  },
+  code:        { x: 31,   y: 22.5, size: 1.5, color: 'white', bold: true  },
+  parking:     { x: 25,   y: 93,   size: 1.0, color: '#555',  bold: false },
 }
 
-function TextOverlay({ pos, text, scale }) {
+function TextOverlay({ pos, text }) {
   if (!text) return null
   return (
     <div style={{
       position: 'absolute',
       right: `${pos.x}%`,
       top: `${pos.y}%`,
-      fontSize: `${pos.size * scale}px`,
+      fontSize: `${pos.size}vw`,
       color: pos.color,
       fontWeight: pos.bold ? '800' : '500',
       fontFamily: "'Heebo', sans-serif",
       whiteSpace: 'nowrap',
       lineHeight: 1,
       direction: 'rtl',
-      textAlign: pos.align,
       pointerEvents: 'none',
-      textShadow: pos.color === 'white' ? '0 1px 3px rgba(0,0,0,0.2)' : 'none',
+      textShadow: pos.color === 'white' ? '0 1px 3px rgba(0,0,0,0.3)' : 'none',
     }}>
       {text}
     </div>
@@ -50,18 +48,6 @@ export default function NavigationCard() {
   const [error, setError] = useState('')
   const [downloading, setDownloading] = useState(false)
   const cardRef = useRef()
-  const [containerW, setContainerW] = useState(0)
-
-  useEffect(() => {
-    const update = () => {
-      if (cardRef.current) setContainerW(cardRef.current.offsetWidth)
-    }
-    update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [aptData])
-
-  const scale = containerW / IMG_W
 
   const lookup = async () => {
     if (!building || !aptNum.trim()) return
@@ -152,25 +138,14 @@ export default function NavigationCard() {
               src={`/nav-${building}.png`}
               alt="מפת ניווט"
               style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }}
-              onLoad={() => { if (cardRef.current) setContainerW(cardRef.current.offsetWidth) }}
             />
 
-            {/* Building number after שי עגנון */}
-            <TextOverlay pos={POSITIONS.buildingNum} text={String(b)} scale={scale} />
-
-            {/* Apt */}
-            <TextOverlay pos={POSITIONS.apt} text={String(aptData.apt)} scale={scale} />
-
-            {/* Floor */}
-            <TextOverlay pos={POSITIONS.floor} text={String(aptData.floor)} scale={scale} />
-
-            {/* Code */}
-            <TextOverlay pos={POSITIONS.code} text={code} scale={scale} />
-
-            {/* Guest parking */}
+            <TextOverlay pos={POSITIONS.buildingNum} text={String(b)} />
+            <TextOverlay pos={POSITIONS.apt}         text={String(aptData.apt)} />
+            <TextOverlay pos={POSITIONS.floor}       text={String(aptData.floor)} />
+            <TextOverlay pos={POSITIONS.code}        text={code} />
             <TextOverlay pos={POSITIONS.parking}
-              text={`חניות אורחים בקומת מינוס 4 — מספרי חניות: 409–433`}
-              scale={scale} />
+              text="חניות אורחים בקומת מינוס 4 — מספרי חניות: 409–433" />
           </div>
 
           {/* Download button */}
