@@ -47,13 +47,25 @@ export default function NavigationCard() {
     try {
       const { default: html2canvas } = await import('html2canvas')
       const canvas = await html2canvas(cardRef.current, {
-        useCORS: true, scale: 2, backgroundColor: null,
-        logging: false,
+        useCORS: true, scale: 2, backgroundColor: null, logging: false,
       })
-      const link = document.createElement('a')
-      link.download = `כניסה-עגנון-${building}-דירה-${aptNum}.png`
-      link.href = canvas.toDataURL('image/png')
-      link.click()
+      const dataUrl = canvas.toDataURL('image/png')
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      if (isMobile) {
+        // On mobile — open in new tab, user long-presses to save
+        const win = window.open()
+        win.document.write(`
+          <html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh">
+            <p style="color:white;font-family:sans-serif;font-size:16px;margin-bottom:12px">לחץ לחיצה ארוכה על התמונה לשמירה לאלבום</p>
+            <img src="${dataUrl}" style="max-width:100%;height:auto" />
+          </body></html>
+        `)
+      } else {
+        const link = document.createElement('a')
+        link.download = `כניסה-עגנון-${building}-דירה-${aptNum}.png`
+        link.href = dataUrl
+        link.click()
+      }
     } catch(e) { console.error(e) }
     setDownloading(false)
   }
@@ -173,7 +185,7 @@ export default function NavigationCard() {
               fontFamily: 'Heebo, sans-serif', fontWeight: '700', fontSize: '15px',
               cursor: downloading ? 'not-allowed' : 'pointer', opacity: downloading ? 0.7 : 1,
             }}>
-              {downloading ? 'מכין...' : '📥 הורד תמונה'}
+              {downloading ? 'מכין...' : '📥 שמור תמונה'}
             </button>
             <button onClick={() => { setAptData(null); setAptNum('') }} style={{
               background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
@@ -182,7 +194,7 @@ export default function NavigationCard() {
             }}>← חפש דירה אחרת</button>
           </div>
           <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '8px' }}>
-            💡 ניתן לשתף את התמונה ישירות מהגלריה לאחר ההורדה
+            💡 במכשיר נייד — לחץ "שמור תמונה" ואז לחיצה ארוכה על התמונה לשמירה לאלבום
           </div>
         </div>
       )}
