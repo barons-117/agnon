@@ -1,7 +1,7 @@
 // src/lib/email.js — שליחת מיילים דרך Supabase Edge Function + Resend
 
 const EDGE_URL = 'https://cwewsfuswiiliritikvh.supabase.co/functions/v1/send-email'
-const ANON_KEY = 'sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0' // ← להחליף עם המפתח האמיתי מ-Supabase
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3ZXdzZnVzd2lpbGlyaXRpa3ZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMwNDI0NzksImV4cCI6MjA4ODYxODQ3OX0.zr1tSyeqEI4NsOIE5YT1f6MC5jlLIbWKxrLYXh5Qa4o' // ← להחליף עם המפתח האמיתי מ-Supabase
 
 async function sendEmail(to, subject, html) {
   if (!to) return
