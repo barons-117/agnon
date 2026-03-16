@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase.js'
-import { sendNewRequestEmail } from '../lib/emailjs.js'
+import { sendNewRequestEmail } from '../lib/email.js'
 
 export default function Requests() {
   const [form, setForm] = useState({

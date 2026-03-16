@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase.js'
-import { sendDoneEmail, sendInProgressEmail } from '../lib/emailjs.js'
+import { sendDoneEmail, sendInProgressEmail } from '../lib/email.js'
 import RoomBookings from './RoomBookings.jsx'
 import AdminNotices from './AdminNotices.jsx'
 import AdminPros from './AdminPros.jsx'
