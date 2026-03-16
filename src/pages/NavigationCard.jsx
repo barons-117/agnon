@@ -133,7 +133,14 @@ export default function NavigationCard() {
       {/* Card preview */}
       {aptData && (
         <div style={{ maxWidth: '700px', marginTop: '24px' }}>
-          <div ref={cardRef} style={{ position: 'relative', width: '100%', lineHeight: 0 }}>
+          <div ref={cardRef} style={{ position: 'relative', width: '100%', lineHeight: 0 }}
+            onClick={e => {
+              const rect = e.currentTarget.getBoundingClientRect()
+              const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1)
+              const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1)
+              alert(`left: ${x}%  top: ${y}%`)
+            }}
+          >
             <img src={`${import.meta.env.BASE_URL}nav-${building}.png`} alt="מפת ניווט"
               style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }}
             />
