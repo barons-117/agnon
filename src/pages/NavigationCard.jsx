@@ -49,23 +49,19 @@ export default function NavigationCard() {
       const canvas = await html2canvas(cardRef.current, {
         useCORS: true, scale: 2, backgroundColor: null, logging: false,
       })
-      const dataUrl = canvas.toDataURL('image/png')
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-      if (isMobile) {
-        // On mobile — open in new tab, user long-presses to save
-        const win = window.open()
-        win.document.write(`
-          <html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh">
-            <p style="color:white;font-family:sans-serif;font-size:16px;margin-bottom:12px">לחץ לחיצה ארוכה על התמונה לשמירה לאלבום</p>
-            <img src="${dataUrl}" style="max-width:100%;height:auto" />
-          </body></html>
-        `)
-      } else {
-        const link = document.createElement('a')
-        link.download = `כניסה-עגנון-${building}-דירה-${aptNum}.png`
-        link.href = dataUrl
-        link.click()
-      }
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob)
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+        if (isMobile) {
+          window.location.href = url
+        } else {
+          const link = document.createElement('a')
+          link.download = `כניסה-עגנון-${building}-דירה-${aptNum}.png`
+          link.href = url
+          link.click()
+        }
+        setTimeout(() => URL.revokeObjectURL(url), 5000)
+      }, 'image/png')
     } catch(e) { console.error(e) }
     setDownloading(false)
   }
