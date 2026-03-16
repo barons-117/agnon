@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase.js'
 
 const REFRESH_INTERVAL  = 5 * 60 * 1000
+const MEDIA_POLL        = 30 * 1000         // בדיקת מדיה חדשה כל 30 שניות
 const NEWS_INTERVAL     = 30 * 60 * 1000   // refresh news every 30 min
 const WEATHER_INTERVAL  = 15 * 60 * 1000
 const TICKER_SPEED      = 80               // px/sec — higher = faster
@@ -185,11 +186,16 @@ function MediaRotator({ building }) {
       const { data } = await supabase.from('lobby_media')
         .select('*').eq('building', building).eq('active', true)
         .order('sort_order').order('created_at')
-      setMedia(data || [])
-      setIdx(0)
+      const newMedia = data || []
+      setMedia(prev => {
+        const prevIds = prev.map(x => x.id).join(',')
+        const newIds  = newMedia.map(x => x.id).join(',')
+        if (prevIds !== newIds) setIdx(0)  // reset only if list changed
+        return newMedia
+      })
     }
     load()
-    const t = setInterval(load, REFRESH_INTERVAL)
+    const t = setInterval(load, MEDIA_POLL)
     return () => clearInterval(t)
   }, [building])
 
