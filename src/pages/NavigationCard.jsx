@@ -74,7 +74,7 @@ export default function NavigationCard() {
     buildingTitle: Math.round(48 * scale),  // "שי עגנון 12"
     purpleLine:    Math.round(26 * scale),  // דירה/קומה/קוד labels
     purpleVal:     Math.round(30 * scale),  // values
-    parking:       Math.round(30 * scale),  // parking text
+    parking:       Math.round(20 * scale),  // parking text
   }
 
   const txt = (top, left, text, fontSize, color = 'white', bold = true, align = 'center') => (
@@ -172,7 +172,7 @@ export default function NavigationCard() {
 
             {/* Bottom purple box — two lines */}
             <div style={{
-              position: 'absolute', top: '91%', left: '75.5%',
+              position: 'absolute', top: '93%', left: '75.5%',
               transform: 'translate(-50%, -50%)',
               textAlign: 'center', fontFamily: "'Heebo', sans-serif",
               pointerEvents: 'none', direction: 'rtl', lineHeight: 1.25,
