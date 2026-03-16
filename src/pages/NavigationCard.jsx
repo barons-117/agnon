@@ -133,20 +133,29 @@ export default function NavigationCard() {
       {/* Card preview */}
       {aptData && (
         <div style={{ maxWidth: '700px', marginTop: '24px' }}>
-          <div ref={cardRef} style={{ position: 'relative', width: '100%', lineHeight: 0 }}
-            onClick={e => {
-              const rect = e.currentTarget.getBoundingClientRect()
-              const x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1)
-              const y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1)
-              alert(`left: ${x}%  top: ${y}%`)
-            }}
-          >
+          <div ref={cardRef} style={{ position: 'relative', width: '100%', lineHeight: 0 }}>
             <img src={`${import.meta.env.BASE_URL}nav-${building}.png`} alt="מפת ניווט"
               style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }}
             />
 
-            {/* Blue box: "שי עגנון 12" */}
-            {txt(26, 66, `שי עגנון ${b}`, fs.buildingTitle, 'white', true)}
+            {/* Blue box: שתי שורות — שי עגנון + קרית אונו */}
+            <div style={{
+              position: 'absolute',
+              top: '23%', left: '45.9%',
+              transform: 'translate(-50%, -50%)',
+              textAlign: 'center',
+              fontFamily: "'Heebo', sans-serif",
+              pointerEvents: 'none',
+              direction: 'rtl',
+              lineHeight: 1.2,
+            }}>
+              <div style={{ fontSize: `${fs.buildingTitle}px`, fontWeight: '800', color: 'white' }}>
+                שי עגנון {b}
+              </div>
+              <div style={{ fontSize: `${Math.round(fs.buildingTitle * 0.55)}px`, fontWeight: '500', color: 'rgba(255,255,255,0.85)' }}>
+                קריית אונו
+              </div>
+            </div>
 
             {/* Purple box lines */}
             {txt(19.0, 30.3, `דירה ${aptData.apt}`, fs.purpleLine, 'white', true)}
@@ -154,7 +163,7 @@ export default function NavigationCard() {
             {txt(26.3, 30.3, `קוד כניסה: ${code}`, fs.purpleLine, 'white', true)}
 
             {/* Bottom purple box */}
-            {txt(93.3, 75.5, `חניות אורחים 409–433 | מינוס 4`, fs.parking, 'white', true)}
+            {txt(93.3, 75.5, `חניות אורחים 409–433 | קומה מינוס 4 בחניון הבניין`, fs.parking, 'white', true)}
           </div>
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
