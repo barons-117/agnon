@@ -1,13 +1,17 @@
 // src/lib/email.js — שליחת מיילים דרך Supabase Edge Function + Resend
 
 const EDGE_URL = 'https://cwewsfuswiiliritikvh.supabase.co/functions/v1/send-email'
-const ANON_KEY = 'sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0'
+const ANON_KEY = 'sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0' // ← להחליף עם המפתח האמיתי מ-Supabase
 
 async function sendEmail(to, subject, html) {
   if (!to) return
   const r = await fetch(EDGE_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY },
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': ANON_KEY,
+      'Authorization': `Bearer ${ANON_KEY}`, // ← זה מה שחסר!
+    },
     body: JSON.stringify({ to, subject, html }),
   })
   if (!r.ok) console.warn('email error', await r.text())
