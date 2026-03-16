@@ -105,11 +105,20 @@ function NewsTicker() {
     try {
       const r = await fetch(
         'https://cwewsfuswiiliritikvh.supabase.co/functions/v1/ynet-rss',
-        { headers: { 'apikey': 'sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0' } }
+        {
+          headers: {
+            'apikey': 'sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0',
+            'Authorization': 'Bearer sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0',
+          }
+        }
       )
       const j = await r.json()
       if (j.titles?.length) setHeadlines(j.titles)
-    } catch(e) { console.warn('news ticker', e) }
+      else setHeadlines(['טוען חדשות...'])
+    } catch(e) {
+      console.warn('news ticker', e)
+      setHeadlines(['חדשות ynet'])
+    }
   }
 
   useEffect(() => {
@@ -140,7 +149,7 @@ function NewsTicker() {
       </div>
 
       {/* Scrolling text */}
-      <div style={{ flex: 1, overflow: 'hidden', direction: 'rtl', position: 'relative' }}>
+      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         {headlines.length > 0 && (
           <div style={{
             display: 'inline-block',
@@ -148,18 +157,22 @@ function NewsTicker() {
             color: 'rgba(255,255,255,0.9)',
             fontSize: '0.85rem',
             fontWeight: '500',
-            animation: `tickerScroll ${headlines.join(' · ').length * 0.12}s linear infinite`,
-            paddingLeft: '100%',
+            animation: `tickerScroll ${Math.max(headlines.join(' · ').length * 0.1, 20)}s linear infinite`,
           }}>
-            {text}{text}
+            &nbsp;&nbsp;&nbsp;{text}{text}
+          </div>
+        )}
+        {headlines.length === 0 && (
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem', paddingRight: '16px' }}>
+            טוען...
           </div>
         )}
       </div>
 
       <style>{`
         @keyframes tickerScroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          0%   { transform: translateX(100vw); }
+          100% { transform: translateX(-100%); }
         }
       `}</style>
     </div>
