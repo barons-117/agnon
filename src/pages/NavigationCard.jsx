@@ -168,10 +168,18 @@ export default function NavigationCard() {
             {/* Purple box lines */}
             {txt(19.0, 30.3, `דירה ${aptData.apt}`, fs.purpleLine, 'white', true)}
             {txt(22.6, 30.3, `קומה ${aptData.floor}`, fs.purpleLine, 'white', true)}
-            {txt(26.3, 30.3, `קוד כניסה: ${code}`, fs.purpleLine, 'white', true)}
+            {txt(26.3, 30.3, `קוד כניסה ${code}`, fs.purpleLine, 'white', true)}
 
-            {/* Bottom purple box */}
-            {txt(93.3, 75.5, `חניות אורחים 409–433 | קומה מינוס 4 בחניון הבניין`, fs.parking, 'white', true)}
+            {/* Bottom purple box — two lines */}
+            <div style={{
+              position: 'absolute', top: '91%', left: '75.5%',
+              transform: 'translate(-50%, -50%)',
+              textAlign: 'center', fontFamily: "'Heebo', sans-serif",
+              pointerEvents: 'none', direction: 'rtl', lineHeight: 1.25,
+            }}>
+              <div style={{ fontSize: `${fs.parking}px`, fontWeight: '800', color: 'white' }}>חניות אורחים 409–433</div>
+              <div style={{ fontSize: `${fs.parking}px`, fontWeight: '800', color: 'white' }}>קומה מינוס 4 בחניון הבניין</div>
+            </div>
           </div>
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
@@ -189,8 +197,9 @@ export default function NavigationCard() {
               fontFamily: 'Heebo, sans-serif', fontSize: '13px', cursor: 'pointer',
             }}>← חפש דירה אחרת</button>
           </div>
-          <div style={{ fontSize: '12px', color: 'var(--muted)', marginTop: '8px' }}>
-            💡 במכשיר נייד — לחץ "שמור תמונה" ואז לחיצה ארוכה על התמונה לשמירה לאלבום
+          <div style={{ fontSize: '13px', color: 'var(--muted)', marginTop: '10px', lineHeight: 1.7,
+            background: '#f7f5f1', borderRadius: '10px', padding: '10px 14px' }}>
+            📱 <strong>ממכשיר נייד:</strong> לחץ "שמור תמונה" — התמונה תיפתח בדפדפן. לחץ לחיצה ארוכה עליה ובחר <strong>"שמור תמונה"</strong> כדי להוסיף לאלבום.
           </div>
         </div>
       )}
