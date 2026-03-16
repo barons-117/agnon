@@ -151,7 +151,7 @@ function NewsTicker() {
             color: 'rgba(255,255,255,0.9)',
             fontSize: '0.85rem',
             fontWeight: '500',
-            animation: `tickerScroll ${Math.max(headlines.join(' · ').length * 0.1, 20)}s linear infinite`,
+            animation: `tickerScroll ${Math.max(headlines.join(' · ').length * 0.18, 30)}s linear infinite`,
           }}>
             &nbsp;&nbsp;&nbsp;{text}{text}
           </div>
@@ -165,8 +165,8 @@ function NewsTicker() {
 
       <style>{`
         @keyframes tickerScroll {
-          0%   { transform: translateX(100vw); }
-          100% { transform: translateX(-100%); }
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(100vw); }
         }
       `}</style>
     </div>
