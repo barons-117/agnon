@@ -1,108 +1,98 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase.js'
 
-// ── Media items: video + images from Supabase storage ──────
-// You can add more images by uploading to the 'lobby' bucket
-const LOBBY_MEDIA = {
-  12: [
-    { type: 'video', src: '/building.mp4' },          // replace with actual video
-    { type: 'image', src: '/building.png', duration: 8000 },
-    // add more images here
-  ],
-  14: [
-    { type: 'video', src: '/building.mp4' },
-    { type: 'image', src: '/building.png', duration: 8000 },
-  ],
-}
+const REFRESH_INTERVAL = 5 * 60 * 1000
 
-const REFRESH_INTERVAL = 5 * 60 * 1000   // refresh data every 5 min
-const IMAGE_DURATION   = 8000            // 8 seconds per image
-const VIDEO_FALLBACK   = 15000           // fallback if video has no duration
-
-// ── Helpers ─────────────────────────────────────────────────
 const HE_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת']
 const HE_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר']
 
-function formatClock(d) {
-  return d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-}
-function formatDate(d) {
-  return `יום ${HE_DAYS[d.getDay()]}, ${d.getDate()} ב${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`
-}
-
-// ── Clock component ──────────────────────────────────────────
+// ── Clock ────────────────────────────────────────────────────
 function Clock() {
   const [now, setNow] = useState(new Date())
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
+  const timeStr = now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  const dateStr = `יום ${HE_DAYS[now.getDay()]}, ${now.getDate()} ב${HE_MONTHS[now.getMonth()]} ${now.getFullYear()}`
   return (
     <div style={{ textAlign: 'center', color: 'white' }}>
       <div style={{
-        fontSize: 'clamp(4rem, 8vw, 7rem)',
-        fontFamily: "'Heebo', sans-serif",
-        fontWeight: '900',
-        lineHeight: 1,
-        letterSpacing: '-2px',
+        fontSize: 'clamp(3.5rem, 7vw, 6rem)',
+        fontFamily: "'Heebo', sans-serif", fontWeight: '900',
+        lineHeight: 1, letterSpacing: '-2px',
         background: 'linear-gradient(135deg, #ffffff 0%, #a8d8f0 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
+        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
         filter: 'drop-shadow(0 0 30px rgba(168,216,240,0.4))',
-      }}>
-        {formatClock(now)}
-      </div>
+      }}>{timeStr}</div>
       <div style={{
-        fontSize: 'clamp(1rem, 2vw, 1.5rem)',
-        fontFamily: "'Heebo', sans-serif",
-        fontWeight: '400',
-        color: 'rgba(255,255,255,0.7)',
-        marginTop: '8px',
-        letterSpacing: '0.5px',
-      }}>
-        {formatDate(now)}
-      </div>
+        fontSize: 'clamp(0.85rem, 1.5vw, 1.2rem)',
+        fontFamily: "'Heebo', sans-serif", fontWeight: '400',
+        color: 'rgba(255,255,255,0.65)', marginTop: '6px', letterSpacing: '0.5px',
+      }}>{dateStr}</div>
     </div>
   )
 }
 
-// ── Media rotator ────────────────────────────────────────────
+// ── Media rotator — loads from Supabase ──────────────────────
 function MediaRotator({ building }) {
-  const media = LOBBY_MEDIA[building] || LOBBY_MEDIA[12]
+  const [media, setMedia] = useState([])
   const [idx, setIdx] = useState(0)
   const [visible, setVisible] = useState(true)
   const videoRef = useRef()
   const timerRef = useRef()
 
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from('lobby_media')
+        .select('*').eq('building', building).eq('active', true)
+        .order('sort_order').order('created_at')
+      setMedia(data || [])
+      setIdx(0)
+    }
+    load()
+    const t = setInterval(load, REFRESH_INTERVAL)
+    return () => clearInterval(t)
+  }, [building])
+
   const advance = () => {
     setVisible(false)
     setTimeout(() => {
-      setIdx(i => (i + 1) % media.length)
+      setIdx(i => (i + 1) % Math.max(media.length, 1))
       setVisible(true)
-    }, 600)
+    }, 700)
   }
 
   useEffect(() => {
+    clearTimeout(timerRef.current)
+    if (!media.length) return
     const item = media[idx]
-    if (item.type === 'image') {
-      timerRef.current = setTimeout(advance, item.duration || IMAGE_DURATION)
+    if (item?.type === 'image') {
+      timerRef.current = setTimeout(advance, (item.duration || 8) * 1000)
     }
     return () => clearTimeout(timerRef.current)
-  }, [idx])
+  }, [idx, media])
+
+  if (!media.length) return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
+      <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '1.2rem', textAlign: 'center' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🖼️</div>
+        אין מדיה — הוסף מממשק הניהול
+      </div>
+    </div>
+  )
 
   const item = media[idx]
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden', borderRadius: '16px' }}>
-      <div style={{
-        position: 'absolute', inset: 0,
-        opacity: visible ? 1 : 0,
-        transition: 'opacity 0.6s ease',
-      }}>
+      <div style={{ position: 'absolute', inset: 0, opacity: visible ? 1 : 0, transition: 'opacity 0.7s ease' }}>
         {item.type === 'video' ? (
           <video
             ref={videoRef}
-            src={item.src}
+            key={item.file_url}
+            src={item.file_url}
             autoPlay muted playsInline
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onEnded={advance}
@@ -110,7 +100,8 @@ function MediaRotator({ building }) {
           />
         ) : (
           <img
-            src={item.src}
+            key={item.file_url}
+            src={item.file_url}
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
@@ -118,15 +109,28 @@ function MediaRotator({ building }) {
       </div>
 
       {/* Dot indicator */}
-      <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
-        {media.map((_, i) => (
-          <div key={i} style={{
-            width: i === idx ? '20px' : '6px', height: '6px',
-            borderRadius: '3px', background: i === idx ? 'white' : 'rgba(255,255,255,0.4)',
-            transition: 'all 0.3s ease',
-          }} />
-        ))}
-      </div>
+      {media.length > 1 && (
+        <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', gap: '6px', zIndex: 2 }}>
+          {media.map((_, i) => (
+            <div key={i} style={{
+              width: i === idx ? '20px' : '6px', height: '6px', borderRadius: '3px',
+              background: i === idx ? 'white' : 'rgba(255,255,255,0.35)',
+              transition: 'all 0.3s ease',
+            }} />
+          ))}
+        </div>
+      )}
+
+      {/* Type badge */}
+      {item.type === 'video' && (
+        <div style={{ position: 'absolute', top: '14px', right: '14px',
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)',
+          borderRadius: '8px', padding: '4px 10px', fontSize: '11px',
+          color: 'rgba(255,255,255,0.7)', fontFamily: 'Heebo, sans-serif' }}>
+          ▶ וידאו
+        </div>
+      )}
     </div>
   )
 }
@@ -139,11 +143,9 @@ function NoticesPanel({ building }) {
 
   const load = async () => {
     const { data } = await supabase.from('notices')
-      .select('*')
-      .eq('show_in_lobby', true)
+      .select('*').eq('show_in_lobby', true)
       .in('building', [String(building), 'both'])
-      .order('date', { ascending: false })
-      .limit(8)
+      .order('date', { ascending: false }).limit(8)
     setNotices(data || [])
   }
 
@@ -153,22 +155,19 @@ function NoticesPanel({ building }) {
     return () => clearInterval(t)
   }, [building])
 
-  // rotate notices every 12 seconds
   useEffect(() => {
     if (notices.length <= 1) return
     const t = setInterval(() => {
       setFade(false)
-      setTimeout(() => {
-        setNoticeIdx(i => (i + 1) % notices.length)
-        setFade(true)
-      }, 400)
+      setTimeout(() => { setNoticeIdx(i => (i + 1) % notices.length); setFade(true) }, 400)
     }, 12000)
     return () => clearInterval(t)
   }, [notices])
 
   if (notices.length === 0) return (
     <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '1rem', textAlign: 'center' }}>
+      <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.9rem', textAlign: 'center' }}>
+        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>📋</div>
         אין הודעות לתצוגה
       </div>
     </div>
@@ -178,66 +177,39 @@ function NoticesPanel({ building }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '10px',
-        marginBottom: '20px', paddingBottom: '16px',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-      }}>
-        <div style={{
-          width: '8px', height: '8px', borderRadius: '50%',
-          background: '#4ade80',
-          boxShadow: '0 0 10px #4ade80',
-          animation: 'pulse 2s infinite',
-        }} />
-        <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase' }}>
-          הודעות ועד
-        </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px',
+        paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80',
+          boxShadow: '0 0 10px #4ade80', animation: 'pulse 2s infinite' }} />
+        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.75rem', fontWeight: '700',
+          letterSpacing: '2px', textTransform: 'uppercase' }}>הודעות ועד</span>
         {notices.length > 1 && (
-          <span style={{ marginRight: 'auto', color: 'rgba(255,255,255,0.3)', fontSize: '0.75rem' }}>
-            {noticeIdx + 1}/{notices.length}
+          <span style={{ marginRight: 'auto', color: 'rgba(255,255,255,0.25)', fontSize: '0.75rem' }}>
+            {noticeIdx + 1} / {notices.length}
           </span>
         )}
       </div>
 
-      {/* Notice content */}
+      {/* Content */}
       <div style={{ flex: 1, opacity: fade ? 1 : 0, transition: 'opacity 0.4s ease', overflow: 'hidden' }}>
-        <div style={{
-          fontSize: 'clamp(1rem, 1.8vw, 1.4rem)',
-          fontWeight: '700', color: 'white', lineHeight: 1.4,
-          marginBottom: '16px',
-        }}>
-          {n.title}
-        </div>
-        <div style={{
-          fontSize: 'clamp(0.8rem, 1.3vw, 1.05rem)',
-          color: 'rgba(255,255,255,0.75)',
-          lineHeight: 1.8,
-          whiteSpace: 'pre-line',
-          overflow: 'hidden',
-          display: '-webkit-box',
-          WebkitLineClamp: 10,
-          WebkitBoxOrient: 'vertical',
-        }}>
-          {n.text}
-        </div>
-        <div style={{
-          marginTop: '20px',
-          fontSize: '0.75rem',
-          color: 'rgba(255,255,255,0.3)',
-          letterSpacing: '1px',
-        }}>
+        <div style={{ fontSize: 'clamp(1rem, 1.8vw, 1.35rem)', fontWeight: '700', color: 'white',
+          lineHeight: 1.4, marginBottom: '14px' }}>{n.title}</div>
+        <div style={{ fontSize: 'clamp(0.8rem, 1.2vw, 1rem)', color: 'rgba(255,255,255,0.7)',
+          lineHeight: 1.9, whiteSpace: 'pre-line',
+          overflow: 'hidden', display: '-webkit-box',
+          WebkitLineClamp: 9, WebkitBoxOrient: 'vertical' }}>{n.text}</div>
+        <div style={{ marginTop: '18px', fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '1px' }}>
           {n.date}
         </div>
       </div>
 
       {/* Progress dots */}
       {notices.length > 1 && (
-        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '16px' }}>
+        <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', marginTop: '14px' }}>
           {notices.map((_, i) => (
             <div key={i} style={{
-              width: i === noticeIdx ? '20px' : '6px', height: '6px',
-              borderRadius: '3px',
-              background: i === noticeIdx ? '#4ade80' : 'rgba(255,255,255,0.2)',
+              width: i === noticeIdx ? '20px' : '6px', height: '5px', borderRadius: '3px',
+              background: i === noticeIdx ? '#4ade80' : 'rgba(255,255,255,0.15)',
               transition: 'all 0.4s ease',
             }} />
           ))}
@@ -249,7 +221,6 @@ function NoticesPanel({ building }) {
 
 // ── Main LobbyDisplay ────────────────────────────────────────
 export default function LobbyDisplay({ building = 12 }) {
-  // Auto-refresh page every 5 min
   useEffect(() => {
     const t = setTimeout(() => window.location.reload(), REFRESH_INTERVAL)
     return () => clearTimeout(t)
@@ -258,43 +229,45 @@ export default function LobbyDisplay({ building = 12 }) {
   return (
     <div style={{
       width: '100vw', height: '100vh',
-      background: '#0a0e1a',
-      backgroundImage: 'radial-gradient(ellipse at 20% 50%, rgba(26,58,92,0.4) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(26,92,58,0.2) 0%, transparent 50%)',
+      background: '#080c18',
+      backgroundImage: `
+        radial-gradient(ellipse at 15% 50%, rgba(27,58,92,0.45) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%, rgba(27,92,58,0.2) 0%, transparent 50%)
+      `,
       display: 'flex', flexDirection: 'column',
       fontFamily: "'Heebo', sans-serif",
-      overflow: 'hidden',
-      position: 'relative',
+      overflow: 'hidden', position: 'relative',
+      direction: 'rtl',
     }}>
-      {/* Subtle grid overlay */}
+      {/* Grid overlay */}
       <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)',
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px)`,
         backgroundSize: '60px 60px',
-        zIndex: 0,
       }} />
 
-      {/* ── TOP HEADER ── */}
+      {/* ── HEADER ── */}
       <div style={{
         position: 'relative', zIndex: 1,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '28px 48px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '24px 48px 18px',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        flexShrink: 0,
       }}>
-        {/* Building identity */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Building ID */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: '180px' }}>
           <div style={{
-            width: '48px', height: '48px', borderRadius: '12px',
+            width: '44px', height: '44px', borderRadius: '12px',
             background: 'linear-gradient(135deg, #1B3A5C, #2563EB)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '22px',
-          }}>
-            🏢
-          </div>
+            fontSize: '20px', boxShadow: '0 4px 20px rgba(37,99,235,0.3)',
+          }}>🏢</div>
           <div>
-            <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
+            <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'white', lineHeight: 1 }}>
               שי עגנון {building}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '3px', letterSpacing: '1px' }}>
+            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', marginTop: '3px', letterSpacing: '1px' }}>
               קריית אונו
             </div>
           </div>
@@ -303,55 +276,49 @@ export default function LobbyDisplay({ building = 12 }) {
         {/* Clock — center */}
         <Clock />
 
-        {/* Logo/space right */}
-        <div style={{ width: '140px', display: 'flex', justifyContent: 'flex-end' }}>
+        {/* Right placeholder */}
+        <div style={{ minWidth: '180px', display: 'flex', justifyContent: 'flex-end' }}>
           <div style={{
-            fontSize: '0.7rem', color: 'rgba(255,255,255,0.2)',
-            letterSpacing: '2px', textTransform: 'uppercase',
-            textAlign: 'right',
+            fontSize: '0.65rem', color: 'rgba(255,255,255,0.15)',
+            letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'left',
           }}>
-            ועד בית<br/>שי עגנון {building}
+            ועד בית<br />שי עגנון {building}
           </div>
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* ── BODY ── */}
       <div style={{
         flex: 1, zIndex: 1,
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr',
-        gap: '20px',
-        padding: '20px 48px 28px',
+        display: 'grid', gridTemplateColumns: '2fr 1fr',
+        gap: '16px', padding: '16px 48px 28px',
         minHeight: 0,
       }}>
-        {/* Left 2/3 — media */}
+        {/* Media */}
         <div style={{
-          borderRadius: '16px',
-          overflow: 'hidden',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: '16px', overflow: 'hidden',
+          border: '1px solid rgba(255,255,255,0.05)',
+          minHeight: 0,
         }}>
           <MediaRotator building={building} />
         </div>
 
-        {/* Right 1/3 — notices */}
+        {/* Notices */}
         <div style={{
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '16px',
-          padding: '24px',
-          backdropFilter: 'blur(10px)',
-          overflow: 'hidden',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '16px', padding: '24px',
+          backdropFilter: 'blur(12px)',
+          overflow: 'hidden', minHeight: 0,
         }}>
           <NoticesPanel building={building} />
         </div>
       </div>
 
-      {/* CSS animations */}
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.8); }
+          50% { opacity: 0.4; transform: scale(0.8); }
         }
       `}</style>
     </div>
