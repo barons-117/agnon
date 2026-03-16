@@ -6,6 +6,7 @@ export const navSections = [
       { id: 'requests',       icon: '📝', label: 'פניות לחברת הניהול' },
       { id: 'contacts',       icon: '📇', label: 'אנשי קשר' },
       { id: 'update-profile', icon: '✏️', label: 'עדכון פרטי שוכר' },
+      { id: 'nav-card',       icon: '🗺️', label: 'כרטיס ניווט לאורחים' },
     ],
   },
   {

@@ -11,6 +11,7 @@ import ContactsPage from './pages/ContactsPage.jsx'
 import GeneralInfoPage from './pages/GeneralInfoPage.jsx'
 import UpdateProfile from './pages/UpdateProfile.jsx'
 import DocumentsPage from './pages/DocumentsPage.jsx'
+import NavigationCard from './pages/NavigationCard.jsx'
 import LobbyDisplay from './pages/LobbyDisplay.jsx'
 import { VaadNotices, Wifi, Cleaning } from './pages/BuildingPages.jsx'
 import { Parking } from './pages/InfoPages.jsx'
@@ -58,6 +59,7 @@ export default function App() {
     'admin':            <Admin />,
     'update-profile':   <UpdateProfile />,
     'documents':        <DocumentsPage />,
+    'nav-card':         <NavigationCard />,
     'lobby-12':         <LobbyDisplay building={12} />,
     'lobby-14':         <LobbyDisplay building={14} />,
   }
