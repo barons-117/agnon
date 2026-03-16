@@ -168,7 +168,6 @@ export default function NavigationCard() {
             {/* Purple box lines */}
             {txt(19.0, 30.3, `דירה ${aptData.apt}`, fs.purpleLine, 'white', true)}
             {txt(22.6, 30.3, `קומה ${aptData.floor}`, fs.purpleLine, 'white', true)}
-            {txt(26.3, 30.3, `קוד כניסה ${code}`, fs.purpleLine, 'white', true)}
 
             {/* Bottom purple box — two lines */}
             <div style={{
