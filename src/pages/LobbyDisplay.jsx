@@ -104,13 +104,7 @@ function NewsTicker() {
   const load = async () => {
     try {
       const r = await fetch(
-        'https://cwewsfuswiiliritikvh.supabase.co/functions/v1/ynet-rss',
-        {
-          headers: {
-            'apikey': 'sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0',
-            'Authorization': 'Bearer sb_publishable_qIHIRr47iAqiYoTn9aQIuQ_qteCIHk0',
-          }
-        }
+        'https://cwewsfuswiiliritikvh.supabase.co/functions/v1/ynet-rss'
       )
       const j = await r.json()
       if (j.titles?.length) setHeadlines(j.titles)
