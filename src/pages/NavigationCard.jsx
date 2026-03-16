@@ -172,7 +172,7 @@ export default function NavigationCard() {
 
             {/* Bottom purple box — two lines */}
             <div style={{
-              position: 'absolute', top: '93%', left: '75.5%',
+              position: 'absolute', top: '95%', left: '75.5%',
               transform: 'translate(-50%, -50%)',
               textAlign: 'center', fontFamily: "'Heebo', sans-serif",
               pointerEvents: 'none', direction: 'rtl', lineHeight: 1.25,
