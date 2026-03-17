@@ -8,6 +8,7 @@ import AdminApartments from './AdminApartments.jsx'
 import AdminProjects from './AdminProjects.jsx'
 import AdminDocuments from './AdminDocuments.jsx'
 import AdminLobbyMedia from './AdminLobbyMedia.jsx'
+import AdminGatePhones from './AdminGatePhones.jsx'
 import FileAttachment from '../components/FileAttachment.jsx'
 
 export default function Admin() {
@@ -200,6 +201,7 @@ export default function Admin() {
           <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>פרויקטים</button>
           <button className={`admin-nav-btn${adminTab === 'documents' ? ' active' : ''}`} onClick={() => setAdminTab('documents')}>מסמכים</button>
           <button className={`admin-nav-btn${adminTab === 'lobby' ? ' active' : ''}`} onClick={() => setAdminTab('lobby')}>מסך לובי</button>
+          <button className={`admin-nav-btn${adminTab === 'gate' ? ' active' : ''}`} onClick={() => setAdminTab('gate')}>שער חשמלי 🔒</button>
         </>}
         {userRole === 'admin' && adminGroup === 'site' && <>
           <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>ניהול דיירים</button>
@@ -213,6 +215,7 @@ export default function Admin() {
       {adminTab === 'projects' && <AdminProjects />}
       {adminTab === 'documents' && <AdminDocuments />}
       {adminTab === 'lobby' && <AdminLobbyMedia />}
+      {adminTab === 'gate' && <AdminGatePhones />}
 
 
       {adminTab === 'requests' && <>

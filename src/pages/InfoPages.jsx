@@ -41,18 +41,64 @@ export function Parking() {
         background:'linear-gradient(135deg,#fffbf0,#fff3d6)', border:'1.5px solid #f5c97a',
         borderRadius:'16px', padding:'20px', marginBottom:'16px'
       }}>
-        <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px'}}>
+        <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px'}}>
           <div style={{fontSize:'28px'}}>🔒</div>
           <div>
-            <div style={{fontWeight:'800', fontSize:'16px', color:'#7a5c00'}}>שער חשמלי – חדש</div>
+            <div style={{fontWeight:'800', fontSize:'16px', color:'#7a5c00'}}>שער חשמלי</div>
             <div style={{fontSize:'13px', color:'#a07820'}}>בין מינוס ½ למינוס 1</div>
           </div>
         </div>
-        <div style={{fontSize:'14px', lineHeight:'1.8', color:'var(--text)', marginBottom:'12px'}}>
-          השער נפתח באמצעות <strong>אפליקציה</strong>, <strong>שיחת טלפון</strong> או <strong>שלט רחוק</strong>.
+
+        <div style={{fontSize:'14px', lineHeight:'1.8', color:'var(--text)', marginBottom:'16px'}}>
+          בחניון הותקן שער חשמלי הניתן לפתיחה בשלוש דרכים:
         </div>
-        <div className="info-block amber" style={{margin:0, fontSize:'13px'}}>
-          📱 מי שמעוניין ב<strong>שלט רחוק</strong> בתשלום, או לעדכן מספרי טלפון לאפליקציה — פנו לוועד הבית.
+
+        {/* Method 1: Remote */}
+        <div style={{background:'white', borderRadius:'12px', padding:'14px 16px', marginBottom:'10px', border:'1px solid #f0dfa0'}}>
+          <div style={{fontWeight:'700', fontSize:'14px', color:'#7a5c00', marginBottom:'6px'}}>🎛️ שלט רחוק</div>
+          <div style={{fontSize:'13px', color:'var(--text)', lineHeight:'1.7'}}>
+            למי שרכש שלט במסגרת הרכישה הקבוצתית — השלט פעיל.<br/>
+            <strong>הרכישה הקבוצתית נסגרה.</strong> מי שמעוניין לרכוש שלט באופן פרטי מוזמן לפנות ישירות אל חברת <strong>תמיר שערים</strong>.
+          </div>
+        </div>
+
+        {/* Method 2: App */}
+        <div style={{background:'white', borderRadius:'12px', padding:'14px 16px', marginBottom:'10px', border:'1px solid #f0dfa0'}}>
+          <div style={{fontWeight:'700', fontSize:'14px', color:'#7a5c00', marginBottom:'6px'}}>📱 אפליקציית PALGATE</div>
+          <div style={{fontSize:'13px', color:'var(--text)', lineHeight:'1.7', marginBottom:'12px'}}>
+            הורידו את האפליקציה והירשמו עם מספר הטלפון שלכם.<br/>
+            אם המספר <strong>מעודכן בוועד הבית</strong> כמורשה לפתיחה — השער יתווסף לאפליקציה <strong>אוטומטית</strong>.<br/>
+            אם לא — מלאו את הטופס למטה לעדכון המספר.
+          </div>
+          <div style={{display:'flex', gap:'8px', flexWrap:'wrap'}}>
+            <a href="https://onelink.to/palgate" target="_blank" rel="noopener"
+              style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#1B3A5C', color:'white',
+                borderRadius:'100px', padding:'8px 18px', fontSize:'13px', fontWeight:'700', textDecoration:'none'}}>
+              ⬇️ הורדת PALGATE
+            </a>
+            <a href="#gate-phones"
+              style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#fff3d6', color:'#7a5c00',
+                borderRadius:'100px', padding:'8px 18px', fontSize:'13px', fontWeight:'700', textDecoration:'none',
+                border:'1.5px solid #f5c97a'}}>
+              📋 עדכון מספר טלפון
+            </a>
+          </div>
+        </div>
+
+        {/* Method 3: Phone call */}
+        <div style={{background:'white', borderRadius:'12px', padding:'14px 16px', border:'1px solid #f0dfa0'}}>
+          <div style={{fontWeight:'700', fontSize:'14px', color:'#7a5c00', marginBottom:'6px'}}>📞 חיוג טלפוני</div>
+          <div style={{fontSize:'13px', color:'var(--text)', lineHeight:'1.7', marginBottom:'10px'}}>
+            ניתן לפתוח את השער על ידי חיוג למספר ייעודי — ממספר מזוהה הרשום במערכת.<br/>
+            <span style={{color:'var(--muted)'}}>מספר הטלפון לחיוג יפורסם כאן בקרוב.</span><br/>
+            לעדכון מספר הטלפון שלכם במערכת — מלאו את הטופס:
+          </div>
+          <a href="#gate-phones"
+            style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#fff3d6', color:'#7a5c00',
+              borderRadius:'100px', padding:'8px 18px', fontSize:'13px', fontWeight:'700', textDecoration:'none',
+              border:'1.5px solid #f5c97a'}}>
+            📋 עדכון מספר טלפון
+          </a>
         </div>
       </div>
 

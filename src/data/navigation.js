@@ -13,6 +13,7 @@ export const navSections = [
     label: 'הבניין',
     items: [
       { id: 'parking',        icon: '🚗', label: 'חניות וחניון' },
+      { id: 'gate-phones',    icon: '🔒', label: 'עדכון מספרי שער' },
       { id: 'residents-room', icon: '🛋️', label: 'חדר דיירים' },
       { id: 'cleaning',       icon: '🧹', label: 'לוח ניקיון' },
       { id: 'wifi',           icon: '📶', label: 'קודים ו-WiFi' },

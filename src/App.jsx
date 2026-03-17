@@ -15,6 +15,7 @@ import NavigationCard from './pages/NavigationCard.jsx'
 import LobbyDisplay from './pages/LobbyDisplay.jsx'
 import { VaadNotices, Wifi, Cleaning } from './pages/BuildingPages.jsx'
 import { Parking } from './pages/InfoPages.jsx'
+import GatePhoneForm from './pages/GatePhoneForm.jsx'
 
 export default function App() {
   const parseHash = () => {
@@ -60,6 +61,7 @@ export default function App() {
     'update-profile':   <UpdateProfile />,
     'documents':        <DocumentsPage />,
     'nav-card':         <NavigationCard />,
+    'gate-phones':      <GatePhoneForm />,
     'lobby-12':         <LobbyDisplay building={12} />,
     'lobby-14':         <LobbyDisplay building={14} />,
   }
