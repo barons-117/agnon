@@ -185,10 +185,6 @@ export default function Admin() {
         </div>
       </div>
 
-      {/* Show dashboard without group/tab UI */}
-      {adminTab === 'dashboard' && <AdminDashboard userRole={userRole} onNavigate={setAdminTab} />}
-
-      {/* Group selector — מוצג רק למנהל מערכת */}
       {/* Group selector + tabs */}
       {userRole === 'admin' && (
         <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
@@ -229,6 +225,7 @@ export default function Admin() {
           <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>ניהול דיירים</button>
         </>}
       </div>
+      {adminTab === 'dashboard' && <AdminDashboard userRole={userRole} onNavigate={setAdminTab} />}
       {adminTab === 'rooms' && <RoomBookings />}
       {adminTab === 'notices' && <AdminNotices />}
       {adminTab === 'pros' && <AdminPros />}
