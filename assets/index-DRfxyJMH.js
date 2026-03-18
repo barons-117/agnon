@@ -103,7 +103,7 @@ ${g}`}class fe extends Error{constructor({message:t,code:n,cause:r,name:s}){var 
       </table>
       <div style="background:#f1f5f9;border-radius:8px;padding:16px;margin-top:16px;font-size:14px;line-height:1.7;white-space:pre-line">${e.content}</div>
       <div style="margin-top:16px;font-size:12px;color:#94a3b8">נשלח: ${new Date().toLocaleDateString("he-IL")} ${new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})}</div>
-    `))}function Jy(e){const t=(e.entries||[]).map(n=>`<tr><td style="padding:6px 0;color:#64748b;width:120px">${n.name}</td><td style="font-weight:700;direction:ltr">${n.phone}</td></tr>`).join("");return zi(["erez@barons.co.il","vpolyak@gmail.com","eran9maron@gmail.com","avlili2403@gmail.com","sigalsorgim@gmail.com","baruch.vipman@gmail.com"],`בקשת שער חדשה — עגנון ${e.building} דירה ${e.apt}`,Ii(`
+    `))}function Jy(e){const t=(e.entries||[]).map(n=>`<tr><td style="padding:6px 0;color:#64748b;width:120px">${n.name}</td><td style="font-weight:700;direction:ltr">${n.phone}</td></tr>`).join("");return zi(["erez@barons.co.il"],`בקשת שער חדשה — עגנון ${e.building} דירה ${e.apt}`,Ii(`
       <h2 style="color:#1B3A5C;margin:0 0 20px">🔒 בקשה חדשה לעדכון מספרי שער</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px">
         <tr><td style="padding:8px 0;color:#64748b;width:120px">בניין:</td><td style="font-weight:700">עגנון ${e.building}</td></tr>
