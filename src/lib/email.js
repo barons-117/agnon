@@ -62,7 +62,7 @@ export function sendGatePhoneRequestEmail(req) {
     `<tr><td style="padding:6px 0;color:#64748b;width:120px">${e.name}</td><td style="font-weight:700;direction:ltr">${e.phone}</td></tr>`
   ).join('')
   return sendEmail(
-    ['erez@barons.co.il','vpolyak@gmail.com','eran9maron@gmail.com','avlili2403@gmail.com','sigalsorgim@gmail.com','baruch.vipman@gmail.com'],
+    ['erez@barons.co.il'],
     `בקשת שער חדשה — עגנון ${req.building} דירה ${req.apt}`,
     baseTemplate(`
       <h2 style="color:#1B3A5C;margin:0 0 20px">🔒 בקשה חדשה לעדכון מספרי שער</h2>
