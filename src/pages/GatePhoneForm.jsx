@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase.js'
+import { sendGatePhoneRequestEmail } from '../lib/email.js'
 
 const EMPTY_ENTRY = { name: '', phone: '' }
 
@@ -9,6 +10,7 @@ export default function GatePhoneForm() {
   const [floor, setFloor] = useState(null)
   const [floorLoading, setFloorLoading] = useState(false)
   const [entries, setEntries] = useState([{ ...EMPTY_ENTRY }])
+  const [email, setEmail] = useState('')
   const [notes, setNotes] = useState('')
   const [status, setStatus] = useState(null)
 
@@ -44,17 +46,19 @@ export default function GatePhoneForm() {
       setStatus('missing'); return
     }
     setStatus('sending')
-    const { error } = await supabase.from('gate_phone_requests').insert([{
+    const { data, error } = await supabase.from('gate_phone_requests').insert([{
       building: parseInt(building),
       apt: parseInt(apt),
       floor,
       entries: validEntries,
+      email: email.trim() || null,
       notes: notes.trim() || null,
-    }])
+    }]).select().single()
     if (error) { setStatus('error'); return }
+    try { await sendGatePhoneRequestEmail(data) } catch(e) { console.warn(e) }
     setStatus('success')
     setBuilding(''); setApt(''); setFloor(null)
-    setEntries([{ ...EMPTY_ENTRY }]); setNotes('')
+    setEntries([{ ...EMPTY_ENTRY }]); setEmail(''); setNotes('')
   }
 
   return (
@@ -128,8 +132,17 @@ export default function GatePhoneForm() {
         )}
       </div>
 
+      {/* Email */}
+      <div style={{marginBottom:'14px', marginTop:'14px'}}>
+        <div style={lbl}>דוא״ל <span style={{fontWeight:'400', color:'#bbb'}}>(רשות — לקבלת אישור כשהבקשה תבוצע)</span></div>
+        <input value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="example@gmail.com"
+          style={inp} dir="ltr" type="email" />
+      </div>
+
       {/* Notes */}
-      <div style={{marginBottom:'20px', marginTop:'14px'}}>
+      <div style={{marginBottom:'20px'}}>
         <div style={lbl}>הערות <span style={{fontWeight:'400', color:'#bbb'}}>(רשות)</span></div>
         <textarea value={notes} onChange={e => setNotes(e.target.value)}
           placeholder="הערות נוספות..." rows={3}

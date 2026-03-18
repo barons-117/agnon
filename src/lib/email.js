@@ -56,6 +56,64 @@ export function sendNewRequestEmail(req) {
   )
 }
 
+// מייל לוועד — בקשת שער חדשה
+export function sendGatePhoneRequestEmail(req) {
+  const entriesRows = (req.entries || []).map(e =>
+    `<tr><td style="padding:6px 0;color:#64748b;width:120px">${e.name}</td><td style="font-weight:700;direction:ltr">${e.phone}</td></tr>`
+  ).join('')
+  return sendEmail(
+    ['erez@barons.co.il','vpolyak@gmail.com','eran9maron@gmail.com','avlili2403@gmail.com','sigalsorgim@gmail.com','baruch.vipman@gmail.com'],
+    `בקשת שער חדשה — עגנון ${req.building} דירה ${req.apt}`,
+    baseTemplate(`
+      <h2 style="color:#1B3A5C;margin:0 0 20px">🔒 בקשה חדשה לעדכון מספרי שער</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px">
+        <tr><td style="padding:8px 0;color:#64748b;width:120px">בניין:</td><td style="font-weight:700">עגנון ${req.building}</td></tr>
+        <tr><td style="padding:8px 0;color:#64748b">דירה:</td><td style="font-weight:700">${req.apt}</td></tr>
+        ${req.floor != null ? '<tr><td style="padding:8px 0;color:#64748b">קומה:</td><td>' + req.floor + '</td></tr>' : ''}
+        ${req.email ? '<tr><td style="padding:8px 0;color:#64748b">מייל:</td><td>' + req.email + '</td></tr>' : ''}
+      </table>
+      <div style="background:#f1f5f9;border-radius:8px;padding:16px;margin-bottom:16px">
+        <div style="font-weight:700;color:#1B3A5C;margin-bottom:10px;font-size:14px">מספרי טלפון לעדכון:</div>
+        <table style="width:100%;border-collapse:collapse;font-size:14px">${entriesRows}</table>
+      </div>
+      ${req.notes ? '<div style="background:#fffbf0;border:1px solid #f5c97a;border-radius:8px;padding:12px 16px;font-size:14px;color:#7a5c00;margin-bottom:16px">📌 הערה: ' + req.notes + '</div>' : ''}
+      <a href="https://agnon.net/#admin" style="display:inline-block;background:#1B3A5C;color:white;border-radius:100px;padding:10px 24px;font-size:14px;font-weight:700;text-decoration:none;margin-top:4px">
+        עבור לממשק הניהול לאישור ←
+      </a>
+      <div style="margin-top:16px;font-size:12px;color:#94a3b8">נשלח: ${new Date().toLocaleDateString('he-IL')} ${new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})}</div>
+    `)
+  )
+}
+
+// מייל לדייר — בקשת שער בוצעה
+export function sendGatePhoneDoneEmail(req, note) {
+  if (!req.email) return Promise.resolve()
+  const noteBlock = note ? `
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px;margin:16px 0">
+      <div style="font-weight:700;color:#166534;margin-bottom:8px">💬 הערה מועד הבית:</div>
+      <div style="color:#166534;line-height:1.7;white-space:pre-line">${note}</div>
+    </div>` : ''
+  const entriesText = (req.entries || []).map(e => e.name + ' — ' + e.phone).join('<br/>')
+  return sendEmail(
+    req.email,
+    'בקשת השער שלך בוצעה — שי עגנון ' + req.building,
+    baseTemplate(`
+      <h2 style="color:#1B3A5C;margin:0 0 16px">✅ בקשתך בוצעה</h2>
+      <p style="color:#475569;line-height:1.8;margin:0 0 16px">
+        בקשתך לעדכון מספרי טלפון לשער החשמלי בבניין <strong>עגנון ${req.building}</strong> (דירה ${req.apt}) בוצעה.
+      </p>
+      <div style="background:#f1f5f9;border-radius:8px;padding:16px;font-size:14px;line-height:1.8;color:#475569;margin-bottom:8px">
+        <strong>המספרים שעודכנו:</strong><br/>${entriesText}
+      </div>
+      ${noteBlock}
+      <p style="color:#475569;line-height:1.8;margin:16px 0 0">
+        ניתן להוריד את אפליקציית <strong>PALGATE</strong> ולהתחבר עם המספר הרשום.<br/>
+        <strong>תודה!</strong>
+      </p>
+    `)
+  )
+}
+
 // מייל לדייר — פנייה בטיפול
 export function sendInProgressEmail(req) {
   if (!req.email) return Promise.resolve()
