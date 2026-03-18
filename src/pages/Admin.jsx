@@ -171,13 +171,26 @@ export default function Admin() {
             {session.user.email}
           </div>
         </div>
-        <button onClick={logout} style={{
-          background:'transparent', color:'var(--muted)', border:'1px solid var(--border)',
-          borderRadius:'100px', padding:'6px 14px', fontSize:'12px', cursor:'pointer', fontFamily:'Heebo, sans-serif'
-        }}>התנתק</button>
+        <div style={{display:'flex', gap:'8px'}}>
+          <button onClick={() => setAdminTab('dashboard')} style={{
+            background: adminTab === 'dashboard' ? 'var(--primary)' : '#f0ede8',
+            color: adminTab === 'dashboard' ? 'white' : 'var(--muted)',
+            border:'none', borderRadius:'100px', padding:'6px 14px', fontSize:'12px',
+            cursor:'pointer', fontFamily:'Heebo, sans-serif', fontWeight:'600'
+          }}>🏠 דשבורד</button>
+          <button onClick={logout} style={{
+            background:'transparent', color:'var(--muted)', border:'1px solid var(--border)',
+            borderRadius:'100px', padding:'6px 14px', fontSize:'12px', cursor:'pointer', fontFamily:'Heebo, sans-serif'
+          }}>התנתק</button>
+        </div>
       </div>
 
+      {/* Show dashboard without group/tab UI */}
+      {adminTab === 'dashboard' && <AdminDashboard userRole={userRole} onNavigate={setAdminTab} />}
+
       {/* Group selector — מוצג רק למנהל מערכת */}
+      {/* Group selector + tabs — hidden when on dashboard */}
+      {adminTab !== 'dashboard' && <>
       {userRole === 'admin' && (
         <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', flexWrap: 'wrap' }}>
           {[
@@ -187,7 +200,7 @@ export default function Admin() {
           ].map(g => (
             <button key={g.id} onClick={() => {
               setAdminGroup(g.id)
-              const firstTab = { mgmt: 'dashboard', board: 'dashboard', site: 'apartments' }[g.id]
+              const firstTab = { mgmt: 'requests', board: 'notices', site: 'apartments' }[g.id]
               setAdminTab(firstTab)
             }} style={{
               padding: '7px 16px', borderRadius: '100px', border: 'none', cursor: 'pointer',
@@ -200,15 +213,12 @@ export default function Admin() {
         </div>
       )}
 
-      {/* Sub-tabs */}
       <div className="admin-nav" style={{ marginBottom: '18px' }}>
         {(userRole === 'mgmt' || adminGroup === 'mgmt') && <>
-          <button className={`admin-nav-btn${adminTab === 'dashboard' ? ' active' : ''}`} onClick={() => setAdminTab('dashboard')}>דשבורד</button>
           <button className={`admin-nav-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>פניות דיירים</button>
           <button className={`admin-nav-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>חדר דיירים</button>
         </>}
         {userRole === 'admin' && adminGroup === 'board' && <>
-          <button className={`admin-nav-btn${adminTab === 'dashboard' ? ' active' : ''}`} onClick={() => setAdminTab('dashboard')}>דשבורד</button>
           <button className={`admin-nav-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>הודעות ועד</button>
           <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>בעלי מקצוע</button>
           <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>פרויקטים</button>
@@ -220,8 +230,7 @@ export default function Admin() {
           <button className={`admin-nav-btn${adminTab === 'apartments' ? ' active' : ''}`} onClick={() => setAdminTab('apartments')}>ניהול דיירים</button>
         </>}
       </div>
-
-      {adminTab === 'dashboard' && <AdminDashboard userRole={userRole} onNavigate={setAdminTab} />}
+      </>}
       {adminTab === 'rooms' && <RoomBookings />}
       {adminTab === 'notices' && <AdminNotices />}
       {adminTab === 'pros' && <AdminPros />}
