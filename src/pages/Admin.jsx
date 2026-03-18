@@ -9,6 +9,7 @@ import AdminProjects from './AdminProjects.jsx'
 import AdminDocuments from './AdminDocuments.jsx'
 import AdminLobbyMedia from './AdminLobbyMedia.jsx'
 import AdminGatePhones from './AdminGatePhones.jsx'
+import AdminDashboard from './AdminDashboard.jsx'
 import FileAttachment from '../components/FileAttachment.jsx'
 
 export default function Admin() {
@@ -18,7 +19,7 @@ export default function Admin() {
   const [loginError, setLoginError] = useState('')
   const [loggingIn, setLoggingIn] = useState(false)
   const [adminGroup, setAdminGroup] = useState('mgmt')  // 'mgmt' | 'board' | 'site'
-  const [adminTab, setAdminTab] = useState('requests')
+  const [adminTab, setAdminTab] = useState('dashboard')
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(false)
   const [filter, setFilter] = useState('new')
@@ -58,12 +59,14 @@ export default function Admin() {
   }
 
   const setStatus = async (id, status) => {
-    await supabase.from('requests').update({ status, done: status === 'done' }).eq('id', id)
+    const now = new Date().toISOString()
+    const extra = status === 'inprogress' ? { inprogress_at: now } : status === 'done' ? { done_at: now } : {}
+    await supabase.from('requests').update({ status, done: status === 'done', ...extra }).eq('id', id)
     if (status === 'inprogress') {
       const req = requests.find(r => r.id === id)
       if (req) try { await sendInProgressEmail(req) } catch(e) { console.warn(e) }
     }
-    setRequests(r => r.map(x => x.id === id ? { ...x, status, done: status === 'done' } : x))
+    setRequests(r => r.map(x => x.id === id ? { ...x, status, done: status === 'done', ...extra } : x))
   }
 
   const openDoneModal = (req) => {
@@ -74,9 +77,10 @@ export default function Admin() {
   const confirmDone = async () => {
     if (!doneModal) return
     const res = resolution.trim()
-    await supabase.from('requests').update({ status: 'done', done: true, resolution: res || null }).eq('id', doneModal.id)
+    const now = new Date().toISOString()
+    await supabase.from('requests').update({ status: 'done', done: true, resolution: res || null, done_at: now }).eq('id', doneModal.id)
     try { await sendDoneEmail(doneModal, res) } catch(e) { console.warn(e) }
-    setRequests(r => r.map(x => x.id === doneModal.id ? { ...x, status: 'done', done: true, resolution: res || null } : x))
+    setRequests(r => r.map(x => x.id === doneModal.id ? { ...x, status: 'done', done: true, resolution: res || null, done_at: now } : x))
     setDoneModal(null)
     setResolution('')
   }
@@ -158,12 +162,19 @@ export default function Admin() {
 
   return (
     <div className="card">
+      {/* Header: user + logout */}
       <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px'}}>
-        <div className="panel-title" style={{marginBottom:0}}><div className="icon">⚙️</div>ממשק ניהול</div>
+        <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+          <div className="panel-title" style={{marginBottom:0}}><div className="icon">⚙️</div>ממשק ניהול</div>
+          <div style={{background:'#f0ede8', border:'1px solid var(--border)', borderRadius:'100px',
+            padding:'4px 12px', fontSize:'12px', color:'var(--muted)', fontWeight:'600'}}>
+            {session.user.email}
+          </div>
+        </div>
         <button onClick={logout} style={{
           background:'transparent', color:'var(--muted)', border:'1px solid var(--border)',
           borderRadius:'100px', padding:'6px 14px', fontSize:'12px', cursor:'pointer', fontFamily:'Heebo, sans-serif'
-        }}>יציאה</button>
+        }}>התנתק</button>
       </div>
 
       {/* Group selector — מוצג רק למנהל מערכת */}
@@ -176,7 +187,7 @@ export default function Admin() {
           ].map(g => (
             <button key={g.id} onClick={() => {
               setAdminGroup(g.id)
-              const firstTab = { mgmt: 'requests', board: 'notices', site: 'apartments' }[g.id]
+              const firstTab = { mgmt: 'dashboard', board: 'dashboard', site: 'apartments' }[g.id]
               setAdminTab(firstTab)
             }} style={{
               padding: '7px 16px', borderRadius: '100px', border: 'none', cursor: 'pointer',
@@ -192,10 +203,12 @@ export default function Admin() {
       {/* Sub-tabs */}
       <div className="admin-nav" style={{ marginBottom: '18px' }}>
         {(userRole === 'mgmt' || adminGroup === 'mgmt') && <>
+          <button className={`admin-nav-btn${adminTab === 'dashboard' ? ' active' : ''}`} onClick={() => setAdminTab('dashboard')}>דשבורד</button>
           <button className={`admin-nav-btn${adminTab === 'requests' ? ' active' : ''}`} onClick={() => setAdminTab('requests')}>פניות דיירים</button>
           <button className={`admin-nav-btn${adminTab === 'rooms' ? ' active' : ''}`} onClick={() => setAdminTab('rooms')}>חדר דיירים</button>
         </>}
         {userRole === 'admin' && adminGroup === 'board' && <>
+          <button className={`admin-nav-btn${adminTab === 'dashboard' ? ' active' : ''}`} onClick={() => setAdminTab('dashboard')}>דשבורד</button>
           <button className={`admin-nav-btn${adminTab === 'notices' ? ' active' : ''}`} onClick={() => setAdminTab('notices')}>הודעות ועד</button>
           <button className={`admin-nav-btn${adminTab === 'pros' ? ' active' : ''}`} onClick={() => setAdminTab('pros')}>בעלי מקצוע</button>
           <button className={`admin-nav-btn${adminTab === 'projects' ? ' active' : ''}`} onClick={() => setAdminTab('projects')}>פרויקטים</button>
@@ -208,6 +221,7 @@ export default function Admin() {
         </>}
       </div>
 
+      {adminTab === 'dashboard' && <AdminDashboard userRole={userRole} onNavigate={setAdminTab} />}
       {adminTab === 'rooms' && <RoomBookings />}
       {adminTab === 'notices' && <AdminNotices />}
       {adminTab === 'pros' && <AdminPros />}
