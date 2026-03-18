@@ -145,6 +145,7 @@ export default function AdminDashboard({ userRole, onNavigate }) {
           <div style={divider} />
           <div style={{flex:2, textAlign:'center', padding:'0 16px', display:'flex', alignItems:'center', justifyContent:'center'}}>
             <div style={{fontSize:'12px', color:'var(--muted)', lineHeight:'2'}}>
+              <div style={{fontSize:'11px', color:'var(--muted)', marginBottom:'2px', fontWeight:'600'}}>טופלו:</div>
               השבוע: <strong style={{color:'#1a5c38'}}>{doneThisWeek}</strong>
               &nbsp;·&nbsp; החודש: <strong style={{color:'#1a5c38'}}>{doneThisMonth}</strong>
               &nbsp;·&nbsp; השנה: <strong style={{color:'#1a5c38'}}>{doneThisYear}</strong>
