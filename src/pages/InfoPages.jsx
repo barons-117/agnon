@@ -89,9 +89,16 @@ export function Parking() {
         <div style={{background:'white', borderRadius:'12px', padding:'14px 16px', border:'1px solid #f0dfa0'}}>
           <div style={{fontWeight:'700', fontSize:'14px', color:'#7a5c00', marginBottom:'6px'}}>📞 חיוג טלפוני</div>
           <div style={{fontSize:'13px', color:'var(--text)', lineHeight:'1.7', marginBottom:'10px'}}>
-            ניתן לפתוח את השער על ידי חיוג למספר ייעודי — ממספר מזוהה הרשום במערכת.<br/>
-            <span style={{color:'var(--muted)'}}>מספר הטלפון לחיוג יפורסם כאן בקרוב.</span><br/>
-            לעדכון מספר הטלפון שלכם במערכת — מלאו את הטופס:
+            ניתן לפתוח את השער על ידי חיוג למספר ייעודי — ממספר מזוהה הרשום במערכת.
+          </div>
+          <a href="tel:0504317336" style={{display:'inline-flex', alignItems:'center', gap:'8px',
+            background:'#fff3d6', color:'#7a5c00', borderRadius:'100px',
+            padding:'8px 18px', fontSize:'14px', fontWeight:'700', textDecoration:'none',
+            border:'1.5px solid #f5c97a', marginBottom:'10px'}}>
+            📞 050-431-7336
+          </a>
+          <div style={{fontSize:'12px', color:'var(--muted)', marginBottom:'10px'}}>
+            חיוג ממספר רשום במערכת יפתח את השער אוטומטית.
           </div>
           <a href="#gate-phones"
             style={{display:'inline-flex', alignItems:'center', gap:'6px', background:'#fff3d6', color:'#7a5c00',
