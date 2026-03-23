@@ -5,6 +5,7 @@ const tabs = [
   { id: 'postal',    label: 'מיקוד' },
   { id: 'gush',      label: 'גוש וחלקה' },
   { id: 'address',   label: 'כתובות' },
+  { id: 'cellular',  label: 'קליטה סלולרית' },
   { id: 'elevator',  label: 'מעלית' },
   { id: 'arnona',    label: 'ארנונה' },
   { id: 'ac',        label: 'מיזוג אוויר' },
@@ -123,7 +124,7 @@ function CellularTab() {
       style={{marginBottom:'10px', display:'block'}}>
       מדריך הפעלה — אנדרואיד
     </a>
-    <a className="link-btn outline" href="https://www.youtube.com/watch?v=LakYc2w2sA8" target="_blank" rel="noopener">
+    <a className="link-btn" href="https://www.youtube.com/watch?v=LakYc2w2sA8" target="_blank" rel="noopener">
       מדריך הפעלה — אייפון
     </a>
   </>
