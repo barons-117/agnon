@@ -9,7 +9,6 @@ const tabs = [
   { id: 'elevator',  label: 'מעלית' },
   { id: 'arnona',    label: 'ארנונה' },
   { id: 'ac',        label: 'מיזוג אוויר' },
-  { id: 'cellular',  label: 'קליטה סלולרית' },
 ]
 
 function PostalTab() {
@@ -120,13 +119,14 @@ function CellularTab() {
 
     <div className="divider"></div>
     <div className="section-label">מדריכי הפעלה</div>
-    <a className="link-btn" href="https://www.youtube.com/shorts/2HavdsT3n4I" target="_blank" rel="noopener"
-      style={{marginBottom:'10px', display:'block'}}>
-      מדריך הפעלה — אנדרואיד
-    </a>
-    <a className="link-btn" href="https://www.youtube.com/watch?v=LakYc2w2sA8" target="_blank" rel="noopener">
-      מדריך הפעלה — אייפון
-    </a>
+    <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+      <a className="link-btn" href="https://www.youtube.com/shorts/2HavdsT3n4I" target="_blank" rel="noopener">
+        מדריך הפעלה — אנדרואיד
+      </a>
+      <a className="link-btn" href="https://www.youtube.com/watch?v=LakYc2w2sA8" target="_blank" rel="noopener">
+        מדריך הפעלה — אייפון
+      </a>
+    </div>
   </>
 }
 
