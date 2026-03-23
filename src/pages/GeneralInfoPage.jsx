@@ -8,6 +8,7 @@ const tabs = [
   { id: 'elevator',  label: 'מעלית' },
   { id: 'arnona',    label: 'ארנונה' },
   { id: 'ac',        label: 'מיזוג אוויר' },
+  { id: 'cellular',  label: 'קליטה סלולרית' },
 ]
 
 function PostalTab() {
@@ -89,6 +90,45 @@ function ACTab() {
   </>
 }
 
+function CellularTab() {
+  return <>
+    <div className="section-label">בעיית קליטה סלולרית באזור</div>
+    <p style={{fontSize:'14px', color:'var(--text)', lineHeight:'1.8', marginBottom:'16px'}}>
+      בקריית אונו בכלל, ובשכונה ובבניינים שלנו בפרט, קיימת בעיית קליטה סלולרית ידועה — וזה כמעט ללא הבדל בין חברות הסלולר.
+      בחניון המצב חריף יותר: אין כלל רשת סלולרית, וניתן לתקשר שם רק דרך ה-WiFi של הבניין.
+    </p>
+
+    <div className="divider"></div>
+    <div className="section-label">WiFi Calling — פתרון מובנה בטלפון</div>
+    <p style={{fontSize:'14px', color:'var(--text)', lineHeight:'1.8', marginBottom:'12px'}}>
+      WiFi Calling היא תכונה מובנית בכל סמארטפון מודרני המאפשרת לבצע שיחות טלפון ולשלוח הודעות SMS דרך רשת WiFi —
+      בדיוק כמו שיחה רגילה, עם אותו מספר טלפון, ללא אפליקציה נוספת.
+    </p>
+    <p style={{fontSize:'14px', color:'var(--text)', lineHeight:'1.8', marginBottom:'16px'}}>
+      הטלפון מזהה שאין קליטה סלולרית מספקת ומנתב אוטומטית את השיחה דרך האינטרנט אל ספק הסלולר — ומשם כרגיל.
+      מבחינת הצד השני, השיחה נראית כמו שיחה רגילה לחלוטין. כשהקליטה הסלולרית חוזרת, הטלפון עובר אליה בצורה חלקה.
+    </p>
+
+    <div className="info-block" style={{marginBottom:'16px', lineHeight:'1.9'}}>
+      <strong>כמה דברים חשוב לדעת:</strong>
+      <br/>לא נדרשת אפליקציה — עובד עם מחייגן הטלפון הרגיל
+      <br/>לא נצרך מדטה סלולרי — השיחה עוברת דרך ה-WiFi בלבד
+      <br/>נדרש שחברת הסלולר שלכם תומכת בתכונה — רוב החברות בישראל תומכות
+      <br/>מומלץ להשאיר פעיל תמיד — הטלפון יעבור בין WiFi לסלולר לפי הצורך
+    </div>
+
+    <div className="divider"></div>
+    <div className="section-label">מדריכי הפעלה</div>
+    <a className="link-btn" href="https://www.youtube.com/shorts/2HavdsT3n4I" target="_blank" rel="noopener"
+      style={{marginBottom:'10px', display:'block'}}>
+      מדריך הפעלה — אנדרואיד
+    </a>
+    <a className="link-btn outline" href="https://www.youtube.com/watch?v=LakYc2w2sA8" target="_blank" rel="noopener">
+      מדריך הפעלה — אייפון
+    </a>
+  </>
+}
+
 export default function GeneralInfoPage() {
   const [active, setActive] = useState('postal')
   return (
@@ -107,6 +147,7 @@ export default function GeneralInfoPage() {
         {active === 'elevator' && <ElevatorTab />}
         {active === 'arnona'   && <ArnonaTab />}
         {active === 'ac'       && <ACTab />}
+        {active === 'cellular' && <CellularTab />}
       </div>
     </div>
   )
