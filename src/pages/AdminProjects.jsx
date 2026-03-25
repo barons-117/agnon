@@ -222,6 +222,13 @@ export default function AdminProjects() {
     setItems(data || [])
   }
 
+  const toggleDelivered = async (e, item) => {
+    e.stopPropagation()
+    const newVal = !item.delivered
+    await supabase.from('apt_project_items').update({ delivered: newVal }).eq('id', item.id)
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, delivered: newVal } : i))
+  }
+
   useEffect(() => {
     if (activeProject) loadItems(activeProject.id)
   }, [activeProject])
@@ -465,6 +472,19 @@ export default function AdminProjects() {
                     <div style={{ fontSize: '11px', color: '#1a7a3a', fontWeight: '700' }}>
                       ₪{(item.quantity || 1) * pricePerUnit}
                     </div>
+                  )}
+                  {paid && (
+                    <button
+                      onClick={e => toggleDelivered(e, item)}
+                      style={{
+                        marginTop: '6px', width: '100%', border: 'none', borderRadius: '6px',
+                        padding: '4px 0', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                        fontFamily: 'Heebo, sans-serif', transition: 'all 0.15s',
+                        background: item.delivered ? '#1a7a3a' : '#f0ede8',
+                        color: item.delivered ? 'white' : 'var(--muted)',
+                      }}>
+                      {item.delivered ? '✓ נמסר' : 'נמסר?'}
+                    </button>
                   )}
                 </div>
               )
