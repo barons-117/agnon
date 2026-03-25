@@ -282,6 +282,11 @@ export default function AdminProjects() {
   const totalMoney = paidItems.reduce((s, i) => s + (i.amount_paid || 0), 0)
   const totalApts = apartments.length
 
+  const delivered12 = paidItems.filter(i => i.building === 12 && i.delivered)
+  const delivered14 = paidItems.filter(i => i.building === 14 && i.delivered)
+  const deliveredUnits12 = delivered12.reduce((s, i) => s + (i.quantity || 1), 0)
+  const deliveredUnits14 = delivered14.reduce((s, i) => s + (i.quantity || 1), 0)
+
   const exportToExcel = () => {
     if (!activeProject) return
     const rows = [['בניין', 'דירה', 'קומה', 'שם', 'טלפון', 'שילם', `כמות ${unitLabel}`, 'סכום (₪)', 'הערות', 'תאריך']]
@@ -412,6 +417,28 @@ export default function AdminProjects() {
               </button>
             </div>
           </div>
+
+          {/* Delivered stats */}
+          {(delivered12.length > 0 || delivered14.length > 0) && (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              {[
+                { building: 12, apts: delivered12.length, units: deliveredUnits12 },
+                { building: 14, apts: delivered14.length, units: deliveredUnits14 },
+              ].map(({ building, apts, units }) => apts > 0 ? (
+                <div key={building} style={{
+                  flex: 1, background: '#f0fbf4', border: '1.5px solid #bce8cc',
+                  borderRadius: '10px', padding: '10px 14px',
+                }}>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#1a7a3a', marginBottom: '3px' }}>
+                    בניין {building} — נמסר
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#1a5c38', lineHeight: '1.6' }}>
+                    {apts} דירות · {units} {unitLabel}
+                  </div>
+                </div>
+              ) : null)}
+            </div>
+          )}
 
           <SmartAddInput onSearch={findAptByInput} onSelect={apt => setAddModal(apt)} items={items} />
 
