@@ -286,6 +286,10 @@ export default function AdminProjects() {
   const delivered14 = paidItems.filter(i => i.building === 14 && i.delivered)
   const deliveredUnits12 = delivered12.reduce((s, i) => s + (i.quantity || 1), 0)
   const deliveredUnits14 = delivered14.reduce((s, i) => s + (i.quantity || 1), 0)
+  const paid12 = paidItems.filter(i => i.building === 12)
+  const paid14 = paidItems.filter(i => i.building === 14)
+  const paidUnits12 = paid12.reduce((s, i) => s + (i.quantity || 1), 0)
+  const paidUnits14 = paid14.reduce((s, i) => s + (i.quantity || 1), 0)
 
   const exportToExcel = () => {
     if (!activeProject) return
@@ -422,9 +426,9 @@ export default function AdminProjects() {
           {(delivered12.length > 0 || delivered14.length > 0) && (
             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
               {[
-                { building: 12, apts: delivered12.length, units: deliveredUnits12 },
-                { building: 14, apts: delivered14.length, units: deliveredUnits14 },
-              ].map(({ building, apts, units }) => apts > 0 ? (
+                { building: 12, apts: delivered12.length, units: deliveredUnits12, totalApts: paid12.length, totalUnits: paidUnits12 },
+                { building: 14, apts: delivered14.length, units: deliveredUnits14, totalApts: paid14.length, totalUnits: paidUnits14 },
+              ].map(({ building, apts, units, totalApts, totalUnits }) => apts > 0 ? (
                 <div key={building} style={{
                   flex: 1, background: '#f0fbf4', border: '1.5px solid #bce8cc',
                   borderRadius: '10px', padding: '10px 14px',
@@ -432,8 +436,9 @@ export default function AdminProjects() {
                   <div style={{ fontSize: '11px', fontWeight: '700', color: '#1a7a3a', marginBottom: '3px' }}>
                     בניין {building} — נמסר
                   </div>
-                  <div style={{ fontSize: '13px', color: '#1a5c38', lineHeight: '1.6' }}>
-                    {apts} דירות · {units} {unitLabel}
+                  <div style={{ fontSize: '13px', color: '#1a5c38', lineHeight: '1.7' }}>
+                    <div>{apts} דירות <span style={{fontWeight:'400', fontSize:'11px', color:'#4a8a6a'}}>(מתוך {totalApts} ששילמו)</span></div>
+                    <div>{units} {unitLabel} <span style={{fontWeight:'400', fontSize:'11px', color:'#4a8a6a'}}>(מתוך {totalUnits} סה״כ)</span></div>
                   </div>
                 </div>
               ) : null)}
