@@ -97,6 +97,10 @@ export function Parking() {
             border:'1.5px solid #f5c97a', marginBottom:'10px'}}>
             📞 050-431-7336
           </a>
+          <div style={{background:'#fdf0f0', border:'1.5px solid #f0b8b8', borderRadius:'8px',
+            padding:'10px 14px', fontSize:'13px', color:'#c04444', lineHeight:'1.7', marginBottom:'10px'}}>
+            ⚠️ כרגע לא פעיל — אין אפשרות לפתוח בשיחה טלפונית בגלל בעיות קליטת SIM של השער. אם יהיה שינוי נעדכן.
+          </div>
           <div style={{fontSize:'12px', color:'var(--muted)', marginBottom:'10px'}}>
             חיוג ממספר רשום במערכת יפתח את השער אוטומטית.
           </div>
