@@ -9,6 +9,7 @@ const tabs = [
   { id: 'elevator',  label: 'מעלית' },
   { id: 'arnona',    label: 'ארנונה' },
   { id: 'ac',        label: 'מיזוג אוויר' },
+  { id: 'intercom',  label: 'אינטרקום' },
 ]
 
 function PostalTab() {
@@ -130,6 +131,55 @@ function CellularTab() {
   </>
 }
 
+function IntercomTab() {
+  return <>
+    <div className="section-label">הוראות הפעלה — צג האינטרקום בדירה</div>
+    <p style={{fontSize:'13.5px', color:'var(--muted)', marginBottom:'16px', lineHeight:'1.7'}}>
+      להלן הסבר על כפתורי צג האינטרקום של חברת DACOM המותקן בדירות הבניין.
+    </p>
+
+    <img
+      src={import.meta.env.BASE_URL + 'intercom.png'}
+      alt="צג אינטרקום DACOM"
+      style={{width:'100%', borderRadius:'12px', marginBottom:'20px', border:'1px solid var(--border)'}}
+    />
+
+    <div className="section-label">הפעלה</div>
+
+    <div style={{fontSize:'14px', color:'var(--text)', lineHeight:'1.9', marginBottom:'16px'}}>
+      <p style={{margin:'0 0 10px'}}>כאשר ישנה שיחה נכנסת נפתח המסך. למענה יש ללחוץ על לחצן 4 (מענה לשיחה).</p>
+      <p style={{margin:'0 0 10px'}}>לפתיחת דלת יש ללחוץ על לחצן 5 (פתיחת דלת).</p>
+      <p style={{margin:'0 0 10px'}}>בכדי לפתוח שיחה יזומה יש ללחוץ על לחצן 3 (פתיחת תמונה באופן יזום) ולאחר מכן על לחצן 4 (מענה לשיחה).</p>
+      <p style={{margin:'0 0 10px'}}>לפתיחת דלת יש ללחוץ על לחצן 5 (פתיחת דלת).</p>
+      <p style={{margin:'0 0 10px'}}>לכיבוי המסך יש ללחוץ על לחצן 3 (פתיחת תמונה באופן יזום) שתי לחיצות רצופות.</p>
+    </div>
+
+    <div className="info-block" style={{marginBottom:'16px', lineHeight:'1.9'}}>
+      <strong>להנמכה/הגברה קול, כיוון בהירות וכו׳</strong><br/>
+      יש ללחוץ על לחצן 3 ומיד לאחר מכן על לחצן 1 לדפדוף (למטה למעלה) לחץ על לחצן 1<br/>
+      לכיוון העוצמה לחץ על 4/5<br/>
+      לאישור העוצמה לחץ על לחצן 3
+    </div>
+
+    <div className="info-block amber" style={{marginBottom:'20px'}}>
+      <strong>הערה חשובה</strong> — יש ללחוץ על המקשים פעם אחת ובלחיצות קצרות בלבד.
+    </div>
+
+    <div className="divider"></div>
+    <div className="section-label">סרטון: איפוס המכשיר לעבודה עם שפופרת / ללא שפופרת</div>
+    <video controls style={{width:'100%', borderRadius:'12px', marginBottom:'8px', background:'#000'}}
+      src={import.meta.env.BASE_URL + 'intercom_ipus.mp4'}>
+      הדפדפן שלך אינו תומך בהפעלת וידאו.
+    </video>
+
+    <div className="divider"></div>
+    <div className="section-label">תמיכה טכנית — חברת DACOM</div>
+    <a className="link-btn" href="tel:0775040890">
+      077-504-0890
+    </a>
+  </>
+}
+
 export default function GeneralInfoPage() {
   const [active, setActive] = useState('postal')
   return (
@@ -149,6 +199,7 @@ export default function GeneralInfoPage() {
         {active === 'arnona'   && <ArnonaTab />}
         {active === 'ac'       && <ACTab />}
         {active === 'cellular' && <CellularTab />}
+        {active === 'intercom' && <IntercomTab />}
       </div>
     </div>
   )

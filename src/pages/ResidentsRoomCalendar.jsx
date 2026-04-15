@@ -54,7 +54,7 @@ export default function ResidentsRoomCalendar() {
 
       {/* Intro text */}
       <div style={{ fontSize: '13.5px', color: 'var(--text)', lineHeight: '1.8', marginBottom: '18px', background: '#f7f5f1', borderRadius: '12px', padding: '14px 16px' }}>
-        בבניין קיים חדר דיירים לשימוש הדיירים לאירועים פרטיים.
+        בכל אחד מהבניינים (עגנון 12 ו-14) קיים חדר דיירים לשימוש הדיירים לאירועים פרטיים.
         למען שימוש הוגן ומסודר, יש <strong>להירשם מראש מול חברת הניהול</strong>, לחתום על תקנון החדר ולפעול לפיו — התקנון מצורף בתחתית העמוד.
         <br/>
         <span style={{ color: 'var(--muted)', fontSize: '12.5px' }}>
