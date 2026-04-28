@@ -9,6 +9,7 @@ const tabs = [
   { id: 'elevator',  label: 'מעלית' },
   { id: 'arnona',    label: 'ארנונה' },
   { id: 'ac',        label: 'מיזוג אוויר' },
+  { id: 'heatpump',  label: 'משאבת חום מים' },
   { id: 'intercom',  label: 'אינטרקום' },
 ]
 
@@ -87,6 +88,25 @@ function ACTab() {
     <div className="info-block">🎛️ שלט שהומלץ על ידי דיירים – <strong>עובד מעולה בלי קידוד</strong>.</div>
     <a className="link-btn" href="https://a.aliexpress.com/_c3MVh3yL" target="_blank" rel="noopener">
       🛒 &nbsp; לקנות שלט ב-AliExpress
+    </a>
+    <div className="divider" style={{marginTop:'16px'}}></div>
+    <div className="section-label">הוראות הפעלה — בקר מזגן קירי ELCO</div>
+    <a className="link-btn outline" href={import.meta.env.BASE_URL + 'הוראות_הפעלה_בקר_מזגן_קירי_אלקו.pdf'} target="_blank" rel="noopener">
+      📄 &nbsp; הוראות הפעלה בקר מזגן קירי ELCO
+    </a>
+  </>
+}
+
+function HeatPumpTab() {
+  return <>
+    <div className="section-label">משאבת חום לחימום מים</div>
+    <div className="info-block" style={{marginBottom:'16px', lineHeight:'1.8'}}>
+      בקומות <strong>1–10</strong> בבניין מופעלות <strong>משאבות חום</strong> לצורך חימום מי הדוד.
+      מדובר במערכת יעילה אנרגטית המחממת מים חמים לשימוש ביתי.
+    </div>
+    <div className="section-label">הוראות הפעלה</div>
+    <a className="link-btn" href={import.meta.env.BASE_URL + 'חוברת_הפעלה_משאבת_חום_מים.pdf'} target="_blank" rel="noopener">
+      📄 &nbsp; חוברת הפעלה — משאבת חום מים
     </a>
   </>
 }
@@ -198,6 +218,7 @@ export default function GeneralInfoPage() {
         {active === 'elevator' && <ElevatorTab />}
         {active === 'arnona'   && <ArnonaTab />}
         {active === 'ac'       && <ACTab />}
+        {active === 'heatpump' && <HeatPumpTab />}
         {active === 'cellular' && <CellularTab />}
         {active === 'intercom' && <IntercomTab />}
       </div>
