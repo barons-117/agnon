@@ -23,6 +23,226 @@ function fmtFloor(v) {
   return v
 }
 
+// ─── generatePDF ───────────────────────────────────────────
+function generatePDF(apartments, residents, buildingChoice, modeChoice) {
+  const ownersOnly = modeChoice === 'owners'
+  const buildings = buildingChoice === 'all' ? [12, 14] : [parseInt(buildingChoice)]
+  const today = new Date().toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+  const buildingLabel = buildingChoice === 'all' ? 'שני הבניינים' : `בניין ${buildingChoice}`
+  const modeLabel = ownersOnly ? 'בעלי דירות בלבד' : 'הכל (בעלים + שוכרים)'
+
+  let totalApts = 0, totalResidents = 0
+
+  const buildingBlocks = buildings.map((b, bi) => {
+    const apts = apartments.filter(a => a.building === b).sort((x, y) => x.apt - y.apt)
+    let rows = ''
+
+    apts.forEach(apt => {
+      const aptResidents = residents.filter(r => r.building === b && r.apt === apt.apt)
+      const owners = aptResidents.filter(r => r.role === 'owner')
+      const tenants = aptResidents.filter(r => r.role === 'tenant')
+      const shown = ownersOnly ? owners : [...owners, ...tenants]
+
+      totalApts++
+      if (!apt.is_unsold) totalResidents += shown.length
+
+      const residentRows = shown.map(r => {
+        const isOwner = r.role === 'owner'
+        const roleTxt = isOwner ? 'בעלים' : 'שוכר'
+        const roleColor = isOwner ? '#1e3a5f' : '#0f6e56'
+        const roleBg = isOwner ? '#e4edf8' : '#e1f5ee'
+        const name = r.is_company ? (r.company_name || r.name || '—') : (r.name || '—')
+        const phones = [r.phone, r.phone2].filter(Boolean).join(' · ')
+        const emails = [r.email, r.email2].filter(Boolean).join(' · ')
+        return `
+          <tr>
+            <td style="padding:5px 8px;vertical-align:top;width:56px;">
+              <span style="display:inline-block;background:${roleBg};color:${roleColor};font-size:10px;padding:2px 8px;border-radius:100px;font-weight:600;white-space:nowrap;">${roleTxt}</span>
+            </td>
+            <td style="padding:5px 8px;vertical-align:top;">
+              <div style="font-weight:600;font-size:12px;color:#1a1a1a;">${name}${r.is_company ? ' <span style="font-size:10px;color:#888;">(חברה)</span>' : ''}</div>
+              ${phones ? `<div style="font-size:11px;color:#555;margin-top:2px;">📞 ${phones}</div>` : ''}
+              ${emails ? `<div style="font-size:11px;color:#555;margin-top:1px;">✉ ${emails}</div>` : ''}
+            </td>
+          </tr>`
+      }).join('')
+
+      // parking
+      const parkingParts = []
+      if (apt.parking1) {
+        let p = `מקום ${fmtNum(apt.parking1)}`
+        if (apt.parking1_floor) p += ` (קומה ${fmtFloor(apt.parking1_floor)})`
+        parkingParts.push(p)
+      }
+      if (apt.parking2) {
+        let p = `מקום ${fmtNum(apt.parking2)}`
+        if (apt.parking2_floor) p += ` (קומה ${fmtFloor(apt.parking2_floor)})`
+        parkingParts.push(p)
+      }
+      // storage
+      const storageParts = []
+      if (apt.storage1) {
+        let s = `מחסן ${fmtNum(apt.storage1)}`
+        if (apt.storage1_floor) s += ` (קומה ${fmtFloor(apt.storage1_floor)})`
+        storageParts.push(s)
+      }
+      if (apt.storage2) {
+        let s = `מחסן ${fmtNum(apt.storage2)}`
+        if (apt.storage2_floor) s += ` (קומה ${fmtFloor(apt.storage2_floor)})`
+        storageParts.push(s)
+      }
+
+      const extras = []
+      if (parkingParts.length) extras.push(`🚗 ${parkingParts.join(' + ')}`)
+      if (storageParts.length) extras.push(`📦 ${storageParts.join(' + ')}`)
+
+      rows += `
+        <div style="page-break-inside:avoid;border:1px solid #dde3ee;border-radius:8px;margin-bottom:8px;overflow:hidden;">
+          <div style="display:flex;align-items:stretch;gap:0;">
+            <div style="background:${b === 12 ? '#1e3a5f' : '#1a6b4a'};color:white;min-width:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 6px;flex-shrink:0;">
+              <div style="font-size:17px;font-weight:700;line-height:1;">${apt.apt}</div>
+              <div style="font-size:10px;opacity:0.75;margin-top:3px;">קומה ${apt.floor}</div>
+            </div>
+            <div style="flex:1;padding:8px 10px;">
+              <div style="font-size:10px;color:#666;margin-bottom:6px;">${apt.rooms} חדרים · ${apt.area} מ"ר${apt.is_unsold ? ' · <em>דירה לא מכורה</em>' : ''}</div>
+              ${apt.is_unsold ? '' : (shown.length === 0
+                ? '<div style="font-size:11px;color:#999;">אין פרטי דיירים</div>'
+                : `<table style="width:100%;border-collapse:collapse;">${residentRows}</table>`
+              )}
+              ${extras.length ? `<div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;">${extras.map(e => `<span style="font-size:10px;color:#555;background:#f0f3f8;border:1px solid #dde3ee;padding:2px 8px;border-radius:5px;">${e}</span>`).join('')}</div>` : ''}
+            </div>
+          </div>
+        </div>`
+    })
+
+    const pageBreak = bi > 0 ? 'page-break-before:always;' : ''
+
+    return `
+      <div style="${pageBreak}padding-top:${bi > 0 ? '20px' : '0'};">
+        <div style="background:#eef3fb;border:1px solid #c8d8f0;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:14px;font-weight:700;color:#1e3a5f;">🏢 בניין ${b} — שי עגנון ${b}, קריית אונו</div>
+          <div style="font-size:11px;color:#5a7aaa;">${apts.length} דירות</div>
+        </div>
+        ${rows}
+      </div>`
+  })
+
+  const html = `<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<title>רשימת דיירים — שי עגנון</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Heebo', Arial, sans-serif; direction: rtl; color: #1a1a1a; background: white; padding: 0; margin: 0; }
+  @page { size: A4; margin: 18mm 14mm 18mm 14mm; }
+  @media print {
+    body { padding: 0; }
+    .no-print { display: none !important; }
+  }
+  .page-content { padding: 0 0 20px; }
+</style>
+</head>
+<body>
+
+<div class="page-content">
+
+  <!-- Header -->
+  <div style="background:#1e3a5f;color:white;padding:18px 20px 14px;border-radius:10px;margin-bottom:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div style="font-size:20px;font-weight:700;">רשימת דיירים — שי עגנון 12 ו-14</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px;">קריית אונו · ועד בית</div>
+      </div>
+      <div style="text-align:left;font-size:11px;color:rgba(255,255,255,0.65);line-height:1.7;">
+        <div>הופק: ${today}</div>
+        <div>${buildingLabel} · ${modeLabel}</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <span style="background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.9);font-size:11px;padding:3px 12px;border-radius:100px;">${totalApts} דירות</span>
+      <span style="background:#1a7a3a;color:white;font-size:11px;padding:3px 12px;border-radius:100px;">${totalResidents} רשומים</span>
+    </div>
+  </div>
+
+  ${buildingBlocks.join('')}
+
+  <!-- Footer -->
+  <div style="margin-top:24px;padding-top:12px;border-top:1px solid #dde3ee;display:flex;justify-content:space-between;font-size:10px;color:#888;">
+    <span>agnon.net · ועד בית שי עגנון 12 ו-14</span>
+    <span>${totalApts} דירות · ${totalResidents} רשומים · הופק ${today}</span>
+  </div>
+
+</div>
+
+<script>
+  window.onload = function() { window.print(); }
+<\/script>
+</body>
+</html>`
+
+  const w = window.open('', '_blank')
+  if (w) {
+    w.document.write(html)
+    w.document.close()
+  }
+}
+
+// ─── ExportModal ────────────────────────────────────────────
+function ExportModal({ apartments, residents, onClose }) {
+  const [buildingChoice, setBuildingChoice] = useState('all')
+  const [modeChoice, setModeChoice] = useState('all')
+
+  const doExport = () => {
+    generatePDF(apartments, residents, buildingChoice, modeChoice)
+    onClose()
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }} onClick={onClose}>
+      <div style={{ background: 'white', borderRadius: '16px', width: '100%', maxWidth: '360px', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        <div style={{ background: 'var(--primary)', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ color: 'white', fontWeight: '700', fontSize: '15px' }}>📄 ייצוא רשימת דיירים</div>
+          <button onClick={onClose} style={btn({ background: 'rgba(255,255,255,0.2)', color: 'white', padding: '4px 10px' })}>✕</button>
+        </div>
+        <div style={{ padding: '20px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>בניין</div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {[['all', 'שניהם'], ['12', 'עגנון 12'], ['14', 'עגנון 14']].map(([v, l]) => (
+                <button key={v} onClick={() => setBuildingChoice(v)}
+                  style={btn({ flex: 1, background: buildingChoice === v ? 'var(--primary)' : '#f0ede8', color: buildingChoice === v ? 'white' : 'var(--text)', fontSize: '13px', padding: '9px 6px' })}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>הצג</div>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              {[['all', 'הכל (בעלים + שוכרים)'], ['owners', 'בעלי דירות בלבד']].map(([v, l]) => (
+                <button key={v} onClick={() => setModeChoice(v)}
+                  style={btn({ flex: 1, background: modeChoice === v ? 'var(--primary)' : '#f0ede8', color: modeChoice === v ? 'white' : 'var(--text)', fontSize: '13px', padding: '9px 6px' })}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button onClick={doExport}
+            style={btn({ width: '100%', background: '#1a7a3a', color: 'white', padding: '12px', fontSize: '14px' })}>
+            📄 הפק PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── ApartmentRow ──────────────────────────────────────────
 function ApartmentRow({ apt, residents, projectItems, onEditResident, onAddResident }) {
   const [open, setOpen] = useState(false)
@@ -721,6 +941,7 @@ export default function AdminApartments() {
   const [pendingRequests, setPendingRequests] = useState([])
   const [showPending, setShowPending] = useState(false)
   const [editingRequest, setEditingRequest] = useState(null)
+  const [showExport, setShowExport] = useState(false)
 
   useEffect(() => { loadAll() }, [])
 
@@ -741,12 +962,10 @@ export default function AdminApartments() {
     const data = overrides || req
     if (req.request_type === 'replace_tenant') {
       if (req.replace_tenant_name) {
-        // Delete only the specific tenant by name
         await supabase.from('residents').delete()
           .eq('building', req.building).eq('apt', req.apt)
           .eq('role', 'tenant').eq('name', req.replace_tenant_name)
       } else {
-        // Delete all tenants
         await supabase.from('residents').delete()
           .eq('building', req.building).eq('apt', req.apt).eq('role', 'tenant')
       }
@@ -762,9 +981,80 @@ export default function AdminApartments() {
     setEditingRequest(null)
   }
 
+  // Batch approval: one DELETE + multi INSERT for groups submitted together
+  const approveGroup = async (group) => {
+    if (!group || group.length === 0) return
+    if (group.length === 1) return approveRequest(group[0])
+
+    const first = group[0]
+
+    // Step 1: DELETE — once for the whole group (only for replace_tenant)
+    if (first.request_type === 'replace_tenant') {
+      if (first.replace_tenant_name) {
+        await supabase.from('residents').delete()
+          .eq('building', first.building).eq('apt', first.apt)
+          .eq('role', 'tenant').eq('name', first.replace_tenant_name)
+      } else {
+        await supabase.from('residents').delete()
+          .eq('building', first.building).eq('apt', first.apt).eq('role', 'tenant')
+      }
+    }
+
+    // Step 2: INSERT all new tenants in one shot
+    const inserts = group.map(r => ({
+      building: r.building, apt: r.apt, role: 'tenant',
+      name: r.name, phone: r.phone, phone2: r.phone2 || null,
+      email: r.email, email2: r.email2 || null,
+      is_company: false,
+    }))
+    await supabase.from('residents').insert(inserts)
+
+    // Step 3: Mark all rows as approved
+    const ids = group.map(r => r.id)
+    await supabase.from('profile_update_requests')
+      .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+      .in('id', ids)
+
+    await loadAll()
+    setEditingRequest(null)
+  }
+
+  // Save edits to a pending request without approving it (used inside groups)
+  const saveOnlyRequest = async (req, overrides) => {
+    await supabase.from('profile_update_requests').update({
+      name: overrides.name,
+      phone: overrides.phone,
+      phone2: overrides.phone2 || null,
+      email: overrides.email,
+      email2: overrides.email2 || null,
+      notes: overrides.notes || null,
+    }).eq('id', req.id)
+    await loadAll()
+    setEditingRequest(null)
+  }
+
   const dismissRequest = async (req) => {
     await supabase.from('profile_update_requests').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', req.id)
     await loadAll()
+  }
+
+  // Group requests submitted together (same apt + same action + within 30s)
+  const groupRequests = (reqs) => {
+    const sorted = [...reqs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    const groups = []
+    for (const req of sorted) {
+      const key = `${req.building}-${req.apt}-${req.request_type}-${req.replace_tenant_name || ''}`
+      const last = groups.find(g =>
+        g.key === key &&
+        Math.abs(new Date(req.created_at) - new Date(g.items[g.items.length - 1].created_at)) < 30000
+      )
+      if (last) {
+        last.items.push(req)
+      } else {
+        groups.push({ key, items: [req] })
+      }
+    }
+    return groups.map(g => g.items)
   }
 
   const filteredApts = apartments.filter(a => {
@@ -814,19 +1104,27 @@ export default function AdminApartments() {
       {/* ── Pending list ── */}
       {showPending && pendingRequests.length > 0 && (
         <div style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {pendingRequests.map(req => (
-            <PendingRequestCard key={req.id} req={req}
-              onApprove={() => approveRequest(req)}
-              onEdit={() => setEditingRequest(req)}
-              onDismiss={() => dismissRequest(req)} />
-          ))}
+          {groupRequests(pendingRequests).map((group, gi) =>
+            group.length === 1 ? (
+              <PendingRequestCard key={group[0].id} req={group[0]}
+                onApprove={() => approveRequest(group[0])}
+                onEdit={() => setEditingRequest({ req: group[0], inGroup: false })}
+                onDismiss={() => dismissRequest(group[0])} />
+            ) : (
+              <PendingGroupCard key={`g-${gi}`} group={group}
+                onApproveGroup={() => approveGroup(group)}
+                onEdit={(req) => setEditingRequest({ req, inGroup: true })}
+                onDismiss={(req) => dismissRequest(req)} />
+            )
+          )}
         </div>
       )}
 
       {/* ── Edit request modal ── */}
       {editingRequest && (
-        <EditRequestModal req={editingRequest}
-          onApprove={(data) => approveRequest(editingRequest, data)}
+        <EditRequestModal req={editingRequest.req} inGroup={editingRequest.inGroup}
+          onApprove={(data) => approveRequest(editingRequest.req, data)}
+          onSaveOnly={(data) => saveOnlyRequest(editingRequest.req, data)}
           onClose={() => setEditingRequest(null)} />
       )}
 
@@ -842,7 +1140,20 @@ export default function AdminApartments() {
           placeholder="חיפוש שם / דירה / טלפון / חניה / מחסן..."
           style={{ flex: 1, padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '13px', fontFamily: 'Heebo, sans-serif', background: '#fafaf8', minWidth: '140px' }} />
         <div style={{ fontSize: '12px', color: 'var(--muted)', alignSelf: 'center', whiteSpace: 'nowrap' }}>{filteredApts.length} דירות</div>
+        <button onClick={() => setShowExport(true)}
+          title="ייצוא לPDF"
+          style={btn({ background: '#f0fbf4', color: '#1a7a3a', border: '1.5px solid #bce8cc', padding: '7px 12px', fontSize: '16px' })}>
+          📄
+        </button>
       </div>
+
+      {showExport && (
+        <ExportModal
+          apartments={apartments}
+          residents={residents}
+          onClose={() => setShowExport(false)}
+        />
+      )}
 
       <div style={{ border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
         {filteredApts.map(apt => (
@@ -917,7 +1228,7 @@ function PendingRequestCard({ req, onApprove, onEdit, onDismiss }) {
 }
 
 // ─── EditRequestModal ──────────────────────────────────────
-function EditRequestModal({ req, onApprove, onClose }) {
+function EditRequestModal({ req, inGroup, onApprove, onSaveOnly, onClose }) {
   const [form, setForm] = useState({
     name: req.name || '', phone: req.phone || '', phone2: req.phone2 || '',
     email: req.email || '', email2: req.email2 || '', notes: req.notes || '',
@@ -936,6 +1247,14 @@ function EditRequestModal({ req, onApprove, onClose }) {
           <button onClick={onClose} style={btn({ background: 'rgba(255,255,255,0.2)', color: 'white', padding: '4px 10px' })}>✕</button>
         </div>
         <div style={{ padding: '18px' }}>
+          {inGroup && (
+            <div style={{
+              background: '#f0e8fb', border: '1px solid #d4c4f0', borderRadius: '9px',
+              padding: '9px 12px', marginBottom: '14px', fontSize: '12px', color: '#4a2a7a', lineHeight: '1.6',
+            }}>
+              📦 הבקשה הזו חלק מקבוצה. שמירה תעדכן רק את הפרטים שלה — האישור עצמו ייעשה דרך כפתור <strong>"אשר את כל הקבוצה"</strong>.
+            </div>
+          )}
           {[
             { k: 'name',   l: 'שם מלא',      dir: 'rtl' },
             { k: 'phone',  l: 'טלפון ראשי',   dir: 'ltr' },
@@ -950,10 +1269,88 @@ function EditRequestModal({ req, onApprove, onClose }) {
             </div>
           ))}
           <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-            <button onClick={() => onApprove(form)} style={btn({ background: '#1a7a3a', color: 'white', flex: 1, padding: '10px', fontSize: '14px' })}>✅ אשר ושמור</button>
+            {inGroup ? (
+              <button onClick={() => onSaveOnly(form)} style={btn({ background: 'var(--primary)', color: 'white', flex: 1, padding: '10px', fontSize: '14px' })}>💾 שמור שינויים</button>
+            ) : (
+              <button onClick={() => onApprove(form)} style={btn({ background: '#1a7a3a', color: 'white', flex: 1, padding: '10px', fontSize: '14px' })}>✅ אשר ושמור</button>
+            )}
             <button onClick={onClose} style={btn({ background: '#fdf0f0', color: '#e05555' })}>ביטול</button>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── PendingGroupCard ──────────────────────────────────────
+function PendingGroupCard({ group, onApproveGroup, onEdit, onDismiss }) {
+  const first = group[0]
+  const date = new Date(first.created_at).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
+
+  const actionLabel = () => {
+    const n = group.length
+    if (first.request_type === 'add_tenant') return { label: `הוספת ${n} שוכרים`, bg: '#e8f9ee', color: '#1a7a3a' }
+    if (first.replace_tenant_name) return { label: `החלפת ${first.replace_tenant_name} ב-${n} שוכרים`, bg: '#fff3e0', color: '#b35c00' }
+    return { label: `החלפת כל השוכרים ב-${n} חדשים`, bg: '#e8f4fd', color: '#1a5c8c' }
+  }
+  const al = actionLabel()
+  const groupNotes = group.find(r => r.notes)?.notes
+
+  return (
+    <div style={{ background: 'white', border: '2px solid #c4a8e8', borderRadius: '12px', padding: '14px 16px', position: 'relative' }}>
+      <div style={{
+        position: 'absolute', top: '-9px', right: '14px',
+        background: '#6f3aaa', color: 'white', borderRadius: '100px',
+        padding: '2px 10px', fontSize: '11px', fontWeight: '800',
+      }}>
+        📦 קבוצה · {group.length} בקשות
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '6px', marginBottom: '12px' }}>
+        <div>
+          <div style={{ fontWeight: '800', fontSize: '15px', color: 'var(--primary)' }}>
+            בניין {first.building} · דירה {first.apt}
+            <span style={{ marginRight: '8px', fontSize: '11px', background: al.bg, color: al.color, padding: '2px 7px', borderRadius: '100px', fontWeight: '700' }}>
+              {al.label}
+            </span>
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>{date}</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginBottom: '12px' }}>
+        {group.map((req, idx) => (
+          <div key={req.id} style={{ background: '#f7f5f1', borderRadius: '9px', padding: '10px 13px', fontSize: '13px', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '700' }}>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '6px', fontWeight: '600' }}>שוכר {idx + 1}:</span>
+                {req.name}
+              </div>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button onClick={() => onEdit(req)} style={btn({ background: '#e8f4fd', color: '#1a5c8c', padding: '3px 9px', fontSize: '11px' })}>✏️</button>
+                <button onClick={() => onDismiss(req)} style={btn({ background: '#fdf0f0', color: '#e05555', padding: '3px 9px', fontSize: '11px' })} title="הסר את השוכר הזה מהקבוצה">✕</button>
+              </div>
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
+              📞 {req.phone}{req.phone2 ? ` · ${req.phone2}` : ''}
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: '12px' }}>
+              ✉️ {req.email}{req.email2 ? ` · ${req.email2}` : ''}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {groupNotes && (
+        <div style={{ background: '#fffbea', border: '1px solid #f0d060', borderRadius: '9px', padding: '8px 12px', fontSize: '12px', color: '#7a6000', fontStyle: 'italic', marginBottom: '12px' }}>
+          הערה: "{groupNotes}"
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button onClick={onApproveGroup} style={btn({ background: '#1a7a3a', color: 'white', flex: 1, padding: '10px', fontWeight: '700' })}>
+          ✅ אשר את כל הקבוצה ({group.length})
+        </button>
       </div>
     </div>
   )

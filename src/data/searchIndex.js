@@ -33,11 +33,15 @@ export const searchIndex = [
   { text: 'חדר דיירים הזמנה זמינות', tab: 'residents-room', desc: 'לוח זמינות חדר דיירים' },
 
   // מידע כללי
-  { text: 'מיקוד גוש חלקה כתובת', tab: 'general-info', desc: 'פרטי הנכס הרשמיים' },
-  { text: 'מידות מעלית', tab: 'general-info', desc: 'מידות מעלית משא ורגילה' },
-  { text: 'לוי אשכול כתובת', tab: 'general-info', desc: 'לוי אשכול 75/77' },
-  { text: 'ארנונה תשלום עירייה', tab: 'general-info', desc: 'תעריפי ארנונה קריית אונו 2026' },
-  { text: 'מיזוג אוויר דירה נעילת ילדים', tab: 'general-info', desc: 'מדריך מיזוג ושלט AliExpress' },
+  { text: 'מיקוד', tab: 'general-info~postal', desc: 'מיקוד עגנון 12/14' },
+  { text: 'גוש חלקה', tab: 'general-info~gush', desc: 'גוש 6496 · חלקות 519/520' },
+  { text: 'כתובת לוי אשכול', tab: 'general-info~address', desc: 'לוי אשכול 75/77' },
+  { text: 'מידות מעלית משא רגילה', tab: 'general-info~elevator', desc: 'מידות מעלית משא ורגילה' },
+  { text: 'ארנונה תשלום עירייה', tab: 'general-info~arnona', desc: 'תעריפי ארנונה קריית אונו 2026' },
+  { text: 'מיזוג אוויר דירה נעילת ילדים שלט', tab: 'general-info~ac', desc: 'מדריך מיזוג ושלט AliExpress' },
+  { text: 'משאבת חום מים דוד חימום', tab: 'general-info~heatpump', desc: 'משאבת חום לחימום מים · קומות 1–10' },
+  { text: 'אינטרקום DACOM צג פתיחת דלת', tab: 'general-info~intercom', desc: 'הוראות הפעלה צג אינטרקום' },
+  { text: 'קליטה סלולרית WiFi Calling חניון', tab: 'general-info~cellular', desc: 'פתרון קליטה סלולרית בבניין' },
 
   // בעלי מקצוע
   { text: 'קובי הנדימן צבע ריהוט', tab: 'pros', desc: '054-573-7556 · גר בפרויקט' },

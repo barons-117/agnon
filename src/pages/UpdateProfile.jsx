@@ -19,13 +19,15 @@ const actionBtn = (active) => ({
   cursor: 'pointer', textAlign: 'right', transition: 'all 0.15s',
 })
 
+const emptyTenant = () => ({ name: '', phone: '', phone2: '', email: '', email2: '' })
+
 export default function UpdateProfile() {
-  // Steps: select → pending_warn → confirm → action_select → form → done
+  // Steps: select → pending_warn → confirm → form → done
   const [step, setStep] = useState('select')
   const [building, setBuilding] = useState('')
   const [aptNum, setAptNum] = useState('')
   const [owners, setOwners] = useState([])
-  const [tenants, setTenants] = useState([])
+  const [tenants, setTenants] = useState([])           // existing tenants from DB
   const [pendingCount, setPendingCount] = useState(0)
   const [loadingApt, setLoadingApt] = useState(false)
   const [aptError, setAptError] = useState('')
@@ -33,11 +35,44 @@ export default function UpdateProfile() {
 
   // Action: 'replace_all' | 'replace_one' | 'add_tenant'
   const [action, setAction] = useState(null)
-  const [replacingTenant, setReplacingTenant] = useState(null) // name of tenant being replaced
+  const [replacingTenant, setReplacingTenant] = useState(null)
 
-  const [form, setForm] = useState({ name: '', phone: '', phone2: '', email: '', email2: '', notes: '' })
-  const [errors, setErrors] = useState({})
-  const ff = (k) => e => setForm(x => ({ ...x, [k]: e.target.value }))
+  // NEW: array of tenant detail objects (1+)
+  const [newTenants, setNewTenants] = useState([emptyTenant()])
+  const [notes, setNotes] = useState('')
+  const [errors, setErrors] = useState({})  // keyed by `${idx}_${field}`
+
+  const updateTenant = (idx, key, value) => {
+    setNewTenants(prev => prev.map((t, i) => i === idx ? { ...t, [key]: value } : t))
+    // Clear that specific error as user types
+    if (errors[`${idx}_${key}`]) {
+      setErrors(prev => {
+        const n = { ...prev }
+        delete n[`${idx}_${key}`]
+        return n
+      })
+    }
+  }
+
+  const addAnotherTenant = () => {
+    setNewTenants(prev => [...prev, emptyTenant()])
+  }
+
+  const removeTenant = (idx) => {
+    setNewTenants(prev => prev.filter((_, i) => i !== idx))
+    // Re-index errors so they don't end up pointing at the wrong row
+    setErrors(prev => {
+      const next = {}
+      Object.entries(prev).forEach(([k, v]) => {
+        const m = k.match(/^(\d+)_(.+)$/)
+        if (!m) { next[k] = v; return }
+        const i = parseInt(m[1])
+        if (i === idx) return                  // drop errors for removed row
+        next[`${i > idx ? i - 1 : i}_${m[2]}`] = v
+      })
+      return next
+    })
+  }
 
   const lookupApt = async () => {
     if (!building || !aptNum.trim()) return
@@ -56,7 +91,6 @@ export default function UpdateProfile() {
     setTenants((data.tenants || []).map((name, i) => ({ id: i, name })))
     setPendingCount(data.pending_requests || 0)
     setLoadingApt(false)
-    // If pending requests exist, warn first
     if ((data.pending_requests || 0) > 0) {
       setStep('pending_warn')
     } else {
@@ -67,18 +101,21 @@ export default function UpdateProfile() {
   const chooseAction = (act, tenant = null) => {
     setAction(act)
     setReplacingTenant(tenant)
-    setForm({ name: '', phone: '', phone2: '', email: '', email2: '', notes: '' })
+    setNewTenants([emptyTenant()])
+    setNotes('')
     setErrors({})
     setStep('form')
   }
 
   const validate = () => {
     const e = {}
-    if (!form.name.trim()) e.name = 'שם מלא הוא שדה חובה'
-    if (!form.phone.trim()) e.phone = 'טלפון הוא שדה חובה'
-    else if (!/^[\d\-\+\s]{7,}$/.test(form.phone.trim())) e.phone = 'מספר טלפון לא תקין'
-    if (!form.email.trim()) e.email = 'מייל הוא שדה חובה'
-    else if (!/\S+@\S+\.\S+/.test(form.email.trim())) e.email = 'כתובת מייל לא תקינה'
+    newTenants.forEach((t, idx) => {
+      if (!t.name.trim()) e[`${idx}_name`] = 'שם מלא הוא שדה חובה'
+      if (!t.phone.trim()) e[`${idx}_phone`] = 'טלפון הוא שדה חובה'
+      else if (!/^[\d\-\+\s]{7,}$/.test(t.phone.trim())) e[`${idx}_phone`] = 'מספר טלפון לא תקין'
+      if (!t.email.trim()) e[`${idx}_email`] = 'מייל הוא שדה חובה'
+      else if (!/\S+@\S+\.\S+/.test(t.email.trim())) e[`${idx}_email`] = 'כתובת מייל לא תקינה'
+    })
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -89,20 +126,26 @@ export default function UpdateProfile() {
 
     const request_type = action === 'add_tenant' ? 'add_tenant' : 'replace_tenant'
 
-    await supabase.from('profile_update_requests').insert([{
+    const rows = newTenants.map(t => ({
       building: parseInt(building),
       apt: parseInt(aptNum),
       request_type,
       replace_tenant_name: action === 'replace_one' ? replacingTenant : null,
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      phone2: form.phone2.trim() || null,
-      email: form.email.trim(),
-      email2: form.email2.trim() || null,
-      notes: form.notes.trim() || null,
+      name: t.name.trim(),
+      phone: t.phone.trim(),
+      phone2: t.phone2.trim() || null,
+      email: t.email.trim(),
+      email2: t.email2.trim() || null,
+      notes: notes.trim() || null,
       status: 'pending',
-    }])
+    }))
+
+    const { error } = await supabase.from('profile_update_requests').insert(rows)
     setSubmitting(false)
+    if (error) {
+      alert('שליחת הבקשה נכשלה: ' + (error.message || ''))
+      return
+    }
     setStep('done')
   }
 
@@ -110,7 +153,7 @@ export default function UpdateProfile() {
     setStep('select'); setBuilding(''); setAptNum('')
     setOwners([]); setTenants([]); setPendingCount(0)
     setAction(null); setReplacingTenant(null)
-    setForm({ name: '', phone: '', phone2: '', email: '', email2: '', notes: '' })
+    setNewTenants([emptyTenant()]); setNotes('')
     setErrors({})
   }
 
@@ -119,6 +162,23 @@ export default function UpdateProfile() {
       ℹ️ הפרטים <strong>לא יעודכנו אוטומטית</strong> — הבקשה תועבר לועד הבית לאישור לפני שינוי כלשהו במערכת.
     </div>
   )
+
+  // Headline text per action + tenant count
+  const formHeadline = () => {
+    const n = newTenants.length
+    if (action === 'add_tenant') {
+      return n === 1 ? '➕ פרטי השוכר הנוסף' : `➕ פרטי ${n} השוכרים הנוספים`
+    }
+    if (action === 'replace_all') {
+      return n === 1 ? '🔄 פרטי השוכר החדש (יחליף את כולם)' : `🔄 פרטי ${n} השוכרים החדשים (יחליפו את כולם)`
+    }
+    if (action === 'replace_one') {
+      return n === 1
+        ? `↩️ פרטי השוכר החדש (יחליף את ${replacingTenant})`
+        : `↩️ פרטי ${n} השוכרים החדשים (יחליפו את ${replacingTenant})`
+    }
+    return ''
+  }
 
   return (
     <section className="page-section">
@@ -253,31 +313,88 @@ export default function UpdateProfile() {
       {step === 'form' && (
         <div style={{ maxWidth: '420px' }}>
           <div style={{ background: 'var(--primary)', borderRadius: '12px', padding: '12px 18px', marginBottom: '18px', color: 'white', fontSize: '14px', fontWeight: '700' }}>
-            {action === 'add_tenant' && '➕ פרטי השוכר הנוסף'}
-            {action === 'replace_all' && '🔄 פרטי השוכר החדש (יחליף את כולם)'}
-            {action === 'replace_one' && `↩️ פרטי השוכר החדש (יחליף את ${replacingTenant})`}
+            {formHeadline()}
             <div style={{ fontSize: '12px', opacity: 0.75, marginTop: '3px', fontWeight: '400' }}>בניין {building} · דירה {aptNum}</div>
           </div>
 
-          {[
-            { key: 'name',   label: 'שם מלא *',        placeholder: 'שם פרטי + שם משפחה', dir: 'rtl' },
-            { key: 'phone',  label: 'טלפון ראשי *',     placeholder: '05x-xxxxxxx',         dir: 'ltr' },
-            { key: 'phone2', label: 'טלפון נוסף',       placeholder: '(רשות)',               dir: 'ltr' },
-            { key: 'email',  label: 'מייל ראשי *',      placeholder: 'email@example.com',    dir: 'ltr' },
-            { key: 'email2', label: 'מייל נוסף',        placeholder: '(רשות)',               dir: 'ltr' },
-          ].map(item => (
-            <div key={item.key} style={{ marginBottom: '14px' }}>
-              <span style={lbl}>{item.label}</span>
-              <input value={form[item.key]} onChange={ff(item.key)}
-                placeholder={item.placeholder} dir={item.dir}
-                style={inp(errors[item.key] ? { borderColor: '#e05555' } : {})} />
-              {errors[item.key] && <div style={{ color: '#e05555', fontSize: '12px', marginTop: '4px' }}>{errors[item.key]}</div>}
+          {/* Per-tenant cards */}
+          {newTenants.map((tenant, idx) => (
+            <div key={idx} style={{
+              background: 'white',
+              border: '1.5px solid var(--border)',
+              borderRadius: '12px',
+              padding: '14px 14px 6px',
+              marginBottom: '12px',
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '12px',
+                paddingBottom: '8px',
+                borderBottom: '1px dashed var(--border)',
+              }}>
+                <div style={{ fontSize: '13px', fontWeight: '800', color: 'var(--primary)' }}>
+                  {newTenants.length === 1 ? 'פרטי השוכר' : `שוכר ${idx + 1}`}
+                </div>
+                {newTenants.length > 1 && (
+                  <button type="button" onClick={() => removeTenant(idx)} style={{
+                    background: 'transparent',
+                    border: '1px solid #e05555',
+                    color: '#e05555',
+                    borderRadius: '6px',
+                    padding: '4px 10px',
+                    fontFamily: 'Heebo, sans-serif',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                  }}>✕ הסר</button>
+                )}
+              </div>
+
+              {[
+                { key: 'name',   label: 'שם מלא *',        placeholder: 'שם פרטי + שם משפחה', dir: 'rtl' },
+                { key: 'phone',  label: 'טלפון ראשי *',     placeholder: '05x-xxxxxxx',         dir: 'ltr' },
+                { key: 'phone2', label: 'טלפון נוסף',       placeholder: '(רשות)',               dir: 'ltr' },
+                { key: 'email',  label: 'מייל ראשי *',      placeholder: 'email@example.com',    dir: 'ltr' },
+                { key: 'email2', label: 'מייל נוסף',        placeholder: '(רשות)',               dir: 'ltr' },
+              ].map(item => {
+                const errKey = `${idx}_${item.key}`
+                return (
+                  <div key={item.key} style={{ marginBottom: '10px' }}>
+                    <span style={lbl}>{item.label}</span>
+                    <input value={tenant[item.key]}
+                      onChange={e => updateTenant(idx, item.key, e.target.value)}
+                      placeholder={item.placeholder} dir={item.dir}
+                      style={inp(errors[errKey] ? { borderColor: '#e05555', background: '#fff' } : { background: '#fafaf8' })} />
+                    {errors[errKey] && <div style={{ color: '#e05555', fontSize: '12px', marginTop: '4px' }}>{errors[errKey]}</div>}
+                  </div>
+                )
+              })}
             </div>
           ))}
 
+          {/* Add another tenant button */}
+          <button type="button" onClick={addAnotherTenant} style={{
+            width: '100%',
+            padding: '12px',
+            borderRadius: '10px',
+            border: '2px dashed var(--primary)',
+            background: 'transparent',
+            color: 'var(--primary)',
+            fontFamily: 'Heebo, sans-serif',
+            fontWeight: '700',
+            fontSize: '14px',
+            cursor: 'pointer',
+            marginBottom: '18px',
+            transition: 'all 0.15s',
+          }}>
+            ➕ {newTenants.length === 1 ? 'יש דייר נוסף? הוסף אותו' : 'הוסף עוד דייר'}
+          </button>
+
           <div style={{ marginBottom: '20px' }}>
             <span style={lbl}>הערות לועד הבית (רשות)</span>
-            <textarea value={form.notes} onChange={ff('notes')}
+            <textarea value={notes} onChange={e => setNotes(e.target.value)}
               placeholder="רוצים להוסיף משהו לועד?"
               rows={3} style={{ ...inp(), resize: 'vertical', lineHeight: '1.6' }} />
           </div>
@@ -294,7 +411,9 @@ export default function UpdateProfile() {
               padding: '12px', fontFamily: 'Heebo, sans-serif', fontWeight: '700', fontSize: '15px',
               cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.7 : 1, transition: 'all 0.15s',
             }}>
-              {submitting ? 'שולח...' : '📨 שלח לאישור הועד'}
+              {submitting
+                ? 'שולח...'
+                : (newTenants.length === 1 ? '📨 שלח לאישור הועד' : `📨 שלח ${newTenants.length} בקשות לאישור הועד`)}
             </button>
           </div>
         </div>

@@ -55,7 +55,7 @@ export default function App() {
     'wifi':           <Wifi />,
     'pros':           <Pros />,
     'contractors':    <Contractors />,
-    'general-info':     <GeneralInfoPage />,
+    'general-info':     <GeneralInfoPage initialTab={activeSubtab} />,
     'emergency':        <Emergency />,
     'admin':            <Admin />,
     'update-profile':   <UpdateProfile />,

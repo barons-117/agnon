@@ -55,11 +55,18 @@ export function Parking() {
 
         {/* Method 1: Remote */}
         <div style={{background:'white', borderRadius:'12px', padding:'14px 16px', marginBottom:'10px', border:'1px solid #f0dfa0'}}>
-          <div style={{fontWeight:'700', fontSize:'14px', color:'#7a5c00', marginBottom:'6px'}}>🎛️ שלט רחוק</div>
-          <div style={{fontSize:'13px', color:'var(--text)', lineHeight:'1.7'}}>
-            למי שרכש שלט במסגרת הרכישה הקבוצתית — השלט פעיל.<br/>
-            <strong>הרכישה הקבוצתית נסגרה.</strong> מי שמעוניין לרכוש שלט באופן פרטי מוזמן לפנות ישירות אל חברת <strong>תמיר שערים</strong>.
+          <div style={{fontWeight:'700', fontSize:'14px', color:'#7a5c00', marginBottom:'6px'}}>🎛️ שלט רחוק פיזי</div>
+          <div style={{fontSize:'13px', color:'var(--text)', lineHeight:'1.7', marginBottom:'12px'}}>
+            ניתן לרכוש שלט פיזי <strong>דרך הוועד</strong> בעלות של <strong>90 ₪</strong>.<br/>
+            היתרון בשלט הפיזי: הוא פשוט לתפעול, אינו מסתמך על תקשורת או על טלפון נייד, ויכול לשמש כגיבוי טוב.<br/>
+            עם זאת — השלט <strong>אינו חובה</strong>, וניתן בהחלט להסתדר עם האפליקציה בלבד.
           </div>
+          <a href="tel:0542121021" style={{display:'inline-flex', alignItems:'center', gap:'8px',
+            background:'#fff3d6', color:'#7a5c00', borderRadius:'100px',
+            padding:'8px 18px', fontSize:'14px', fontWeight:'700', textDecoration:'none',
+            border:'1.5px solid #f5c97a'}}>
+            📞 לרכישה — ארז 054-212-1021
+          </a>
         </div>
 
         {/* Method 2: App */}
@@ -111,6 +118,45 @@ export function Parking() {
             📋 עדכון מספר טלפון
           </a>
         </div>
+      </div>
+
+      {/* EV charging */}
+      <div style={{
+        background:'linear-gradient(135deg,#f0fbf4,#e2f5ea)', border:'1.5px solid #a8dcbc',
+        borderRadius:'16px', padding:'20px', marginBottom:'16px'
+      }}>
+        <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px'}}>
+          <div style={{fontSize:'28px'}}>⚡</div>
+          <div>
+            <div style={{fontWeight:'800', fontSize:'16px', color:'#1a5c38'}}>רכבים חשמליים</div>
+            <div style={{fontSize:'13px', color:'#3a7a55'}}>התקנת עמדת טעינה בחנייה הפרטית</div>
+          </div>
+        </div>
+
+        <div style={{fontSize:'13.5px', color:'var(--text)', lineHeight:'1.8', marginBottom:'12px'}}>
+          דייר שמעוניין בעמדת טעינה לרכב חשמלי בחנייה שלו <strong>אינו יכול להתקין אותה באופן עצמאי</strong> או
+          דרך חשמלאי פרטי — ההתקנה מתבצעת <strong>רק דרך החברה שאיתה הבניינים חתמו הסכם</strong>.
+        </div>
+
+        <div style={{background:'white', borderRadius:'12px', padding:'14px 16px', marginBottom:'12px', border:'1px solid #c8e8d4'}}>
+          <div style={{fontWeight:'700', fontSize:'14px', color:'#1a5c38', marginBottom:'8px'}}>למה דרך חברה אחת?</div>
+          <div style={{fontSize:'13px', color:'var(--text)', lineHeight:'1.8'}}>
+            לחיבור החשמל של הבניין יש קיבולת מוגבלת. כשהרבה רכבים נטענים בבת אחת — בעיקר בערב, כשכולם חוזרים הביתה —
+            עלול להיווצר עומס שיקפיץ את החשמל ויפגע בתשתית המשותפת.<br/>
+            החברה מתקינה מערכת <strong>לניהול עומסים</strong>, שמחלקת באופן חכם את ההספק הזמין בין כל הרכבים שמחוברים
+            ומתאימה את קצב הטעינה לצריכת הבניין בזמן אמת — כך שכולם נטענים בלי לחרוג מהקיבולת.
+          </div>
+        </div>
+
+        <div style={{fontSize:'13.5px', color:'var(--text)', lineHeight:'1.8', marginBottom:'12px'}}>
+          הבניינים שלנו חתמו הסכם עם חברת <strong>ENOVA</strong>. לתיאום התקנה פנו לאשת הקשר:
+        </div>
+
+        <a href="tel:0542227252" style={{display:'inline-flex', alignItems:'center', gap:'8px',
+          background:'#1a5c38', color:'white', borderRadius:'100px',
+          padding:'8px 18px', fontSize:'14px', fontWeight:'700', textDecoration:'none'}}>
+          📞 אורית, מתאמת התקנות ENOVA — 054-222-7252
+        </a>
       </div>
 
       {/* Rules */}

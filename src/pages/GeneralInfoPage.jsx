@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const IconBuilding = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -260,18 +260,51 @@ const tabComponents = {
   heatpump: HeatPumpTab, cellular: CellularTab, intercom: IntercomTab,
 }
 
-export default function GeneralInfoPage() {
-  const [activeCategory, setActiveCategory] = useState(null)
-  const [activeTab, setActiveTab] = useState(null)
+// maps a tab id → its parent category id
+const tabToCategory = {}
+categories.forEach(cat => cat.tabs.forEach(t => { tabToCategory[t.id] = cat.id }))
+
+export default function GeneralInfoPage({ initialTab = null }) {
+  // resolve the initial tab: must be a real tab id, otherwise nothing open
+  const resolve = (tab) => {
+    if (tab && tabToCategory[tab]) {
+      return { category: tabToCategory[tab], tab }
+    }
+    return { category: null, tab: null }
+  }
+
+  const [{ activeCategory, activeTab }, setState] = useState(() => {
+    const r = resolve(initialTab)
+    return { activeCategory: r.category, activeTab: r.tab }
+  })
+
+  // react to navigation from search / external hash change while page is mounted
+  useEffect(() => {
+    if (initialTab && tabToCategory[initialTab] && initialTab !== activeTab) {
+      const r = resolve(initialTab)
+      setState({ activeCategory: r.category, activeTab: r.tab })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTab])
+
+  const setHash = (tabId) => {
+    window.location.hash = tabId ? `general-info~${tabId}` : 'general-info'
+  }
 
   const selectCategory = (cat) => {
     if (activeCategory === cat.id) {
-      setActiveCategory(null)
-      setActiveTab(null)
+      setState({ activeCategory: null, activeTab: null })
+      setHash(null)
     } else {
-      setActiveCategory(cat.id)
-      setActiveTab(cat.tabs[0].id)
+      const firstTab = cat.tabs[0].id
+      setState({ activeCategory: cat.id, activeTab: firstTab })
+      setHash(firstTab)
     }
+  }
+
+  const selectTab = (tabId) => {
+    setState({ activeCategory: tabToCategory[tabId], activeTab: tabId })
+    setHash(tabId)
   }
 
   const ActiveComponent = activeTab ? tabComponents[activeTab] : null
@@ -317,7 +350,7 @@ export default function GeneralInfoPage() {
           {currentCat.tabs.map(t => (
             <button key={t.id}
               className={`ctab-btn${activeTab === t.id ? ' active' : ''}`}
-              onClick={() => setActiveTab(t.id)}>
+              onClick={() => selectTab(t.id)}>
               {t.label}
             </button>
           ))}

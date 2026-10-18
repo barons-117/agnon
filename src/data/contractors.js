@@ -20,4 +20,5 @@ export const contractors = [
   { id: 16, name: 'אינטר אפ',       role: 'ספק מעליות',                 contact: 'משרד',                    phone: '08-9420740',   email: 'info@inter-up.co.il' },
   { id: 17, name: 'סטודיו',         role: 'ספק ריצוף, חיפוי וכלים',     contact: 'שירות לקוחות',            phone: '03-9771788',   email: '' },
   { id: 18, name: 'נגב',            role: 'ספק ריצוף, חיפוי וכלים',     contact: 'שירות לקוחות',            phone: '*2855',        email: 'וואטסאפ 0549909616' },
+  { id: 19, name: 'ENOVA',          role: 'עמדות טעינה לרכב חשמלי',     contact: 'אורית – מתאמת התקנות',     phone: '054-2227252',  email: '' },
 ]
