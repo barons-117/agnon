@@ -3,6 +3,9 @@ import { supabase } from '../lib/supabase.js'
 
 function clean(v) { return v === null || v === undefined ? '' : String(v) }
 
+// Mode: 'tenant' | 'owner'
+const MODES = { tenant: 'שוכרים', owner: 'בעלי דירה' }
+
 const inp = (extra = {}) => ({
   width: '100%', padding: '10px 13px', borderRadius: '10px',
   border: '1.5px solid var(--border)', fontSize: '14px',
@@ -33,7 +36,10 @@ export default function UpdateProfile() {
   const [aptError, setAptError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  // Action: 'replace_all' | 'replace_one' | 'add_tenant'
+  // Mode: 'tenant' | 'owner'
+  const [mode, setMode] = useState('tenant')
+
+  // Action: 'replace_all' | 'replace_one' | 'add_tenant' | 'replace_all_owners' | 'replace_one_owner' | 'add_owner'
   const [action, setAction] = useState(null)
   const [replacingTenant, setReplacingTenant] = useState(null)
 
@@ -90,6 +96,7 @@ export default function UpdateProfile() {
     setOwners((data.owners || []).map((name, i) => ({ id: i, name })))
     setTenants((data.tenants || []).map((name, i) => ({ id: i, name })))
     setPendingCount(data.pending_requests || 0)
+    setMode('tenant')
     setLoadingApt(false)
     if ((data.pending_requests || 0) > 0) {
       setStep('pending_warn')
@@ -124,13 +131,16 @@ export default function UpdateProfile() {
     if (!validate()) return
     setSubmitting(true)
 
-    const request_type = action === 'add_tenant' ? 'add_tenant' : 'replace_tenant'
+    const isOwnerMode = action === 'add_owner' || action === 'replace_all_owners' || action === 'replace_one_owner'
+    const request_type = isOwnerMode
+      ? (action === 'add_owner' ? 'add_owner' : 'replace_owner')
+      : (action === 'add_tenant' ? 'add_tenant' : 'replace_tenant')
 
     const rows = newTenants.map(t => ({
       building: parseInt(building),
       apt: parseInt(aptNum),
       request_type,
-      replace_tenant_name: action === 'replace_one' ? replacingTenant : null,
+      replace_tenant_name: (action === 'replace_one' || action === 'replace_one_owner') ? replacingTenant : null,
       name: t.name.trim(),
       phone: t.phone.trim(),
       phone2: t.phone2.trim() || null,
@@ -152,7 +162,7 @@ export default function UpdateProfile() {
   const reset = () => {
     setStep('select'); setBuilding(''); setAptNum('')
     setOwners([]); setTenants([]); setPendingCount(0)
-    setAction(null); setReplacingTenant(null)
+    setAction(null); setReplacingTenant(null); setMode('tenant')
     setNewTenants([emptyTenant()]); setNotes('')
     setErrors({})
   }
@@ -163,26 +173,23 @@ export default function UpdateProfile() {
     </div>
   )
 
-  // Headline text per action + tenant count
+  // Headline text per action + tenant/owner count
   const formHeadline = () => {
     const n = newTenants.length
-    if (action === 'add_tenant') {
-      return n === 1 ? '➕ פרטי השוכר הנוסף' : `➕ פרטי ${n} השוכרים הנוספים`
-    }
-    if (action === 'replace_all') {
-      return n === 1 ? '🔄 פרטי השוכר החדש (יחליף את כולם)' : `🔄 פרטי ${n} השוכרים החדשים (יחליפו את כולם)`
-    }
-    if (action === 'replace_one') {
-      return n === 1
-        ? `↩️ פרטי השוכר החדש (יחליף את ${replacingTenant})`
-        : `↩️ פרטי ${n} השוכרים החדשים (יחליפו את ${replacingTenant})`
-    }
+    if (action === 'add_tenant') return n === 1 ? '➕ פרטי השוכר הנוסף' : `➕ פרטי ${n} השוכרים הנוספים`
+    if (action === 'replace_all') return n === 1 ? '🔄 פרטי השוכר החדש (יחליף את כולם)' : `🔄 פרטי ${n} השוכרים החדשים (יחליפו את כולם)`
+    if (action === 'replace_one') return n === 1 ? `↩️ פרטי השוכר החדש (יחליף את ${replacingTenant})` : `↩️ פרטי ${n} השוכרים החדשים (יחליפו את ${replacingTenant})`
+    if (action === 'add_owner') return n === 1 ? '➕ פרטי בעל הדירה הנוסף' : `➕ פרטי ${n} בעלי הדירה הנוספים`
+    if (action === 'replace_all_owners') return n === 1 ? '🔄 פרטי בעל הדירה החדש (יחליף את כולם)' : `🔄 פרטי ${n} בעלי הדירה החדשים (יחליפו את כולם)`
+    if (action === 'replace_one_owner') return n === 1 ? `↩️ פרטי בעל הדירה החדש (יחליף את ${replacingTenant})` : `↩️ פרטי ${n} בעלי הדירה החדשים (יחליפו את ${replacingTenant})`
     return ''
   }
 
+  const isOwnerMode = mode === 'owner'
+
   return (
     <section className="page-section">
-      <div className="section-title">✏️ עדכון פרטי שוכר</div>
+      <div className="section-title">✏️ עדכון פרטי דיירים ובעלים</div>
 
       {/* ── STEP: SELECT ── */}
       {step === 'select' && (
@@ -255,7 +262,7 @@ export default function UpdateProfile() {
       {/* ── STEP: CONFIRM ── */}
       {step === 'confirm' && (
         <div style={{ maxWidth: '420px' }}>
-          {/* Owner confirmation */}
+          {/* Apartment verification box */}
           <div style={{ background: '#f7f5f1', borderRadius: '12px', padding: '16px 18px', marginBottom: '16px' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>אימות דירה</div>
             {owners.length === 0
@@ -264,42 +271,79 @@ export default function UpdateProfile() {
             }
           </div>
 
-          {/* Current tenants - names only */}
-          {tenants.length > 0 && (
-            <div style={{ background: '#edf4fb', border: '1px solid #c4d4f0', borderRadius: '12px', padding: '16px 18px', marginBottom: '16px' }}>
-              <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>שוכרים נוכחיים</div>
-              {tenants.map(t => (
-                <div key={t.id} style={{ fontSize: '14px', color: 'var(--text)', padding: '4px 0', fontWeight: '600' }}>
-                  {clean(t.name)}
+          {/* Mode tabs: tenants / owners */}
+          <div style={{ display: 'flex', gap: '0', marginBottom: '16px', border: '1.5px solid var(--border)', borderRadius: '10px', overflow: 'hidden' }}>
+            {[['tenant', '🏠 עדכון שוכרים'], ['owner', '🔑 עדכון בעלי דירה']].map(([m, label]) => (
+              <button key={m} onClick={() => setMode(m)} style={{
+                flex: 1, padding: '11px 10px', border: 'none',
+                background: mode === m ? 'var(--primary)' : 'white',
+                color: mode === m ? 'white' : 'var(--text)',
+                fontFamily: 'Heebo, sans-serif', fontWeight: '700', fontSize: '13px',
+                cursor: 'pointer', transition: 'all 0.15s',
+                borderLeft: m === 'tenant' ? '1.5px solid var(--border)' : 'none',
+              }}>{label}</button>
+            ))}
+          </div>
+
+          {/* TENANT MODE */}
+          {mode === 'tenant' && (
+            <>
+              {tenants.length > 0 && (
+                <div style={{ background: '#edf4fb', border: '1px solid #c4d4f0', borderRadius: '12px', padding: '16px 18px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>שוכרים נוכחיים</div>
+                  {tenants.map(t => (
+                    <div key={t.id} style={{ fontSize: '14px', color: 'var(--text)', padding: '4px 0', fontWeight: '600' }}>{clean(t.name)}</div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+              {noticeBox}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
+                {tenants.length > 0 && (
+                  <button onClick={() => chooseAction('replace_all')} style={actionBtn(false)}>🔄 החלפת כל השוכרים בדירה</button>
+                )}
+                {tenants.length > 1 && tenants.map(t => (
+                  <button key={t.id} onClick={() => chooseAction('replace_one', clean(t.name))}
+                    style={{ ...actionBtn(false), paddingRight: '20px', fontSize: '13px' }}>
+                    ↩️ החלפת {clean(t.name)} בלבד
+                  </button>
+                ))}
+                <button onClick={() => chooseAction('add_tenant')} style={actionBtn(false)}>
+                  ➕ {tenants.length > 0 ? 'הוספת שוכר נוסף' : 'הוספת שוכר לדירה'}
+                </button>
+              </div>
+            </>
           )}
 
-          {noticeBox}
-
-          {/* Action buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
-            {/* Replace all */}
-            {tenants.length > 0 && (
-              <button onClick={() => chooseAction('replace_all')} style={actionBtn(false)}>
-                🔄 החלפת כל השוכרים בדירה
-              </button>
-            )}
-
-            {/* Replace specific (only when multiple tenants) */}
-            {tenants.length > 1 && tenants.map(t => (
-              <button key={t.id} onClick={() => chooseAction('replace_one', clean(t.name))}
-                style={{ ...actionBtn(false), paddingRight: '20px', fontSize: '13px' }}>
-                ↩️ החלפת {clean(t.name)} בלבד
-              </button>
-            ))}
-
-            {/* Add tenant (always available if there are owners) */}
-            <button onClick={() => chooseAction('add_tenant')} style={actionBtn(false)}>
-              ➕ {tenants.length > 0 ? 'הוספת שוכר נוסף' : 'הוספת שוכר לדירה'}
-            </button>
-          </div>
+          {/* OWNER MODE */}
+          {mode === 'owner' && (
+            <>
+              {owners.length > 0 && (
+                <div style={{ background: '#fef9e8', border: '1px solid #e8d080', borderRadius: '12px', padding: '16px 18px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: 'var(--muted)', marginBottom: '8px' }}>בעלי הדירה הנוכחיים</div>
+                  {owners.map(o => (
+                    <div key={o.id} style={{ fontSize: '14px', color: 'var(--text)', padding: '4px 0', fontWeight: '600' }}>{clean(o.name)}</div>
+                  ))}
+                </div>
+              )}
+              {noticeBox}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
+                {owners.length > 0 && (
+                  <button onClick={() => chooseAction('replace_all_owners')} style={actionBtn(false)}>
+                    🔄 החלפת כל בעלי הדירה (למשל: מכירת דירה)
+                  </button>
+                )}
+                {owners.length > 1 && owners.map(o => (
+                  <button key={o.id} onClick={() => chooseAction('replace_one_owner', clean(o.name))}
+                    style={{ ...actionBtn(false), paddingRight: '20px', fontSize: '13px' }}>
+                    ↩️ החלפת {clean(o.name)} בלבד
+                  </button>
+                ))}
+                <button onClick={() => chooseAction('add_owner')} style={actionBtn(false)}>
+                  ➕ {owners.length > 0 ? 'הוספת בעלים נוסף לדירה' : 'הוספת בעל דירה'}
+                </button>
+              </div>
+            </>
+          )}
 
           <button onClick={reset} style={{
             background: 'transparent', color: 'var(--muted)', border: '1px solid var(--border)',
@@ -335,7 +379,9 @@ export default function UpdateProfile() {
                 borderBottom: '1px dashed var(--border)',
               }}>
                 <div style={{ fontSize: '13px', fontWeight: '800', color: 'var(--primary)' }}>
-                  {newTenants.length === 1 ? 'פרטי השוכר' : `שוכר ${idx + 1}`}
+                  {newTenants.length === 1
+                    ? (isOwnerMode ? 'פרטי בעל הדירה' : 'פרטי השוכר')
+                    : (isOwnerMode ? `בעלים ${idx + 1}` : `שוכר ${idx + 1}`)}
                 </div>
                 {newTenants.length > 1 && (
                   <button type="button" onClick={() => removeTenant(idx)} style={{
@@ -389,7 +435,9 @@ export default function UpdateProfile() {
             marginBottom: '18px',
             transition: 'all 0.15s',
           }}>
-            ➕ {newTenants.length === 1 ? 'יש דייר נוסף? הוסף אותו' : 'הוסף עוד דייר'}
+            ➕ {isOwnerMode
+              ? (newTenants.length === 1 ? 'יש בעלים נוסף? הוסף אותו' : 'הוסף עוד בעלים')
+              : (newTenants.length === 1 ? 'יש דייר נוסף? הוסף אותו' : 'הוסף עוד דייר')}
           </button>
 
           <div style={{ marginBottom: '20px' }}>
@@ -414,6 +462,7 @@ export default function UpdateProfile() {
               {submitting
                 ? 'שולח...'
                 : (newTenants.length === 1 ? '📨 שלח לאישור הועד' : `📨 שלח ${newTenants.length} בקשות לאישור הועד`)}
+              {/* show context */}
             </button>
           </div>
         </div>

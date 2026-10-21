@@ -958,20 +958,26 @@ export default function AdminApartments() {
     setLoading(false)
   }
 
+  // Determine role from request_type
+  const roleFromType = (request_type) =>
+    (request_type === 'add_owner' || request_type === 'replace_owner') ? 'owner' : 'tenant'
+
   const approveRequest = async (req, overrides = null) => {
     const data = overrides || req
-    if (req.request_type === 'replace_tenant') {
+    const role = roleFromType(req.request_type)
+
+    if (req.request_type === 'replace_tenant' || req.request_type === 'replace_owner') {
       if (req.replace_tenant_name) {
         await supabase.from('residents').delete()
           .eq('building', req.building).eq('apt', req.apt)
-          .eq('role', 'tenant').eq('name', req.replace_tenant_name)
+          .eq('role', role).eq('name', req.replace_tenant_name)
       } else {
         await supabase.from('residents').delete()
-          .eq('building', req.building).eq('apt', req.apt).eq('role', 'tenant')
+          .eq('building', req.building).eq('apt', req.apt).eq('role', role)
       }
     }
     await supabase.from('residents').insert([{
-      building: req.building, apt: req.apt, role: 'tenant',
+      building: req.building, apt: req.apt, role,
       name: data.name, phone: data.phone, phone2: data.phone2 || null,
       email: data.email, email2: data.email2 || null,
       is_company: false,
@@ -987,22 +993,23 @@ export default function AdminApartments() {
     if (group.length === 1) return approveRequest(group[0])
 
     const first = group[0]
+    const role = roleFromType(first.request_type)
 
-    // Step 1: DELETE — once for the whole group (only for replace_tenant)
-    if (first.request_type === 'replace_tenant') {
+    // Step 1: DELETE — once for the whole group (only for replace_*)
+    if (first.request_type === 'replace_tenant' || first.request_type === 'replace_owner') {
       if (first.replace_tenant_name) {
         await supabase.from('residents').delete()
           .eq('building', first.building).eq('apt', first.apt)
-          .eq('role', 'tenant').eq('name', first.replace_tenant_name)
+          .eq('role', role).eq('name', first.replace_tenant_name)
       } else {
         await supabase.from('residents').delete()
-          .eq('building', first.building).eq('apt', first.apt).eq('role', 'tenant')
+          .eq('building', first.building).eq('apt', first.apt).eq('role', role)
       }
     }
 
-    // Step 2: INSERT all new tenants in one shot
+    // Step 2: INSERT all new residents in one shot
     const inserts = group.map(r => ({
-      building: r.building, apt: r.apt, role: 'tenant',
+      building: r.building, apt: r.apt, role,
       name: r.name, phone: r.phone, phone2: r.phone2 || null,
       email: r.email, email2: r.email2 || null,
       is_company: false,
@@ -1043,7 +1050,9 @@ export default function AdminApartments() {
     const sorted = [...reqs].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
     const groups = []
     for (const req of sorted) {
-      const key = `${req.building}-${req.apt}-${req.request_type}-${req.replace_tenant_name || ''}`
+      // Normalize replace_owner/replace_tenant into a canonical key so group logic works for both roles
+      const typeKey = req.request_type
+      const key = `${req.building}-${req.apt}-${typeKey}-${req.replace_tenant_name || ''}`
       const last = groups.find(g =>
         g.key === key &&
         Math.abs(new Date(req.created_at) - new Date(g.items[g.items.length - 1].created_at)) < 30000
@@ -1189,6 +1198,11 @@ function PendingRequestCard({ req, onApprove, onEdit, onDismiss }) {
   const date = new Date(req.created_at).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' })
 
   const actionLabel = () => {
+    if (req.request_type === 'add_owner') return { label: '🔑 הוספת בעלים', bg: '#fef9e8', color: '#7a6000' }
+    if (req.request_type === 'replace_owner') {
+      if (req.replace_tenant_name) return { label: `🔑 החלפת ${req.replace_tenant_name}`, bg: '#fef9e8', color: '#7a6000' }
+      return { label: '🔑 החלפת כל בעלי הדירה', bg: '#fef9e8', color: '#7a6000' }
+    }
     if (req.request_type === 'add_tenant') return { label: 'הוספת שוכר', bg: '#e8f9ee', color: '#1a7a3a' }
     if (req.replace_tenant_name) return { label: `החלפת ${req.replace_tenant_name}`, bg: '#fff3e0', color: '#b35c00' }
     return { label: 'החלפת כל השוכרים', bg: '#e8f4fd', color: '#1a5c8c' }
@@ -1289,6 +1303,11 @@ function PendingGroupCard({ group, onApproveGroup, onEdit, onDismiss }) {
 
   const actionLabel = () => {
     const n = group.length
+    if (first.request_type === 'add_owner') return { label: `🔑 הוספת ${n} בעלים`, bg: '#fef9e8', color: '#7a6000' }
+    if (first.request_type === 'replace_owner') {
+      if (first.replace_tenant_name) return { label: `🔑 החלפת ${first.replace_tenant_name} ב-${n} בעלים`, bg: '#fef9e8', color: '#7a6000' }
+      return { label: `🔑 החלפת כל בעלי הדירה ב-${n} חדשים`, bg: '#fef9e8', color: '#7a6000' }
+    }
     if (first.request_type === 'add_tenant') return { label: `הוספת ${n} שוכרים`, bg: '#e8f9ee', color: '#1a7a3a' }
     if (first.replace_tenant_name) return { label: `החלפת ${first.replace_tenant_name} ב-${n} שוכרים`, bg: '#fff3e0', color: '#b35c00' }
     return { label: `החלפת כל השוכרים ב-${n} חדשים`, bg: '#e8f4fd', color: '#1a5c8c' }
@@ -1323,7 +1342,9 @@ function PendingGroupCard({ group, onApproveGroup, onEdit, onDismiss }) {
           <div key={req.id} style={{ background: '#f7f5f1', borderRadius: '9px', padding: '10px 13px', fontSize: '13px', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
               <div style={{ fontWeight: '700' }}>
-                <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '6px', fontWeight: '600' }}>שוכר {idx + 1}:</span>
+                <span style={{ fontSize: '11px', color: 'var(--muted)', marginLeft: '6px', fontWeight: '600' }}>
+                  {(first.request_type === 'add_owner' || first.request_type === 'replace_owner') ? `בעלים ${idx + 1}` : `שוכר ${idx + 1}`}:
+                </span>
                 {req.name}
               </div>
               <div style={{ display: 'flex', gap: '4px' }}>
